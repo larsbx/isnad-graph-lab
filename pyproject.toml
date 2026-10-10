@@ -1,0 +1,34 @@
+[project]
+name = "isnad-graph"
+version = "0.1.0"
+description = "Annotated graph of recorded hadith chains of narration (asanid)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT (code); derived data CC-BY-4.0, see README" }
+dependencies = ["pandas>=2.2", "pyarrow>=15", "networkx>=3.2"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "hypothesis>=6.100", "ruff>=0.5"]
+
+[project.scripts]
+isnad-graph = "isnad_graph.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/isnad_graph"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = ["source: requires the downloaded source database (skipped otherwise)"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
+ignore = ["RUF001", "RUF002", "RUF003"]  # Arabic text is intentional
