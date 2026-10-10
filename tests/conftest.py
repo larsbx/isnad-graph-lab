@@ -2,6 +2,7 @@
 
 Narrators: 1 Abu Hurayra (companion), 2 A, 3 B, 7 G (tabi'un and later),
 4 C and 5 D (compilers; D born after A died), markers 30001 ta'liq, 30002 irsal.
+A is a mudallis. Isnad texts read «حدثنا X عن Y عن Z قال : متن».
 
     h1 marfu', group 1:  s1 [4,3,2,1]  s2 [5,3,2,1]  s3 [4,7,2,1]  s6 [5,2,1]
     h2 marfu' (mursal):  s4 [4,3,30002]
@@ -15,6 +16,7 @@ Narrators: 1 Abu Hurayra (companion), 2 A, 3 B, 7 G (tabi'un and later),
 
 from __future__ import annotations
 
+import json
 import sqlite3
 from pathlib import Path
 
@@ -27,6 +29,8 @@ RAWIS = {  # id: (name, rank_no, tabaka, birth, death)
     7: ("جيم", 4, 5, 70, 160), 4: ("دال", 2, 10, 194, 256), 5: ("هاء", 2, 10, 200, 261),
     30001: ("موضع تعليق", 12, 0, None, None), 30002: ("موضع إرسال", 12, 0, None, None),
 }
+MUDALLIS = {2}  # A narrates with tadlis
+
 SANADS = {1: (1, [4, 3, 2, 1]), 2: (1, [5, 3, 2, 1]), 3: (1, [4, 7, 2, 1]),
           4: (2, [4, 3, 30002]), 5: (5, [30001, 2, 1]), 6: (1, [5, 2, 1]), 7: (8, [4, 7, 2, 1])}
 HADITHS = {  # id: (type_no, group_id, isnad mention ids, tahwil?)
@@ -51,8 +55,8 @@ def make_db(path: Path) -> Path:
     con.executescript(SCHEMA.read_text())
     ins = lambda t, rows: con.executemany(  # noqa: E731
         f"INSERT INTO {t} VALUES ({','.join('?' * len(rows[0]))})", rows)
-    ins("rawis", [(i, n, "", r, None, t, 0, 0, 0, 0, 0, b, None, d, None, None,
-                   None, None, None, None, 0) for i, (n, r, t, b, d) in RAWIS.items()])
+    ins("rawis", [(i, n, "", r, None, t, 0, 0, 0, int(i in MUDALLIS), 0, b, None, d, None,
+                   None, None, None, None, None, 0) for i, (n, r, t, b, d) in RAWIS.items()])
     ins("books", [(1, "كتاب", 1, "مصنف", 256, None, None, None, 1, "صحاح", 5)])
     rows, mentions = [], []
     for hid, (type_no, gid, ids, tahwil) in HADITHS.items():
@@ -75,6 +79,23 @@ def make_db(path: Path) -> Path:
     return path
 
 
+def make_editions(directory: Path) -> Path:
+    """A miniature external edition of book 1 with its own numbering: entry 10 is
+    h1's text, entry 11 h2's with honorifics spelled out, entry 12 matches nothing."""
+    con = sqlite3.connect(directory.parent / "mini.db")
+    text = dict(con.execute("SELECT id, nass FROM hadiths"))
+    con.close()
+    ara = [text[1], text[2].replace("قال", "رضي الله عنه قال"), "نص لا يوجد في المصدر اصلا"]
+    grades = [[], [{"name": "Al-Albani", "grade": "Sahih"}], []]
+    directory.mkdir(exist_ok=True)
+    for lang, texts in [("ara", ara), ("eng", ["Narrated A", "Narrated B", "Other"])]:
+        (directory / f"{lang}-mini.json").write_text(json.dumps({"hadiths": [
+            {"hadithnumber": n, "arabicnumber": n, "text": t, "grades": g,
+             "reference": {"book": 1, "hadith": n - 9}}
+            for n, t, g in zip((10, 11, 12), texts, grades, strict=True)]}))
+    return directory
+
+
 @pytest.fixture(scope="session")
 def mini_db(tmp_path_factory) -> Path:
     return make_db(tmp_path_factory.mktemp("src") / "mini.db")
@@ -83,5 +104,7 @@ def mini_db(tmp_path_factory) -> Path:
 @pytest.fixture(scope="session")
 def mini_graph(mini_db):
     from isnad_graph.build import build
+    from isnad_graph.corpus import Edition
 
-    return build(mini_db)
+    return build(mini_db, editions_dir=make_editions(mini_db.parent / "editions"),
+                 editions={"mini": Edition(1)})

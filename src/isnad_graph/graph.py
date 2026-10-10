@@ -10,6 +10,9 @@ Layers
 * **hadiths / books / groups / topics** — what the chains carry and where.
 * **critics / assessments** — the jarh-wa-ta'dil layer: critic → narrator.
 * **common_links** — Juynboll-style (partial) common links per meaning group.
+* **alignments / external_grades** — reports matched to the public-domain
+  hadith-api editions (with English translations in the corpus) and the
+  modern gradings attached to them.
 """
 
 from __future__ import annotations
@@ -52,6 +55,8 @@ class IsnadGraph:
     critics: pa.Table
     assessments: pa.Table
     common_links: pa.Table
+    alignments: pa.Table
+    external_grades: pa.Table
     manifest: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -158,6 +163,9 @@ class IsnadGraph:
             "path_nodes_are_nodes": bool(on_path.isin(ids).all()),
             "no_marker_on_any_path": not bool(on_path.isin(markers).any()),
             "one_flag_per_link": bool((c.links.map(len) == c.path.map(len) - 1).all()),
+            "one_mode_per_link": bool((c.modes.map(len) == c.links.map(len)).all()),
+            "mode_histogram_partitions_links": bool(
+                (e.filter(like="mode_").sum(axis=1) == e.n_links).all()),
             "link_mass_conserved": int(e.n_links.sum()) == int(c.n_links.sum()),
             "provenance_partitions_links": bool((e.n_recorded + e.n_inferred == e.n_links).all()),
             "no_direct_self_loops": not bool((e.src.eq(e.dst) & e.n_direct.gt(0)).any()),
@@ -167,6 +175,10 @@ class IsnadGraph:
             "chains_reference_hadiths": bool(c.hadith_id.isin(h.id).all()),
             "every_recorded_sanad_present": source_sanads is None or int(source_sanads) == int(
                 c.provenance.eq(Provenance.RECORDED).sum()),
+            "alignments_reference_hadiths": bool(
+                self.frame("alignments").hadith_id.isin(h.id).all()),
+            "each_external_entry_aligned_once": not bool(self.frame("alignments")
+                .duplicated(["collection", "hadithnumber"]).any()),
             "assessments_reference_nodes": bool(
                 a.rawi_id.isin(ids).all() and a.alem_id.isin(self.frame("critics").id).all()),
         }

@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 GRAPH_DIR = Path("data/graph")
+CORPUS_DIR = Path("data/corpus")
 EXPORTS = {"graphml": "write_graphml", "gexf": "write_gexf"}
 
 
@@ -21,7 +22,8 @@ def main(argv: list[str] | None = None) -> int:
 
     p = argparse.ArgumentParser(prog="isnad-graph", description=__doc__)
     sub = p.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("fetch", help="download and verify the pinned source database")
+    sub.add_parser("fetch", help="download and verify the pinned sources")
+    sub.add_parser("corpus", help="write the text corpus (Arabic texts, English translations)")
     b = sub.add_parser("build", help="build the graph from the source database")
     b.add_argument("--db", type=Path, default=DEFAULT_PATH)
     b.add_argument("--no-validate", action="store_true", help="skip inference validation")
@@ -38,9 +40,15 @@ def main(argv: list[str] | None = None) -> int:
     a = p.parse_args(argv)
 
     if a.cmd == "fetch":
-        from .source import fetch
+        from .source import fetch, fetch_editions
 
-        print(fetch(a.db if "db" in a else DEFAULT_PATH))
+        print(fetch(dest=DEFAULT_PATH), fetch_editions(), sep="\n")
+    elif a.cmd == "corpus":
+        from .corpus import align_editions, export_corpus
+        from .source import EDITIONS_DIR, connect
+
+        con = connect(DEFAULT_PATH)
+        print(export_corpus(con, align_editions(con, EDITIONS_DIR)[0], CORPUS_DIR))
     elif a.cmd == "build":
         from .build import build
 

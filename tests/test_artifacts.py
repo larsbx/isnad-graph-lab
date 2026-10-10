@@ -50,3 +50,30 @@ def test_innama_al_amal_common_link_is_yahya_b_said(g):
 def test_abu_hurayra_is_the_busiest_companion(g):
     top = g.students(PROPHET_ID).iloc[0]
     assert g.narrator(int(top.dst))["name"] == "عبد الرحمن بن صخر"  # Abū Hurayra
+
+
+def test_bukhari_1_transmission_modes(g):
+    from isnad_graph.sigha import Mode
+
+    (modes,) = g.chains_of(1).modes  # Prophet → ʿUmar → ʿAlqama → al-Taymī → Yaḥyā → Sufyān …
+    assert [Mode(m) for m in modes] == [Mode.SAMA] * 3 + [Mode.IKHBAR] + [Mode.TAHDITH] * 3
+
+
+def test_unread_share_ceiling(g):
+    by_class = g.manifest["transmission_modes"]["links_by_class"]
+    assert by_class["unread"] / sum(by_class.values()) < 0.09
+
+
+def test_archetypal_mudallis_narrates_by_an(g):
+    al_amash = g.narrator(3629)  # سليمان بن مهران الأعمش
+    assert al_amash["has_tadlis"] and al_amash["an_share"] > 0.9
+
+
+def test_editions_align_with_preserved_order(g):
+    stats = g.manifest["external_editions"]["alignment"]
+    for collection, s in stats.items():
+        floor = 0.85 if s["cross_recension"] else 0.99
+        assert s["order_consistency"] > floor, collection
+        assert s["aligned"] / s["entries"] > (0.7 if s["cross_recension"] else 0.9), collection
+    a = g.frame("alignments")
+    assert a[a.hadith_id.eq(1)].hadithnumber.tolist() == ["1"]  # Bukhārī 1 ↔ hadith-api 1
