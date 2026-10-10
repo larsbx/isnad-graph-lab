@@ -1,6 +1,6 @@
 {
   "builder": "isnad_graph 0.1.0",
-  "built_at": "2026-10-10T19:57:43+00:00",
+  "built_at": "2026-10-10T21:14:27+00:00",
   "source": {
     "repo": "emadjumaah/hadith-kg",
     "file": "hadith-kg.db",
@@ -57,6 +57,99 @@
     "30001": "TALIQ",
     "30002": "IRSAL"
   },
+  "external_editions": {
+    "repo": "fawazahmed0/hadith-api",
+    "revision": "df57907be35291c91ad6a6691180e22ca9920784",
+    "license": "Unlicense (public domain)",
+    "files": {
+      "ara-abudawud.json": "216139c5f40a8147e700d62ffa3b5b2fe45d0e034f86941a193c598c10056189",
+      "ara-bukhari.json": "e34a3402889ca378871da3c5984b7875c680920e93f1c8738ac7afe502179562",
+      "ara-ibnmajah.json": "b406e6be81588ab0ec1ddbed32f5fd95bbcdda242c460d88331e82eb5c2bc0aa",
+      "ara-malik.json": "088b1f354e110211da006d47e37dd8f8837368f318ed683271f0fdb0f09a3ab5",
+      "ara-muslim.json": "194073b24090c5368e4d14a3f55c9e0ef144c7437bd7e5aa83aa4d2bc54a8ea0",
+      "ara-nasai.json": "c705983c19bb089c87cd6531aff609bd94d862183ed0859115b0ff991826a956",
+      "ara-tirmidhi.json": "408028cd56329ed78edbe3ad443beb96b58e16c3e5bd49f9bc7b0eac77c8820f",
+      "eng-abudawud.json": "f6bcf73ad96d2f28296232e201e12963e7b3dd5325572fb88365edbbfb0ecd40",
+      "eng-bukhari.json": "b3a10b8d50949e86cec82b0d323ce0eae3e2f713fa2f3daa5361638feb795988",
+      "eng-ibnmajah.json": "5e9479efd403e935ddcf746a709b2727d535a41fe1f496deadc8a43f1d103cd7",
+      "eng-malik.json": "fb02a0ae16ebba1a658b107da3b93e72ecb59c2acd871819e2b1f3bd2e90d27b",
+      "eng-muslim.json": "2ef51a2a1980fb91e395fbf1580cc9c9413297f54bb8cad271e1499417299488",
+      "eng-nasai.json": "4f2aaca4229b96210fdaa887915c69ba99dda8726816856cc8660e996b6b3a1f",
+      "eng-tirmidhi.json": "f64f1a5e6f2614e164e3b10138412af322d3959011bf84d67f428f79b3858afb"
+    },
+    "alignment": {
+      "bukhari": {
+        "book_id": 1,
+        "entries": 7589,
+        "aligned": 7372,
+        "reports_covered": 6845,
+        "reports_in_book": 7031,
+        "median_score": 0.84545,
+        "order_consistency": 0.9928,
+        "cross_recension": false
+      },
+      "muslim": {
+        "book_id": 2,
+        "entries": 7563,
+        "aligned": 7022,
+        "reports_covered": 5176,
+        "reports_in_book": 5367,
+        "median_score": 0.7903,
+        "order_consistency": 0.9976,
+        "cross_recension": false
+      },
+      "tirmidhi": {
+        "book_id": 3,
+        "entries": 3998,
+        "aligned": 3818,
+        "reports_covered": 3680,
+        "reports_in_book": 3924,
+        "median_score": 0.76305,
+        "order_consistency": 0.9961,
+        "cross_recension": false
+      },
+      "abudawud": {
+        "book_id": 4,
+        "entries": 5274,
+        "aligned": 5237,
+        "reports_covered": 4555,
+        "reports_in_book": 4592,
+        "median_score": 0.8545,
+        "order_consistency": 0.9979,
+        "cross_recension": false
+      },
+      "ibnmajah": {
+        "book_id": 6,
+        "entries": 4343,
+        "aligned": 4220,
+        "reports_covered": 4199,
+        "reports_in_book": 4340,
+        "median_score": 0.7917,
+        "order_consistency": 0.9983,
+        "cross_recension": false
+      },
+      "malik": {
+        "book_id": 8,
+        "entries": 1858,
+        "aligned": 1755,
+        "reports_covered": 1723,
+        "reports_in_book": 1823,
+        "median_score": 0.8367,
+        "order_consistency": 0.9989,
+        "cross_recension": false
+      },
+      "nasai": {
+        "book_id": 17,
+        "entries": 5765,
+        "aligned": 4305,
+        "reports_covered": 4149,
+        "reports_in_book": 11385,
+        "median_score": 0.6707,
+        "order_consistency": 0.9003,
+        "cross_recension": true
+      }
+    }
+  },
   "inferred_layer": {
     "unrecorded_hadiths": 312422,
     "without_any_mention": 179672,
@@ -69,6 +162,32 @@
     "only_gap_markers": 277,
     "inferred_chains": 119929,
     "single_narrator_chains": 59166
+  },
+  "transmission_modes": {
+    "links_by_mode": {
+      "UNREAD": 381799,
+      "SAMA": 101436,
+      "TAHDITH": 1466289,
+      "IKHBAR": 572647,
+      "QIRAA": 5140,
+      "LIQA": 26987,
+      "KITABA": 844,
+      "IJAZA": 186,
+      "WIJADA": 558,
+      "AN": 1508438,
+      "ANNA": 166215,
+      "QALA": 320690,
+      "DHAKARA": 2664,
+      "RAWA": 473
+    },
+    "links_by_class": {
+      "explicit": 2172499,
+      "ambiguous": 1998480,
+      "unread": 381799,
+      "written": 1588
+    },
+    "borrowed_from_preceding_reports": 139751,
+    "chains_with_tadlis_risk": 144613
   },
   "inference_validation": {
     "evaluated": 302229,
@@ -91,7 +210,9 @@
       "topics": 54862,
       "critics": 1015,
       "assessments": 127863,
-      "common_links": 187616
+      "common_links": 187616,
+      "alignments": 33729,
+      "external_grades": 67716
     },
     "narrators_by_kind": {
       "narrator": 49815,
@@ -126,12 +247,16 @@
     "path_nodes_are_nodes": true,
     "no_marker_on_any_path": true,
     "one_flag_per_link": true,
+    "one_mode_per_link": true,
+    "mode_histogram_partitions_links": true,
     "link_mass_conserved": true,
     "provenance_partitions_links": true,
     "no_direct_self_loops": true,
     "prophet_only_as_apex_of_prophetic_chains": true,
     "chains_reference_hadiths": true,
     "every_recorded_sanad_present": true,
+    "alignments_reference_hadiths": true,
+    "each_external_entry_aligned_once": true,
     "assessments_reference_nodes": true
   }
 }

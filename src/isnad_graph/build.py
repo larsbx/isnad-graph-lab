@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import sqlite3
 from collections import Counter
-from collections.abc import Iterator, Mapping
+from collections.abc import Container, Iterator, Mapping
 from contextlib import closing
 from datetime import UTC, datetime
 from itertools import groupby
@@ -18,8 +18,15 @@ import numpy as np
 import pandas as pd
 
 from . import __version__
-from .analysis import aggregate_transmissions, chronology, common_links
+from .analysis import (
+    aggregate_transmissions,
+    chronology,
+    common_links,
+    hearing_profile,
+    tadlis_risk,
+)
 from .chains import Chain, normalize
+from .corpus import EDITIONS, Edition, align_editions, alignment_table, grade_table
 from .graph import IsnadGraph
 from .inference import Mention, abstention, infer_source_chain
 from .schema import (
@@ -32,7 +39,24 @@ from .schema import (
     NodeKind,
     Provenance,
 )
-from .source import HADITH_KG, SourceSpec, connect
+from .sigha import Mention as SighaMention
+from .sigha import Mode, Readings, borrowed_modes, mode_class, transmission_modes
+from .source import (
+    EDITION_FILES,
+    EDITIONS_DIR,
+    HADITH_API_REVISION,
+    HADITH_KG,
+    SourceSpec,
+    connect,
+)
+
+NO_READINGS = Readings({}, {})
+EMPTY_ENTRIES = pd.DataFrame({
+    "hadith_id": pd.array([], dtype="Int64"), "collection": pd.Series([], dtype=str),
+    "hadithnumber": pd.Series([], dtype=str), "arabicnumber": pd.Series([], dtype=object),
+    "chapter": pd.Series([], dtype="int64"), "chapter_hadith": pd.Series([], dtype="int64"),
+    "score": pd.Series([], dtype=float), "cross_recension": pd.Series([], dtype=bool),
+    "grades": pd.Series([], dtype=object)})
 
 
 def read(con: sqlite3.Connection, sql: str) -> pd.DataFrame:
@@ -133,13 +157,41 @@ def validate_inference(con, markers, known) -> dict:
             "coverage": attempted / max(outcomes.total(), 1)}
 
 
+APEX_LOOKAHEAD = 200  # chars past the matn boundary in which the Prophet may be named
+LOOKBACK = 3  # preceding reports of the same book consulted for links a text omits
+
+
+def chain_modes(con: sqlite3.Connection, chains: pd.DataFrame,
+                markers: Container[int] = frozenset()) -> tuple[list[list[int]], list[int]]:
+    """Transmission mode of every link of every chain, read from its report's
+    isnad text (see :mod:`.sigha`); returns per-chain mode codes and the number
+    of modes borrowed from preceding reports of the same book.
+    """
+    rows = con.execute(f"""
+        SELECT h.id, substr(h.nass, 1, h.matn_start + {APEX_LOOKAHEAD}), h.matn_start,
+               hr.rawi_id, hr.start, hr.end
+        FROM hadiths h JOIN hadith_rawis hr ON hr.hadith_id = h.id
+        WHERE h.matn_start IS NOT NULL AND hr.rawi_id IS NOT NULL ORDER BY h.id, hr.seq""")
+    readings = {
+        hid: transmission_modes(text, [SighaMention(*r[3:]) for r in grp], end, markers)
+        for (hid, text, end), grp in groupby(rows, key=itemgetter(0, 1, 2))
+    }
+    book = dict(con.execute("SELECT id, book_id FROM hadiths"))
+    neighbours = lambda h: [readings[n] for n in range(h - 1, h - 1 - LOOKBACK, -1)  # noqa: E731
+                            if n in readings and book.get(n) == book[h]]
+    out = [borrowed_modes(path, readings.get(h, NO_READINGS), neighbours(h))
+           for h, path in zip(chains.hadith_id, chains.path, strict=True)]
+    return [[int(m) for m in modes] for modes, _ in out], [n for _, n in out]
+
+
 def explode_links(chains: pd.DataFrame) -> pd.DataFrame:
     cols = ["chain_id", "hadith_id", "book_id", "group_id", "provenance"]
     return pd.DataFrame(
-        (*meta, s, d, f, i)
-        for *meta, path, links in chains[[*cols, "path", "links"]].itertuples(index=False)
-        for i, (s, d, f) in enumerate(zip(path[:-1], path[1:], links, strict=True))
-    ).set_axis([*cols, "src", "dst", "flag", "depth"], axis=1)
+        (*meta, s, d, f, m, i)
+        for *meta, path, links, modes in
+        chains[[*cols, "path", "links", "modes"]].itertuples(index=False)
+        for i, (s, d, f, m) in enumerate(zip(path[:-1], path[1:], links, modes, strict=True))
+    ).set_axis([*cols, "src", "dst", "flag", "mode", "depth"], axis=1)
 
 
 # ── nodes ───────────────────────────────────────────────────────────────────
@@ -179,8 +231,14 @@ def narrator_table(rawis: pd.DataFrame, markers: Mapping[int, LinkFlag],
     )
 
 
-def build(db: Path, spec: SourceSpec = HADITH_KG, validate: bool = True) -> IsnadGraph:
+def build(db: Path, spec: SourceSpec = HADITH_KG, validate: bool = True,
+          editions_dir: Path | None = EDITIONS_DIR,
+          editions: Mapping[str, Edition] = EDITIONS) -> IsnadGraph:
+    """Build the graph; external editions are aligned when ``editions_dir`` exists."""
     with closing(connect(db)) as con:
+        use_editions = editions_dir is not None and editions_dir.exists()
+        entries, edition_stats = (align_editions(con, editions_dir, editions) if use_editions
+                                  else (EMPTY_ENTRIES, {}))
         rawis = read(con, "SELECT * FROM rawis")
         markers = marker_flags(rawis)
         known = frozenset(rawis.id.tolist())
@@ -198,9 +256,14 @@ def build(db: Path, spec: SourceSpec = HADITH_KG, validate: bool = True) -> Isna
         )
         chains.insert(0, "chain_id", range(len(chains)))
         chains = chains.astype({"sanad_id": "Int64", "group_id": "Int64", "takhrij": "Int64"})
+        modes, borrowed = chain_modes(con, chains, markers)
+        chains = chains.assign(modes=modes, n_modes_borrowed=borrowed)
         links = explode_links(chains)
         edges = aggregate_transmissions(links)
-        narrators = narrator_table(rawis, markers, chains, edges)
+        narrators = narrator_table(rawis, markers, chains, edges).join(
+            hearing_profile(links), on="id").pipe(_counts, ["n_links_read"])
+        chains = chains.join(tadlis_risk(links, narrators).rename("n_tadlis_risk"),
+                             on="chain_id").pipe(_counts, ["n_tadlis_risk"])
         per_hadith = chains.pivot_table(index="hadith_id", columns="provenance",
                                         values="chain_id", aggfunc="size", fill_value=0)
         counts = [f"n_chains_{p}" for p in Provenance]
@@ -224,6 +287,8 @@ def build(db: Path, spec: SourceSpec = HADITH_KG, validate: bool = True) -> Isna
             critics=read(con, "SELECT * FROM alems"),
             assessments=read(con, "SELECT * FROM aqwal"),
             common_links=common_links(links),
+            alignments=alignment_table(entries),
+            external_grades=grade_table(entries),
             manifest={
                 "builder": f"isnad_graph {__version__}",
                 "built_at": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -232,7 +297,20 @@ def build(db: Path, spec: SourceSpec = HADITH_KG, validate: bool = True) -> Isna
                            "license": spec.license,
                            "meta": dict(con.execute("SELECT key, value FROM meta"))},
                 "markers": {str(k): v.name for k, v in sorted(markers.items())},
+                "external_editions": {"repo": EDITION_FILES[0].repo,
+                                      "revision": HADITH_API_REVISION,
+                                      "license": EDITION_FILES[0].license,
+                                      "files": {s.filename: s.sha256 for s in EDITION_FILES},
+                                      "alignment": edition_stats} if use_editions else None,
                 "inferred_layer": inference_stats,
+                "transmission_modes": {
+                    "links_by_mode": {Mode(int(k)).name: int(v) for k, v in
+                                      links["mode"].value_counts().sort_index().items()},
+                    "links_by_class": {k: int(v) for k, v in links["mode"].map(
+                        lambda m: mode_class(Mode(m))).value_counts().items()},
+                    "borrowed_from_preceding_reports": int(sum(borrowed)),
+                    "chains_with_tadlis_risk": int(chains.n_tadlis_risk.gt(0).sum()),
+                },
                 "inference_validation": validate_inference(con, markers, known) if validate
                 else None,
             },

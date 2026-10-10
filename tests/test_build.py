@@ -3,6 +3,7 @@ import pytest
 
 from isnad_graph import IsnadGraph, LinkFlag
 from isnad_graph.schema import PROPHET_ID
+from isnad_graph.sigha import Mode
 
 
 def edge(g, src, dst):
@@ -109,3 +110,40 @@ def test_graph_is_immutable(mini_graph):
         mini_graph.chains = None
     with pytest.raises(TypeError):
         mini_graph.manifest["x"] = 1
+
+
+def test_transmission_modes_are_read_per_link(mini_graph):
+    c = mini_graph.frame("chains").set_index("sanad_id")
+    # s1 = Prophet → 1 → 2 → 3 → 4, text «حدثنا باء عن ألف عن أبي هريرة قال : متن»
+    assert list(c.loc[1, "modes"]) == [Mode.UNREAD, Mode.AN, Mode.AN, Mode.TAHDITH]
+    assert all(len(m) == n for m, n in zip(c.modes, c.n_links, strict=True))
+
+
+def test_edge_mode_histogram(mini_graph):
+    e = edge(mini_graph, 3, 4)
+    assert (e.mode_tahdith, e.top_mode) == (2, "tahdith")
+    assert edge(mini_graph, 1, 2).mode_an == 6
+
+
+def test_tadlis_risk_flags_an_of_a_mudallis(mini_graph):
+    c = mini_graph.frame("chains").set_index("sanad_id")
+    assert c.loc[1, "n_tadlis_risk"] == 1  # A (mudallis) ← Abū Hurayra by ʿan
+    assert mini_graph.manifest["transmission_modes"]["chains_with_tadlis_risk"] == 6  # s1–s3, s5–s7
+
+
+def test_hearing_profile(mini_graph):
+    n = mini_graph.frame("narrators").set_index("id")
+    assert (n.loc[2, "an_share"], n.loc[2, "explicit_share"]) == (1.0, 0.0)
+    assert n.loc[4, "n_links_read"] == 3
+
+
+def test_external_edition_is_aligned_by_text(mini_graph):
+    a = mini_graph.frame("alignments")
+    assert dict(zip(a.hadithnumber, a.hadith_id, strict=True)) == {"10": 1, "11": 2}
+    stats = mini_graph.manifest["external_editions"]["alignment"]["mini"]
+    assert (stats["entries"], stats["aligned"], stats["order_consistency"]) == (3, 2, 1.0)
+
+
+def test_external_grades_attach_to_source_reports(mini_graph):
+    (row,) = mini_graph.frame("external_grades").itertuples()
+    assert (row.hadith_id, row.grader, row.grade) == (2, "Al-Albani", "Sahih")

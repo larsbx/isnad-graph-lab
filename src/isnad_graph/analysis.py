@@ -6,6 +6,9 @@ import numpy as np
 import pandas as pd
 
 from .schema import FLAG_COLUMNS, PROPHET_ID, Provenance
+from .sigha import AMBIGUOUS, EXPLICIT, Mode
+
+MODE_COLUMNS = {m: f"mode_{m.name.lower()}" for m in Mode}
 
 
 def aggregate_transmissions(links: pd.DataFrame) -> pd.DataFrame:
@@ -16,6 +19,11 @@ def aggregate_transmissions(links: pd.DataFrame) -> pd.DataFrame:
         **{col: (links.flag & int(f)).ne(0) for f, col in FLAG_COLUMNS.items()},  # Flag is iterable
     )
     counts = ["recorded", "n_direct", *FLAG_COLUMNS.values()]
+    modes = (pd.crosstab([links.src, links.dst], links["mode"])
+             .reindex(columns=[int(m) for m in Mode], fill_value=0)
+             .rename(columns={int(m): c for m, c in MODE_COLUMNS.items()}))
+    read = modes.drop(columns=MODE_COLUMNS[Mode.UNREAD])
+    top = read.idxmax(axis=1).str.removeprefix("mode_").where(read.sum(axis=1).gt(0))
     return (
         flagged.groupby(["src", "dst"], sort=True)
         .agg(
@@ -27,8 +35,28 @@ def aggregate_transmissions(links: pd.DataFrame) -> pd.DataFrame:
         )
         .rename(columns={"recorded": "n_recorded"})
         .assign(n_inferred=lambda d: d.n_links - d.n_recorded)
+        .join(modes).assign(top_mode=top)
         .reset_index()
     )
+
+
+def tadlis_risk(links: pd.DataFrame, narrators: pd.DataFrame) -> pd.Series:
+    """Per chain: links where the student is a known mudallis and the formula is
+    ambiguous (ʿan, anna, qāla …) — the classical ʿanʿana-of-a-mudallis defect."""
+    mudallis = set(narrators.id[narrators.has_tadlis.fillna(False).astype(bool)])
+    risky = links.dst.isin(mudallis) & links["mode"].isin([int(m) for m in AMBIGUOUS])
+    return risky.groupby(links.chain_id).sum()
+
+
+def hearing_profile(links: pd.DataFrame) -> pd.DataFrame:
+    """Per narrator as student: share of read links with explicit hearing, and with ʿan."""
+    read = links[links["mode"].ne(Mode.UNREAD)]
+    flags = read.assign(explicit=read["mode"].isin([int(x) for x in EXPLICIT]),
+                        an=read["mode"].eq(Mode.AN))
+    return (flags.groupby("dst")
+            .agg(n_links_read=("mode", "size"), explicit_share=("explicit", "mean"),
+                 an_share=("an", "mean"))
+            .rename_axis("id"))
 
 
 def chronology(edges: pd.DataFrame, narrators: pd.DataFrame) -> pd.DataFrame:
