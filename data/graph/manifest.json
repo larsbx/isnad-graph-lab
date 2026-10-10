@@ -1,0 +1,137 @@
+{
+  "builder": "isnad_graph 0.1.0",
+  "built_at": "2026-10-10T19:57:43+00:00",
+  "source": {
+    "repo": "emadjumaah/hadith-kg",
+    "file": "hadith-kg.db",
+    "revision": "8ae7e3d5be284a6b32a989cd41866343fc19501c",
+    "sha256": "d528084321e715006712e0e2461809a3afc9408065a1d1af90238c8b723815a6",
+    "license": "CC-BY-4.0",
+    "meta": {
+      "source": "mongodump hadithdb/hadith (2017-10-12) + rawa_cat.csv",
+      "built_by": "build_hkg.py + finalize_hkg.py",
+      "sanad_rawis.pos": "0 = book author (musannif), ascending toward the sahabi",
+      "offsets": "hadith_rawis/hadith_ayas/matn_start are [start,end) char offsets into hadiths.nass",
+      "report.broken_link_hadiths": "6351",
+      "report.mentions_repaired_from_chain": "1087",
+      "report.mentions_unrepairable": "8309",
+      "report.salasil_rwat_mismatches": "0",
+      "report.sanads_not_in_any_sanad_list": "0",
+      "report.count_books": "425",
+      "report.count_alems": "1015",
+      "report.count_aqwal": "127863",
+      "report.count_meaning_groups": "20745",
+      "report.count_tarafs": "20745",
+      "report.count_hadiths": "715790",
+      "report.count_hadith_rawis": "3339040",
+      "report.count_hadith_ayas": "117194",
+      "report.count_sanads": "577024",
+      "report.count_sanad_rawis": "4414211",
+      "report.count_topics": "54862",
+      "report.fk_hadith_book": "0",
+      "report.marfu_without_group": "522",
+      "report.fk_hadith_group": "0",
+      "report.matn_span_missing": "1180",
+      "report.mentions_still_null": "6302",
+      "report.mentions_still_unknown_rawi": "2028",
+      "report.fk_sanad_hadith": "0",
+      "report.fk_aqwal_alem": "0",
+      "report.fk_aqwal_rawi": "0",
+      "report.fk_topic_parent": "0",
+      "report.fk_topic_group": "0",
+      "report.group_without_hadith": "461",
+      "sanads.length": "DISTINCT narrators in the chain (a repeated narrator counts once); 1,117 chains have a repeated narrator",
+      "sanads.max_rank": "max rank_no over the chain INCLUDING the author at pos 0",
+      "meaning_groups.counts": "sahaba_qty/repeat_qty are legacy declared values (Aug-2017 cat table); corpus drifted by Oct-2017 — compute live stats for exact numbers",
+      "hadith_rawis.rawi_id": "kept verbatim from source; may be NULL (unrepairable malformed href) or reference an id with no rawis row (e.g. 0 = never described)",
+      "rawis.is_stub": "1 = placeholder created by clean_hkg.py for a chain narrator the source never described; name harvested from hadith text",
+      "report.fk_srawi_rawi": "0",
+      "report.count_rawis": "49844",
+      "cleaned_at": "2026-07-09 23:18"
+    }
+  },
+  "markers": {
+    "1131": "MUBHAM",
+    "9481": "MUBHAM",
+    "30000": "INQITA",
+    "30001": "TALIQ",
+    "30002": "IRSAL"
+  },
+  "inferred_layer": {
+    "unrecorded_hadiths": 312422,
+    "without_any_mention": 179672,
+    "abstained": {
+      "tahwil": 4210,
+      "unresolved_mention": 3312,
+      "no_isnad_mentions": 4972,
+      "no_matn_boundary": 50
+    },
+    "only_gap_markers": 277,
+    "inferred_chains": 119929,
+    "single_narrator_chains": 59166
+  },
+  "inference_validation": {
+    "evaluated": 302229,
+    "attempted": 300764,
+    "exact": 237468,
+    "mismatch": 12611,
+    "abstained": 1465,
+    "exact_with_compiler": 50685,
+    "precision": 0.9580701147743746,
+    "coverage": 0.995152682237641
+  },
+  "counts": {
+    "tables": {
+      "narrators": 49845,
+      "transmissions": 330628,
+      "chains": 696953,
+      "hadiths": 715790,
+      "books": 425,
+      "groups": 20745,
+      "topics": 54862,
+      "critics": 1015,
+      "assessments": 127863,
+      "common_links": 187616
+    },
+    "narrators_by_kind": {
+      "narrator": 49815,
+      "stub": 24,
+      "marker": 5,
+      "prophet": 1
+    },
+    "chains_by_provenance": {
+      "recorded": 577024,
+      "inferred": 119929
+    },
+    "links": 4554366,
+    "transmission_flags": {
+      "n_links": 4554366,
+      "n_recorded": 4345717,
+      "n_direct": 4490120,
+      "n_irsal": 32497,
+      "n_inqita": 13839,
+      "n_taliq": 3989,
+      "n_mubham": 14594,
+      "n_inferred": 208649
+    },
+    "chronology": {
+      "unknown": 257785,
+      "consistent": 59089,
+      "impossible": 13754
+    },
+    "common_links": 26432
+  },
+  "invariants": {
+    "edge_endpoints_are_nodes": true,
+    "path_nodes_are_nodes": true,
+    "no_marker_on_any_path": true,
+    "one_flag_per_link": true,
+    "link_mass_conserved": true,
+    "provenance_partitions_links": true,
+    "no_direct_self_loops": true,
+    "prophet_only_as_apex_of_prophetic_chains": true,
+    "chains_reference_hadiths": true,
+    "every_recorded_sanad_present": true,
+    "assessments_reference_nodes": true
+  }
+}

@@ -1,0 +1,13 @@
+import networkx as nx
+
+from isnad_graph.cli import main
+
+
+def test_export_and_verify_roundtrip(mini_graph, tmp_path, capsys):
+    gdir = mini_graph.save(tmp_path / "g")
+    assert main(["--graph", str(gdir), "verify"]) == 0
+    assert main(["--graph", str(gdir), "export", str(tmp_path / "g.graphml")]) == 0
+    g = nx.read_graphml(tmp_path / "g.graphml")
+    assert g.number_of_edges() == mini_graph.transmissions.num_rows
+    assert main(["--graph", str(gdir), "chain", "2"]) == 0
+    assert "⇢" in capsys.readouterr().out
