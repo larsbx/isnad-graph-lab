@@ -5,7 +5,7 @@ description = "Annotated graph of recorded hadith chains of narration (asanid)"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT (code); derived data CC-BY-4.0, see README" }
-dependencies = ["pandas>=2.2", "pyarrow>=15", "networkx>=3.2"]
+dependencies = ["pandas>=2.2", "pyarrow>=15", "networkx>=3.2", "scipy>=1.11"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "hypothesis>=6.100", "ruff>=0.5"]

@@ -339,6 +339,11 @@ def build(db: Path, spec: SourceSpec = HADITH_KG, validate: bool = True,
                     "defect_lift": defect_lift(reports, grades[~grades.collection.map(
                         {c: e.cross_recension for c, e in editions.items()})
                         .fillna(False).astype(bool)]).to_dict("records"),
+                    "defect_lift_inference": {
+                        "score": "signed uncorrected CMH, conditional on structural-verdict strata",
+                        "p_value": "exact conditional, twice smaller inclusive tail",
+                        "rates": "descriptive marginal rejection proportions",
+                    },
                     "defect_lift_excludes": sorted(
                         c for c, e in editions.items() if e.cross_recension),
                 },

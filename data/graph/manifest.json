@@ -166,7 +166,26 @@
         "n_conflicting": 4,
         "reject_clean": 0.0905,
         "risk_ratio_mh": 1.271,
-        "z": -0.32
+        "risk_ratio_status": "finite",
+        "z_cmh": 1.6287,
+        "p_exact": 0.12780851544839583,
+        "n_informative_strata": 2,
+        "strata": [
+          {
+            "verdict": 0,
+            "flagged_rejected": 17,
+            "flagged_total": 416,
+            "clean_rejected": 24,
+            "clean_total": 1050
+          },
+          {
+            "verdict": 1,
+            "flagged_rejected": 36,
+            "flagged_total": 198,
+            "clean_rejected": 164,
+            "clean_total": 1027
+          }
+        ]
       },
       {
         "grader": "Ahmad Muhammad Shakir",
@@ -177,7 +196,26 @@
         "n_conflicting": 4,
         "reject_clean": 0.0814,
         "risk_ratio_mh": 1.412,
-        "z": 5.9
+        "risk_ratio_status": "finite",
+        "z_cmh": 2.0357,
+        "p_exact": 0.060353755860060726,
+        "n_informative_strata": 1,
+        "strata": [
+          {
+            "verdict": 0,
+            "flagged_rejected": 0,
+            "flagged_total": 0,
+            "clean_rejected": 41,
+            "clean_total": 1466
+          },
+          {
+            "verdict": 1,
+            "flagged_rejected": 35,
+            "flagged_total": 160,
+            "clean_rejected": 165,
+            "clean_total": 1065
+          }
+        ]
       },
       {
         "grader": "Al-Albani",
@@ -188,7 +226,26 @@
         "n_conflicting": 137,
         "reject_clean": 0.1005,
         "risk_ratio_mh": 1.404,
-        "z": 0.68
+        "risk_ratio_status": "finite",
+        "z_cmh": 4.6001,
+        "p_exact": 9.174104908988207e-06,
+        "n_informative_strata": 2,
+        "strata": [
+          {
+            "verdict": 0,
+            "flagged_rejected": 85,
+            "flagged_total": 1369,
+            "clean_rejected": 94,
+            "clean_total": 3638
+          },
+          {
+            "verdict": 1,
+            "flagged_rejected": 129,
+            "flagged_total": 657,
+            "clean_rejected": 651,
+            "clean_total": 3775
+          }
+        ]
       },
       {
         "grader": "Al-Albani",
@@ -199,7 +256,26 @@
         "n_conflicting": 137,
         "reject_clean": 0.0925,
         "risk_ratio_mh": 1.427,
-        "z": 11.29
+        "risk_ratio_status": "finite",
+        "z_cmh": 4.2221,
+        "p_exact": 5.441002638101897e-05,
+        "n_informative_strata": 1,
+        "strata": [
+          {
+            "verdict": 0,
+            "flagged_rejected": 0,
+            "flagged_total": 0,
+            "clean_rejected": 179,
+            "clean_total": 5007
+          },
+          {
+            "verdict": 1,
+            "flagged_rejected": 140,
+            "flagged_total": 589,
+            "clean_rejected": 640,
+            "clean_total": 3843
+          }
+        ]
       },
       {
         "grader": "Bashar Awad Maarouf",
@@ -210,7 +286,26 @@
         "n_conflicting": 0,
         "reject_clean": 0.0031,
         "risk_ratio_mh": 3.022,
-        "z": 1.07
+        "risk_ratio_status": "finite",
+        "z_cmh": 1.5722,
+        "p_exact": 0.2737143823721556,
+        "n_informative_strata": 2,
+        "strata": [
+          {
+            "verdict": 0,
+            "flagged_rejected": 1,
+            "flagged_total": 338,
+            "clean_rejected": 1,
+            "clean_total": 880
+          },
+          {
+            "verdict": 1,
+            "flagged_rejected": 2,
+            "flagged_total": 111,
+            "clean_rejected": 4,
+            "clean_total": 719
+          }
+        ]
       },
       {
         "grader": "Bashar Awad Maarouf",
@@ -221,7 +316,26 @@
         "n_conflicting": 0,
         "reject_clean": 0.0031,
         "risk_ratio_mh": 3.962,
-        "z": 2.78
+        "risk_ratio_status": "finite",
+        "z_cmh": 1.7236,
+        "p_exact": 0.27634669409177653,
+        "n_informative_strata": 1,
+        "strata": [
+          {
+            "verdict": 0,
+            "flagged_rejected": 0,
+            "flagged_total": 0,
+            "clean_rejected": 2,
+            "clean_total": 1218
+          },
+          {
+            "verdict": 1,
+            "flagged_rejected": 2,
+            "flagged_total": 93,
+            "clean_rejected": 4,
+            "clean_total": 737
+          }
+        ]
       },
       {
         "grader": "Muhammad Fouad Abd al-Baqi",
@@ -232,7 +346,26 @@
         "n_conflicting": 0,
         "reject_clean": 0.084,
         "risk_ratio_mh": 1.406,
-        "z": 0.2
+        "risk_ratio_status": "finite",
+        "z_cmh": 2.3553,
+        "p_exact": 0.02634573506662643,
+        "n_informative_strata": 2,
+        "strata": [
+          {
+            "verdict": 0,
+            "flagged_rejected": 22,
+            "flagged_total": 442,
+            "clean_rejected": 17,
+            "clean_total": 943
+          },
+          {
+            "verdict": 1,
+            "flagged_rejected": 38,
+            "flagged_total": 253,
+            "clean_rejected": 172,
+            "clean_total": 1308
+          }
+        ]
       },
       {
         "grader": "Muhammad Fouad Abd al-Baqi",
@@ -243,7 +376,26 @@
         "n_conflicting": 0,
         "reject_clean": 0.0762,
         "risk_ratio_mh": 1.574,
-        "z": 5.97
+        "risk_ratio_status": "finite",
+        "z_cmh": 2.7978,
+        "p_exact": 0.009689492959716505,
+        "n_informative_strata": 1,
+        "strata": [
+          {
+            "verdict": 0,
+            "flagged_rejected": 0,
+            "flagged_total": 0,
+            "clean_rejected": 39,
+            "clean_total": 1385
+          },
+          {
+            "verdict": 1,
+            "flagged_rejected": 40,
+            "flagged_total": 203,
+            "clean_rejected": 170,
+            "clean_total": 1358
+          }
+        ]
       },
       {
         "grader": "Muhammad Muhyi Al-Din Abdul Hamid",
@@ -254,7 +406,26 @@
         "n_conflicting": 71,
         "reject_clean": 0.105,
         "risk_ratio_mh": 1.767,
-        "z": 2.01
+        "risk_ratio_status": "finite",
+        "z_cmh": 5.102,
+        "p_exact": 1.5774725388728264e-06,
+        "n_informative_strata": 2,
+        "strata": [
+          {
+            "verdict": 0,
+            "flagged_rejected": 40,
+            "flagged_total": 499,
+            "clean_rejected": 36,
+            "clean_total": 1639
+          },
+          {
+            "verdict": 1,
+            "flagged_rejected": 51,
+            "flagged_total": 193,
+            "clean_rejected": 283,
+            "clean_total": 1399
+          }
+        ]
       },
       {
         "grader": "Muhammad Muhyi Al-Din Abdul Hamid",
@@ -265,7 +436,26 @@
         "n_conflicting": 71,
         "reject_clean": 0.1007,
         "risk_ratio_mh": 1.334,
-        "z": 7.46
+        "risk_ratio_status": "finite",
+        "z_cmh": 2.203,
+        "p_exact": 0.03826003026649342,
+        "n_informative_strata": 1,
+        "strata": [
+          {
+            "verdict": 0,
+            "flagged_rejected": 0,
+            "flagged_total": 0,
+            "clean_rejected": 76,
+            "clean_total": 2138
+          },
+          {
+            "verdict": 1,
+            "flagged_rejected": 55,
+            "flagged_total": 205,
+            "clean_rejected": 279,
+            "clean_total": 1387
+          }
+        ]
       },
       {
         "grader": "Salim al-Hilali",
@@ -276,7 +466,26 @@
         "n_conflicting": 8,
         "reject_clean": 0.1079,
         "risk_ratio_mh": 0.392,
-        "z": -2.12
+        "risk_ratio_status": "finite",
+        "z_cmh": -2.0053,
+        "p_exact": 0.05020986999942409,
+        "n_informative_strata": 2,
+        "strata": [
+          {
+            "verdict": 0,
+            "flagged_rejected": 4,
+            "flagged_total": 97,
+            "clean_rejected": 101,
+            "clean_total": 996
+          },
+          {
+            "verdict": 1,
+            "flagged_rejected": 0,
+            "flagged_total": 2,
+            "clean_rejected": 17,
+            "clean_total": 98
+          }
+        ]
       },
       {
         "grader": "Salim al-Hilali",
@@ -287,7 +496,26 @@
         "n_conflicting": 8,
         "reject_clean": 0.0828,
         "risk_ratio_mh": 8.742,
-        "z": 12.93
+        "risk_ratio_status": "finite",
+        "z_cmh": 12.3871,
+        "p_exact": 1.1616866669059353e-19,
+        "n_informative_strata": 2,
+        "strata": [
+          {
+            "verdict": 0,
+            "flagged_rejected": 20,
+            "flagged_total": 27,
+            "clean_rejected": 85,
+            "clean_total": 1066
+          },
+          {
+            "verdict": 1,
+            "flagged_rejected": 6,
+            "flagged_total": 7,
+            "clean_rejected": 11,
+            "clean_total": 93
+          }
+        ]
       },
       {
         "grader": "Shuaib Al Arnaut",
@@ -298,7 +526,26 @@
         "n_conflicting": 21,
         "reject_clean": 0.1041,
         "risk_ratio_mh": 1.508,
-        "z": 0.3
+        "risk_ratio_status": "finite",
+        "z_cmh": 3.9132,
+        "p_exact": 0.00019503392405024973,
+        "n_informative_strata": 2,
+        "strata": [
+          {
+            "verdict": 0,
+            "flagged_rejected": 27,
+            "flagged_total": 661,
+            "clean_rejected": 40,
+            "clean_total": 1949
+          },
+          {
+            "verdict": 1,
+            "flagged_rejected": 69,
+            "flagged_total": 232,
+            "clean_rejected": 318,
+            "clean_total": 1491
+          }
+        ]
       },
       {
         "grader": "Shuaib Al Arnaut",
@@ -309,7 +556,26 @@
         "n_conflicting": 21,
         "reject_clean": 0.0926,
         "risk_ratio_mh": 1.447,
-        "z": 10.64
+        "risk_ratio_status": "finite",
+        "z_cmh": 3.2946,
+        "p_exact": 0.001750448442409447,
+        "n_informative_strata": 1,
+        "strata": [
+          {
+            "verdict": 0,
+            "flagged_rejected": 0,
+            "flagged_total": 0,
+            "clean_rejected": 67,
+            "clean_total": 2610
+          },
+          {
+            "verdict": 1,
+            "flagged_rejected": 76,
+            "flagged_total": 249,
+            "clean_rejected": 311,
+            "clean_total": 1474
+          }
+        ]
       },
       {
         "grader": "Zubair Ali Zai",
@@ -320,7 +586,26 @@
         "n_conflicting": 59,
         "reject_clean": 0.1938,
         "risk_ratio_mh": 2.374,
-        "z": 15.88
+        "risk_ratio_status": "finite",
+        "z_cmh": 17.4945,
+        "p_exact": 4.785253888810115e-63,
+        "n_informative_strata": 2,
+        "strata": [
+          {
+            "verdict": 0,
+            "flagged_rejected": 242,
+            "flagged_total": 670,
+            "clean_rejected": 187,
+            "clean_total": 1475
+          },
+          {
+            "verdict": 1,
+            "flagged_rejected": 260,
+            "flagged_total": 544,
+            "clean_rejected": 681,
+            "clean_total": 3004
+          }
+        ]
       },
       {
         "grader": "Zubair Ali Zai",
@@ -331,12 +616,36 @@
         "n_conflicting": 59,
         "reject_clean": 0.2222,
         "risk_ratio_mh": 1.884,
-        "z": 10.92
+        "risk_ratio_status": "finite",
+        "z_cmh": 9.5761,
+        "p_exact": 8.04978687180896e-20,
+        "n_informative_strata": 1,
+        "strata": [
+          {
+            "verdict": 0,
+            "flagged_rejected": 0,
+            "flagged_total": 0,
+            "clean_rejected": 429,
+            "clean_total": 2145
+          },
+          {
+            "verdict": 1,
+            "flagged_rejected": 209,
+            "flagged_total": 467,
+            "clean_rejected": 732,
+            "clean_total": 3081
+          }
+        ]
       }
     ],
     "defect_lift_excludes": [
       "nasai"
-    ]
+    ],
+    "defect_lift_inference": {
+      "score": "signed uncorrected CMH, conditional on structural-verdict strata",
+      "p_value": "exact conditional, twice smaller inclusive tail",
+      "rates": "descriptive marginal rejection proportions"
+    }
   },
   "inferred_layer": {
     "unrecorded_hadiths": 312422,
