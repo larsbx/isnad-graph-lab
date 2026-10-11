@@ -54,3 +54,30 @@ def test_defect_lift_is_stratified():
     (row,) = lift.itertuples()
     assert (row.n_flagged, row.reject_flagged, row.n_clean) == (2, 1.0, 8)
     assert row.risk_ratio_mh == pytest.approx(4.0)  # MH within the ḥasan stratum: 1 / (1/4)
+
+
+def test_apex_rank_counts_toward_the_weakest_narrator():
+    # inferred mawquf chain: a majhul (rank 7) apex, then two thiqat — ḍaʿīf, not ṣaḥīḥ
+    from isnad_graph.assess import assess_chains
+
+    chains = pd.DataFrame({"chain_id": [0], "path": [[10, 11, 12]], "head_gap": [0],
+                           "tail_gap": [0]})
+    links = pd.DataFrame({"chain_id": [0, 0], "src": [10, 11], "dst": [11, 12], "flag": [0, 0],
+                          "mode": [2, 2]})
+    narrators = pd.DataFrame({"id": [10, 11, 12], "rank_no": [7, 3, 3],
+                              "has_tadlis": [False] * 3})
+    edges = pd.DataFrame({"src": [10, 11], "dst": [11, 12], "chronology": ["unknown"] * 2})
+    (row,) = assess_chains(chains, links, narrators, edges).itertuples()
+    assert (row.worst_rank, row.verdict) == (7, Verdict.DAIF)
+
+
+def test_each_report_counts_once_per_grader():
+    # report 0 is graded twice by G through two parallel edition entries; report 1 is
+    # graded inconsistently (accept + reject) and is dropped, not double-counted
+    reports = pd.DataFrame({"best_verdict": [1, 1, 1, 1], "shared_defects": [
+        Defect.TADLIS_WEAK, Defect.TADLIS_WEAK, 0, 0]}, index=pd.Index(range(4), name="hadith_id"))
+    grades = pd.DataFrame({"hadith_id": [0, 0, 1, 1, 2, 3], "grader": "G", "scope": "hadith",
+                           "verdict": [2, 2, 0, 2, 0, 2]})
+    (row,) = defect_lift(reports, grades, min_flagged=1,
+                         defects=(Defect.TADLIS_WEAK,)).itertuples()
+    assert (row.n_flagged, row.reject_flagged, row.n_clean, row.n_conflicting) == (1, 1.0, 2, 1)

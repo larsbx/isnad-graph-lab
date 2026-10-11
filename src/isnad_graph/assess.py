@@ -70,7 +70,8 @@ def assess_chains(chains: pd.DataFrame, links: pd.DataFrame, narrators: pd.DataF
         | np.where(pd.MultiIndex.from_arrays([links.src, links.dst]).map(impossible)
                    .fillna(False).astype(bool), Defect.CHRONOLOGY, 0)
     )
-    per_chain = (links.assign(defects=flags, rank=student_rank)
+    link_rank = np.fmax(links.src.map(rank), student_rank)  # both ends: the apex too
+    per_chain = (links.assign(defects=flags, rank=link_rank)
                  .groupby("chain_id").agg(defects=("defects", np.bitwise_or.reduce),
                                           worst_rank=("rank", "max")))
     out = chains[["chain_id", "path", "head_gap", "tail_gap"]].join(per_chain, on="chain_id")
@@ -117,11 +118,19 @@ def defect_lift(reports: pd.DataFrame, grades: pd.DataFrame, min_flagged: int = 
                                                Defect.CHRONOLOGY)) -> pd.DataFrame:
     """Rejection rate of each grader on structurally acceptable reports, with vs
     without a defect on every acceptable route — within each verdict stratum
-    (ṣaḥīḥ, ḥasan), pooled by Mantel–Haenszel. Uncorroborated grades only."""
-    g = grades[grades.verdict.notna() & grades.scope.ne("corroborated")].join(
-        reports, on="hadith_id", how="inner")
+    (ṣaḥīḥ, ḥasan), pooled by Mantel–Haenszel. Uncorroborated grades only, one
+    observation per (grader, report); ``n_conflicting`` counts reports a grader
+    graded both ways through parallel entries (excluded)."""
+    g = grades[grades.verdict.notna() & grades.scope.ne("corroborated")]
+    # one observation per (grader, report): parallel edition entries aligned to one
+    # report would otherwise count as independent; inconsistent ones are dropped
+    share = (g.assign(reject=g.verdict.gt(Verdict.HASAN))
+             .groupby(["grader", "hadith_id"]).reject.mean().reset_index())
+    conflicting = share[share.reject.between(0, 1, inclusive="neither")]
+    g = (share.drop(conflicting.index).assign(reject=lambda d: d.reject.eq(1))
+         .join(reports, on="hadith_id", how="inner"))
     g = g[g.best_verdict.isin([int(v) for v in ACCEPTABLE])]
-    g = g.assign(reject=g.verdict.gt(Verdict.HASAN))
+    n_conflicting = conflicting.groupby("grader").size()
     rows = []
     for (grader, d), defect in ((x, f) for x in g.groupby("grader") for f in defects):
         flagged = (d.shared_defects & int(defect)).ne(0)  # Flag is iterable
@@ -138,6 +147,7 @@ def defect_lift(reports: pd.DataFrame, grades: pd.DataFrame, min_flagged: int = 
         se = np.sqrt(p * (1 - p) * (1 / flagged.sum() + 1 / (~flagged).sum()))
         rows.append({"grader": grader, "defect": defect.name, "n_flagged": int(flagged.sum()),
                      "reject_flagged": round(p1, 4), "n_clean": int((~flagged).sum()),
+                     "n_conflicting": int(n_conflicting.get(grader, 0)),
                      "reject_clean": round(p0, 4), "risk_ratio_mh": round(num / den, 3)
                      if den else None, "z": round((p1 - p0) / se, 2) if se else None})
     return pd.DataFrame(rows)

@@ -236,16 +236,19 @@ structural verdict is acceptable. Does "every acceptable route carries the
 defect" raise the rate at which a grader rejects them? `defect_lift` answers
 this per grader. It compares within the ṣaḥīḥ and ḥasan strata, pooled by
 Mantel–Haenszel, because a ṣadūq mudallis makes a chain ḥasan by construction.
-It uses uncorroborated grades only, and excludes cross-recension associations
+It counts each report once per grader: parallel edition entries aligned to
+one report are collapsed, and a report a grader grades both ways is dropped and
+counted as `n_conflicting`. It uses uncorroborated grades only, and excludes
+cross-recension associations
 (Nasāʾī), which are not grades of the source report (see
 [External editions](#external-editions)).
 
 | grader | ʿan of a ṣadūq-level mudallis | ʿan of a thiqa mudallis |
 |---|---|---|
-| Zubair ʿAlī Zaʾī | 45% vs 23% rejected, RR 1.87, z 10.8 | **42% vs 20%, RR 2.25, z 16.0** |
-| al-Albānī | 24% vs 10%, RR 1.39, z 10.3 | 11% vs 11%, z 0.3 |
-| Shuʿayb al-Arnaʾūṭ | 31% vs 9%, RR 1.44, z 10.6 | 11% vs 10%, z 0.4 |
-| Aḥmad Shākir | 22% vs 8%, RR 1.40, z 6.0 | 9% vs 9%, z −0.4 |
+| Zubair ʿAlī Zaʾī | 45% vs 22% rejected, RR 1.88, z 10.9 | **41% vs 19%, RR 2.37, z 15.9** |
+| al-Albānī | 24% vs 9%, RR 1.43, z 11.3 | 11% vs 10%, z 0.7 |
+| Shuʿayb al-Arnaʾūṭ | 31% vs 9%, RR 1.45, z 10.6 | 11% vs 10%, z 0.3 |
+| Aḥmad Shākir | 22% vs 8%, RR 1.41, z 5.9 | 9% vs 9%, z −0.3 |
 
 Two findings stand out:
 
@@ -262,7 +265,7 @@ small within-stratum effect that does not reach significance.
 
 An impossible chronology is too rare among acceptable reports to measure for
 most graders. The one exception is Salīm al-Hilālī on the Muwaṭṭaʾ: 76% rejected
-against 9% (n = 34), plausibly Mālik's munqaṭiʿ reports. The full table is in
+against 8% (n = 34), plausibly Mālik's munqaṭiʿ reports. The full table is in
 `manifest.json` under `assessment.defect_lift`.
 
 ### External editions
