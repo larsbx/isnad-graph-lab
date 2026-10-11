@@ -1,6 +1,6 @@
 {
   "builder": "isnad_graph 0.1.0",
-  "built_at": "2026-10-10T21:14:27+00:00",
+  "built_at": "2026-10-11T13:08:15+00:00",
   "source": {
     "repo": "emadjumaah/hadith-kg",
     "file": "hadith-kg.db",
@@ -149,6 +149,194 @@
         "cross_recension": true
       }
     }
+  },
+  "assessment": {
+    "reproduction_of_source_verdicts": {
+      "chains": 577024,
+      "exact": 0.9066,
+      "acceptable_vs_rejected": 0.9433
+    },
+    "defect_lift": [
+      {
+        "grader": "Ahmad Muhammad Shakir",
+        "defect": "TADLIS",
+        "n_flagged": 614,
+        "reject_flagged": 0.0863,
+        "n_clean": 2077,
+        "n_conflicting": 4,
+        "reject_clean": 0.0905,
+        "risk_ratio_mh": 1.271,
+        "z": -0.32
+      },
+      {
+        "grader": "Ahmad Muhammad Shakir",
+        "defect": "TADLIS_WEAK",
+        "n_flagged": 160,
+        "reject_flagged": 0.2188,
+        "n_clean": 2531,
+        "n_conflicting": 4,
+        "reject_clean": 0.0814,
+        "risk_ratio_mh": 1.412,
+        "z": 5.9
+      },
+      {
+        "grader": "Al-Albani",
+        "defect": "TADLIS",
+        "n_flagged": 2026,
+        "reject_flagged": 0.1056,
+        "n_clean": 7413,
+        "n_conflicting": 137,
+        "reject_clean": 0.1005,
+        "risk_ratio_mh": 1.404,
+        "z": 0.68
+      },
+      {
+        "grader": "Al-Albani",
+        "defect": "TADLIS_WEAK",
+        "n_flagged": 589,
+        "reject_flagged": 0.2377,
+        "n_clean": 8850,
+        "n_conflicting": 137,
+        "reject_clean": 0.0925,
+        "risk_ratio_mh": 1.427,
+        "z": 11.29
+      },
+      {
+        "grader": "Bashar Awad Maarouf",
+        "defect": "TADLIS",
+        "n_flagged": 449,
+        "reject_flagged": 0.0067,
+        "n_clean": 1599,
+        "n_conflicting": 0,
+        "reject_clean": 0.0031,
+        "risk_ratio_mh": 3.022,
+        "z": 1.07
+      },
+      {
+        "grader": "Bashar Awad Maarouf",
+        "defect": "TADLIS_WEAK",
+        "n_flagged": 93,
+        "reject_flagged": 0.0215,
+        "n_clean": 1955,
+        "n_conflicting": 0,
+        "reject_clean": 0.0031,
+        "risk_ratio_mh": 3.962,
+        "z": 2.78
+      },
+      {
+        "grader": "Muhammad Fouad Abd al-Baqi",
+        "defect": "TADLIS",
+        "n_flagged": 695,
+        "reject_flagged": 0.0863,
+        "n_clean": 2251,
+        "n_conflicting": 0,
+        "reject_clean": 0.084,
+        "risk_ratio_mh": 1.406,
+        "z": 0.2
+      },
+      {
+        "grader": "Muhammad Fouad Abd al-Baqi",
+        "defect": "TADLIS_WEAK",
+        "n_flagged": 203,
+        "reject_flagged": 0.197,
+        "n_clean": 2743,
+        "n_conflicting": 0,
+        "reject_clean": 0.0762,
+        "risk_ratio_mh": 1.574,
+        "z": 5.97
+      },
+      {
+        "grader": "Muhammad Muhyi Al-Din Abdul Hamid",
+        "defect": "TADLIS",
+        "n_flagged": 692,
+        "reject_flagged": 0.1315,
+        "n_clean": 3038,
+        "n_conflicting": 71,
+        "reject_clean": 0.105,
+        "risk_ratio_mh": 1.767,
+        "z": 2.01
+      },
+      {
+        "grader": "Muhammad Muhyi Al-Din Abdul Hamid",
+        "defect": "TADLIS_WEAK",
+        "n_flagged": 205,
+        "reject_flagged": 0.2683,
+        "n_clean": 3525,
+        "n_conflicting": 71,
+        "reject_clean": 0.1007,
+        "risk_ratio_mh": 1.334,
+        "z": 7.46
+      },
+      {
+        "grader": "Salim al-Hilali",
+        "defect": "TADLIS",
+        "n_flagged": 99,
+        "reject_flagged": 0.0404,
+        "n_clean": 1094,
+        "n_conflicting": 8,
+        "reject_clean": 0.1079,
+        "risk_ratio_mh": 0.392,
+        "z": -2.12
+      },
+      {
+        "grader": "Salim al-Hilali",
+        "defect": "CHRONOLOGY",
+        "n_flagged": 34,
+        "reject_flagged": 0.7647,
+        "n_clean": 1159,
+        "n_conflicting": 8,
+        "reject_clean": 0.0828,
+        "risk_ratio_mh": 8.742,
+        "z": 12.93
+      },
+      {
+        "grader": "Shuaib Al Arnaut",
+        "defect": "TADLIS",
+        "n_flagged": 893,
+        "reject_flagged": 0.1075,
+        "n_clean": 3440,
+        "n_conflicting": 21,
+        "reject_clean": 0.1041,
+        "risk_ratio_mh": 1.508,
+        "z": 0.3
+      },
+      {
+        "grader": "Shuaib Al Arnaut",
+        "defect": "TADLIS_WEAK",
+        "n_flagged": 249,
+        "reject_flagged": 0.3052,
+        "n_clean": 4084,
+        "n_conflicting": 21,
+        "reject_clean": 0.0926,
+        "risk_ratio_mh": 1.447,
+        "z": 10.64
+      },
+      {
+        "grader": "Zubair Ali Zai",
+        "defect": "TADLIS",
+        "n_flagged": 1214,
+        "reject_flagged": 0.4135,
+        "n_clean": 4479,
+        "n_conflicting": 59,
+        "reject_clean": 0.1938,
+        "risk_ratio_mh": 2.374,
+        "z": 15.88
+      },
+      {
+        "grader": "Zubair Ali Zai",
+        "defect": "TADLIS_WEAK",
+        "n_flagged": 467,
+        "reject_flagged": 0.4475,
+        "n_clean": 5226,
+        "n_conflicting": 59,
+        "reject_clean": 0.2222,
+        "risk_ratio_mh": 1.884,
+        "z": 10.92
+      }
+    ],
+    "defect_lift_excludes": [
+      "nasai"
+    ]
   },
   "inferred_layer": {
     "unrecorded_hadiths": 312422,
