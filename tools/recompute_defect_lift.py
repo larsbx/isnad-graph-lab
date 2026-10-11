@@ -12,6 +12,9 @@ DATA = ROOT / "data/graph"
 manifest_path = DATA / "manifest.json"
 manifest = json.loads(manifest_path.read_text())
 old = manifest["assessment"]["defect_lift"]
+audit_path = ROOT / "docs/defect-inference-audit.json"
+# Keep the pre-correction receipt when rerunning the corrected computation.
+previous = json.loads(audit_path.read_text())["previous"] if audit_path.exists() else old
 hadiths = pd.read_parquet(DATA / "hadiths.parquet")
 reports = hadiths.set_index("id")[["best_verdict", "shared_defects"]]
 grades = pd.read_parquet(DATA / "external_grades.parquet")
@@ -32,7 +35,7 @@ manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\
 audit = {"source": manifest["source"], "excluded_collections": excluded,
          "input_sha256": {name: hashlib.sha256((DATA / name).read_bytes()).hexdigest()
                           for name in ("hadiths.parquet", "external_grades.parquet")},
-         "previous": old, "corrected": new}
-(ROOT / "docs/defect-inference-audit.json").write_text(
+         "previous": previous, "corrected": new}
+audit_path.write_text(
     json.dumps(audit, ensure_ascii=False, indent=2) + "\n")
 print(pd.DataFrame(new).drop(columns="strata").to_string(index=False))
