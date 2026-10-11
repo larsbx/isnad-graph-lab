@@ -335,7 +335,12 @@ def build(db: Path, spec: SourceSpec = HADITH_KG, validate: bool = True,
                                       "alignment": edition_stats} if use_editions else None,
                 "assessment": {
                     "reproduction_of_source_verdicts": reproduction(chains),
-                    "defect_lift": defect_lift(reports, grades).to_dict("records"),
+                    # cross-recension associations are not grades of the source report
+                    "defect_lift": defect_lift(reports, grades[~grades.collection.map(
+                        {c: e.cross_recension for c, e in editions.items()})
+                        .fillna(False).astype(bool)]).to_dict("records"),
+                    "defect_lift_excludes": sorted(
+                        c for c, e in editions.items() if e.cross_recension),
                 },
                 "inferred_layer": inference_stats,
                 "transmission_modes": {

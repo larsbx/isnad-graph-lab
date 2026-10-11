@@ -211,31 +211,6 @@ Checks:
 formula is ambiguous, i.e. the classical ʿanʿana of a mudallis. 144,613 chains
 have at least one.
 
-### External editions
-
-Edition numbering differs from the source's: Bukhārī has 7,589 entries against
-7,031 reports. Muslim's parallel routes are numbered separately, while the
-source merges them into one report with several sanads. `align.py` therefore
-maps each edition entry to the source report that best **contains** it. It
-compares normalized word-trigram sets after stripping honorifics, which
-editions spell out, abbreviate as ﷺ, or omit, and keeps matches at ≥ 0.5.
-
-The independent check is **order consistency**: correct matches preserve both
-books' internal order, which the aligner never sees.
-
-| collection | aligned | order consistency |
-|---|---:|---:|
-| Bukhārī | 97.1% | 0.993 |
-| Muslim | 92.8% | 0.998 |
-| Abū Dāwūd | 99.3% | 0.998 |
-| Tirmidhī | 95.5% | 0.996 |
-| Ibn Mājah | 97.2% | 0.998 |
-| Muwaṭṭaʾ (Yaḥyā) | 94.5% | 0.999 |
-| Nasāʾī | 74.7% | 0.900 |
-
-The Nasāʾī alignment is cross-recension: the edition is al-Sunan al-Ṣughrā
-mapped onto the source's al-Kubrā. It is flagged `cross_recension`.
-
 ### Isnad assessment
 
 `assess.py` gives every chain a **structural verdict**: the weakest narrator's
@@ -261,12 +236,14 @@ structural verdict is acceptable. Does "every acceptable route carries the
 defect" raise the rate at which a grader rejects them? `defect_lift` answers
 this per grader. It compares within the ṣaḥīḥ and ḥasan strata, pooled by
 Mantel–Haenszel, because a ṣadūq mudallis makes a chain ḥasan by construction.
-It uses uncorroborated grades only.
+It uses uncorroborated grades only, and excludes cross-recension associations
+(Nasāʾī), which are not grades of the source report (see
+[External editions](#external-editions)).
 
 | grader | ʿan of a ṣadūq-level mudallis | ʿan of a thiqa mudallis |
 |---|---|---|
-| Zubair ʿAlī Zaʾī | 41% vs 19% rejected, RR 1.90, z 12.5 | **35% vs 17%, RR 2.35, z 17.4** |
-| al-Albānī | 22% vs 9%, RR 1.38, z 11.8 | 11% vs 10%, z 1.9 |
+| Zubair ʿAlī Zaʾī | 45% vs 23% rejected, RR 1.87, z 10.8 | **42% vs 20%, RR 2.25, z 16.0** |
+| al-Albānī | 24% vs 10%, RR 1.39, z 10.3 | 11% vs 11%, z 0.3 |
 | Shuʿayb al-Arnaʾūṭ | 31% vs 9%, RR 1.44, z 10.6 | 11% vs 10%, z 0.4 |
 | Aḥmad Shākir | 22% vs 8%, RR 1.40, z 6.0 | 9% vs 9%, z −0.4 |
 
@@ -287,6 +264,31 @@ An impossible chronology is too rare among acceptable reports to measure for
 most graders. The one exception is Salīm al-Hilālī on the Muwaṭṭaʾ: 76% rejected
 against 9% (n = 34), plausibly Mālik's munqaṭiʿ reports. The full table is in
 `manifest.json` under `assessment.defect_lift`.
+
+### External editions
+
+Edition numbering differs from the source's: Bukhārī has 7,589 entries against
+7,031 reports. Muslim's parallel routes are numbered separately, while the
+source merges them into one report with several sanads. `align.py` therefore
+maps each edition entry to the source report that best **contains** it. It
+compares normalized word-trigram sets after stripping honorifics, which
+editions spell out, abbreviate as ﷺ, or omit, and keeps matches at ≥ 0.5.
+
+The independent check is **order consistency**: correct matches preserve both
+books' internal order, which the aligner never sees.
+
+| collection | aligned | order consistency |
+|---|---:|---:|
+| Bukhārī | 97.1% | 0.993 |
+| Muslim | 92.8% | 0.998 |
+| Abū Dāwūd | 99.3% | 0.998 |
+| Tirmidhī | 95.5% | 0.996 |
+| Ibn Mājah | 97.2% | 0.998 |
+| Muwaṭṭaʾ (Yaḥyā) | 94.5% | 0.999 |
+| Nasāʾī | 74.7% | 0.900 |
+
+The Nasāʾī alignment is cross-recension: the edition is al-Sunan al-Ṣughrā
+mapped onto the source's al-Kubrā. It is flagged `cross_recension`.
 
 ## Usage
 
