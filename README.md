@@ -218,8 +218,9 @@ maps each edition entry to the source report that best **contains** it. It
 compares normalized word-trigram sets after stripping honorifics, which
 editions spell out, abbreviate as ﷺ, or omit, and keeps matches at ≥ 0.5.
 
-The independent check is **order consistency**: correct matches preserve both
-books' internal order, which the aligner never sees.
+**Order consistency** checks non-decreasing successive source positions; equal
+positions count as consistent. It is an aggregate diagnostic, not a probability
+of correctness. The aligner never sees numbering.
 
 | collection | aligned | order consistency |
 |---|---:|---:|
@@ -232,7 +233,10 @@ books' internal order, which the aligner never sees.
 | Nasāʾī | 74.7% | 0.900 |
 
 The Nasāʾī alignment is cross-recension: the edition is al-Sunan al-Ṣughrā
-mapped onto the source's al-Kubrā. It is flagged `cross_recension`.
+mapped onto the source's al-Kubrā. It is flagged `cross_recension` in newly built alignment, grading and translation
+tables. See [the provenance audit and guarded-query policy](docs/external-grade-provenance.md).
+The committed bundle predates these fields on grading rows; rebuild before using
+`grades_of`, which rejects legacy grading schemas.
 
 ## Usage
 
