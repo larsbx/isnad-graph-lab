@@ -1,0 +1,718 @@
+{
+  "source": {
+    "repo": "emadjumaah/hadith-kg",
+    "file": "hadith-kg.db",
+    "revision": "8ae7e3d5be284a6b32a989cd41866343fc19501c",
+    "sha256": "d528084321e715006712e0e2461809a3afc9408065a1d1af90238c8b723815a6",
+    "license": "CC-BY-4.0",
+    "meta": {
+      "source": "mongodump hadithdb/hadith (2017-10-12) + rawa_cat.csv",
+      "built_by": "build_hkg.py + finalize_hkg.py",
+      "sanad_rawis.pos": "0 = book author (musannif), ascending toward the sahabi",
+      "offsets": "hadith_rawis/hadith_ayas/matn_start are [start,end) char offsets into hadiths.nass",
+      "report.broken_link_hadiths": "6351",
+      "report.mentions_repaired_from_chain": "1087",
+      "report.mentions_unrepairable": "8309",
+      "report.salasil_rwat_mismatches": "0",
+      "report.sanads_not_in_any_sanad_list": "0",
+      "report.count_books": "425",
+      "report.count_alems": "1015",
+      "report.count_aqwal": "127863",
+      "report.count_meaning_groups": "20745",
+      "report.count_tarafs": "20745",
+      "report.count_hadiths": "715790",
+      "report.count_hadith_rawis": "3339040",
+      "report.count_hadith_ayas": "117194",
+      "report.count_sanads": "577024",
+      "report.count_sanad_rawis": "4414211",
+      "report.count_topics": "54862",
+      "report.fk_hadith_book": "0",
+      "report.marfu_without_group": "522",
+      "report.fk_hadith_group": "0",
+      "report.matn_span_missing": "1180",
+      "report.mentions_still_null": "6302",
+      "report.mentions_still_unknown_rawi": "2028",
+      "report.fk_sanad_hadith": "0",
+      "report.fk_aqwal_alem": "0",
+      "report.fk_aqwal_rawi": "0",
+      "report.fk_topic_parent": "0",
+      "report.fk_topic_group": "0",
+      "report.group_without_hadith": "461",
+      "sanads.length": "DISTINCT narrators in the chain (a repeated narrator counts once); 1,117 chains have a repeated narrator",
+      "sanads.max_rank": "max rank_no over the chain INCLUDING the author at pos 0",
+      "meaning_groups.counts": "sahaba_qty/repeat_qty are legacy declared values (Aug-2017 cat table); corpus drifted by Oct-2017 — compute live stats for exact numbers",
+      "hadith_rawis.rawi_id": "kept verbatim from source; may be NULL (unrepairable malformed href) or reference an id with no rawis row (e.g. 0 = never described)",
+      "rawis.is_stub": "1 = placeholder created by clean_hkg.py for a chain narrator the source never described; name harvested from hadith text",
+      "report.fk_srawi_rawi": "0",
+      "report.count_rawis": "49844",
+      "cleaned_at": "2026-07-09 23:18"
+    }
+  },
+  "excluded_collections": [
+    "nasai"
+  ],
+  "input_sha256": {
+    "hadiths.parquet": "4a2e405fd386a2e7cb1ee9d96aebf89e32f92961d47963ee642331df40581fbc",
+    "external_grades.parquet": "c47beae475a9417871e858cf93cd353f6e5cb416d497a85a8aba8fc91180f2c6"
+  },
+  "previous": [
+    {
+      "grader": "Ahmad Muhammad Shakir",
+      "defect": "TADLIS",
+      "n_flagged": 614,
+      "reject_flagged": 0.0863,
+      "n_clean": 2077,
+      "n_conflicting": 4,
+      "reject_clean": 0.0905,
+      "risk_ratio_mh": 1.271,
+      "z": -0.32
+    },
+    {
+      "grader": "Ahmad Muhammad Shakir",
+      "defect": "TADLIS_WEAK",
+      "n_flagged": 160,
+      "reject_flagged": 0.2188,
+      "n_clean": 2531,
+      "n_conflicting": 4,
+      "reject_clean": 0.0814,
+      "risk_ratio_mh": 1.412,
+      "z": 5.9
+    },
+    {
+      "grader": "Al-Albani",
+      "defect": "TADLIS",
+      "n_flagged": 2026,
+      "reject_flagged": 0.1056,
+      "n_clean": 7413,
+      "n_conflicting": 137,
+      "reject_clean": 0.1005,
+      "risk_ratio_mh": 1.404,
+      "z": 0.68
+    },
+    {
+      "grader": "Al-Albani",
+      "defect": "TADLIS_WEAK",
+      "n_flagged": 589,
+      "reject_flagged": 0.2377,
+      "n_clean": 8850,
+      "n_conflicting": 137,
+      "reject_clean": 0.0925,
+      "risk_ratio_mh": 1.427,
+      "z": 11.29
+    },
+    {
+      "grader": "Bashar Awad Maarouf",
+      "defect": "TADLIS",
+      "n_flagged": 449,
+      "reject_flagged": 0.0067,
+      "n_clean": 1599,
+      "n_conflicting": 0,
+      "reject_clean": 0.0031,
+      "risk_ratio_mh": 3.022,
+      "z": 1.07
+    },
+    {
+      "grader": "Bashar Awad Maarouf",
+      "defect": "TADLIS_WEAK",
+      "n_flagged": 93,
+      "reject_flagged": 0.0215,
+      "n_clean": 1955,
+      "n_conflicting": 0,
+      "reject_clean": 0.0031,
+      "risk_ratio_mh": 3.962,
+      "z": 2.78
+    },
+    {
+      "grader": "Muhammad Fouad Abd al-Baqi",
+      "defect": "TADLIS",
+      "n_flagged": 695,
+      "reject_flagged": 0.0863,
+      "n_clean": 2251,
+      "n_conflicting": 0,
+      "reject_clean": 0.084,
+      "risk_ratio_mh": 1.406,
+      "z": 0.2
+    },
+    {
+      "grader": "Muhammad Fouad Abd al-Baqi",
+      "defect": "TADLIS_WEAK",
+      "n_flagged": 203,
+      "reject_flagged": 0.197,
+      "n_clean": 2743,
+      "n_conflicting": 0,
+      "reject_clean": 0.0762,
+      "risk_ratio_mh": 1.574,
+      "z": 5.97
+    },
+    {
+      "grader": "Muhammad Muhyi Al-Din Abdul Hamid",
+      "defect": "TADLIS",
+      "n_flagged": 692,
+      "reject_flagged": 0.1315,
+      "n_clean": 3038,
+      "n_conflicting": 71,
+      "reject_clean": 0.105,
+      "risk_ratio_mh": 1.767,
+      "z": 2.01
+    },
+    {
+      "grader": "Muhammad Muhyi Al-Din Abdul Hamid",
+      "defect": "TADLIS_WEAK",
+      "n_flagged": 205,
+      "reject_flagged": 0.2683,
+      "n_clean": 3525,
+      "n_conflicting": 71,
+      "reject_clean": 0.1007,
+      "risk_ratio_mh": 1.334,
+      "z": 7.46
+    },
+    {
+      "grader": "Salim al-Hilali",
+      "defect": "TADLIS",
+      "n_flagged": 99,
+      "reject_flagged": 0.0404,
+      "n_clean": 1094,
+      "n_conflicting": 8,
+      "reject_clean": 0.1079,
+      "risk_ratio_mh": 0.392,
+      "z": -2.12
+    },
+    {
+      "grader": "Salim al-Hilali",
+      "defect": "CHRONOLOGY",
+      "n_flagged": 34,
+      "reject_flagged": 0.7647,
+      "n_clean": 1159,
+      "n_conflicting": 8,
+      "reject_clean": 0.0828,
+      "risk_ratio_mh": 8.742,
+      "z": 12.93
+    },
+    {
+      "grader": "Shuaib Al Arnaut",
+      "defect": "TADLIS",
+      "n_flagged": 893,
+      "reject_flagged": 0.1075,
+      "n_clean": 3440,
+      "n_conflicting": 21,
+      "reject_clean": 0.1041,
+      "risk_ratio_mh": 1.508,
+      "z": 0.3
+    },
+    {
+      "grader": "Shuaib Al Arnaut",
+      "defect": "TADLIS_WEAK",
+      "n_flagged": 249,
+      "reject_flagged": 0.3052,
+      "n_clean": 4084,
+      "n_conflicting": 21,
+      "reject_clean": 0.0926,
+      "risk_ratio_mh": 1.447,
+      "z": 10.64
+    },
+    {
+      "grader": "Zubair Ali Zai",
+      "defect": "TADLIS",
+      "n_flagged": 1214,
+      "reject_flagged": 0.4135,
+      "n_clean": 4479,
+      "n_conflicting": 59,
+      "reject_clean": 0.1938,
+      "risk_ratio_mh": 2.374,
+      "z": 15.88
+    },
+    {
+      "grader": "Zubair Ali Zai",
+      "defect": "TADLIS_WEAK",
+      "n_flagged": 467,
+      "reject_flagged": 0.4475,
+      "n_clean": 5226,
+      "n_conflicting": 59,
+      "reject_clean": 0.2222,
+      "risk_ratio_mh": 1.884,
+      "z": 10.92
+    }
+  ],
+  "corrected": [
+    {
+      "grader": "Ahmad Muhammad Shakir",
+      "defect": "TADLIS",
+      "n_flagged": 614,
+      "reject_flagged": 0.0863,
+      "n_clean": 2077,
+      "n_conflicting": 4,
+      "reject_clean": 0.0905,
+      "risk_ratio_mh": 1.271,
+      "risk_ratio_status": "finite",
+      "z_cmh": 1.6287,
+      "p_exact": 0.12780851544839583,
+      "n_informative_strata": 2,
+      "strata": [
+        {
+          "verdict": 0,
+          "flagged_rejected": 17,
+          "flagged_total": 416,
+          "clean_rejected": 24,
+          "clean_total": 1050
+        },
+        {
+          "verdict": 1,
+          "flagged_rejected": 36,
+          "flagged_total": 198,
+          "clean_rejected": 164,
+          "clean_total": 1027
+        }
+      ]
+    },
+    {
+      "grader": "Ahmad Muhammad Shakir",
+      "defect": "TADLIS_WEAK",
+      "n_flagged": 160,
+      "reject_flagged": 0.2188,
+      "n_clean": 2531,
+      "n_conflicting": 4,
+      "reject_clean": 0.0814,
+      "risk_ratio_mh": 1.412,
+      "risk_ratio_status": "finite",
+      "z_cmh": 2.0357,
+      "p_exact": 0.060353755860060726,
+      "n_informative_strata": 1,
+      "strata": [
+        {
+          "verdict": 0,
+          "flagged_rejected": 0,
+          "flagged_total": 0,
+          "clean_rejected": 41,
+          "clean_total": 1466
+        },
+        {
+          "verdict": 1,
+          "flagged_rejected": 35,
+          "flagged_total": 160,
+          "clean_rejected": 165,
+          "clean_total": 1065
+        }
+      ]
+    },
+    {
+      "grader": "Al-Albani",
+      "defect": "TADLIS",
+      "n_flagged": 2026,
+      "reject_flagged": 0.1056,
+      "n_clean": 7413,
+      "n_conflicting": 137,
+      "reject_clean": 0.1005,
+      "risk_ratio_mh": 1.404,
+      "risk_ratio_status": "finite",
+      "z_cmh": 4.6001,
+      "p_exact": 9.174104908988207e-06,
+      "n_informative_strata": 2,
+      "strata": [
+        {
+          "verdict": 0,
+          "flagged_rejected": 85,
+          "flagged_total": 1369,
+          "clean_rejected": 94,
+          "clean_total": 3638
+        },
+        {
+          "verdict": 1,
+          "flagged_rejected": 129,
+          "flagged_total": 657,
+          "clean_rejected": 651,
+          "clean_total": 3775
+        }
+      ]
+    },
+    {
+      "grader": "Al-Albani",
+      "defect": "TADLIS_WEAK",
+      "n_flagged": 589,
+      "reject_flagged": 0.2377,
+      "n_clean": 8850,
+      "n_conflicting": 137,
+      "reject_clean": 0.0925,
+      "risk_ratio_mh": 1.427,
+      "risk_ratio_status": "finite",
+      "z_cmh": 4.2221,
+      "p_exact": 5.441002638101897e-05,
+      "n_informative_strata": 1,
+      "strata": [
+        {
+          "verdict": 0,
+          "flagged_rejected": 0,
+          "flagged_total": 0,
+          "clean_rejected": 179,
+          "clean_total": 5007
+        },
+        {
+          "verdict": 1,
+          "flagged_rejected": 140,
+          "flagged_total": 589,
+          "clean_rejected": 640,
+          "clean_total": 3843
+        }
+      ]
+    },
+    {
+      "grader": "Bashar Awad Maarouf",
+      "defect": "TADLIS",
+      "n_flagged": 449,
+      "reject_flagged": 0.0067,
+      "n_clean": 1599,
+      "n_conflicting": 0,
+      "reject_clean": 0.0031,
+      "risk_ratio_mh": 3.022,
+      "risk_ratio_status": "finite",
+      "z_cmh": 1.5722,
+      "p_exact": 0.2737143823721556,
+      "n_informative_strata": 2,
+      "strata": [
+        {
+          "verdict": 0,
+          "flagged_rejected": 1,
+          "flagged_total": 338,
+          "clean_rejected": 1,
+          "clean_total": 880
+        },
+        {
+          "verdict": 1,
+          "flagged_rejected": 2,
+          "flagged_total": 111,
+          "clean_rejected": 4,
+          "clean_total": 719
+        }
+      ]
+    },
+    {
+      "grader": "Bashar Awad Maarouf",
+      "defect": "TADLIS_WEAK",
+      "n_flagged": 93,
+      "reject_flagged": 0.0215,
+      "n_clean": 1955,
+      "n_conflicting": 0,
+      "reject_clean": 0.0031,
+      "risk_ratio_mh": 3.962,
+      "risk_ratio_status": "finite",
+      "z_cmh": 1.7236,
+      "p_exact": 0.27634669409177653,
+      "n_informative_strata": 1,
+      "strata": [
+        {
+          "verdict": 0,
+          "flagged_rejected": 0,
+          "flagged_total": 0,
+          "clean_rejected": 2,
+          "clean_total": 1218
+        },
+        {
+          "verdict": 1,
+          "flagged_rejected": 2,
+          "flagged_total": 93,
+          "clean_rejected": 4,
+          "clean_total": 737
+        }
+      ]
+    },
+    {
+      "grader": "Muhammad Fouad Abd al-Baqi",
+      "defect": "TADLIS",
+      "n_flagged": 695,
+      "reject_flagged": 0.0863,
+      "n_clean": 2251,
+      "n_conflicting": 0,
+      "reject_clean": 0.084,
+      "risk_ratio_mh": 1.406,
+      "risk_ratio_status": "finite",
+      "z_cmh": 2.3553,
+      "p_exact": 0.02634573506662643,
+      "n_informative_strata": 2,
+      "strata": [
+        {
+          "verdict": 0,
+          "flagged_rejected": 22,
+          "flagged_total": 442,
+          "clean_rejected": 17,
+          "clean_total": 943
+        },
+        {
+          "verdict": 1,
+          "flagged_rejected": 38,
+          "flagged_total": 253,
+          "clean_rejected": 172,
+          "clean_total": 1308
+        }
+      ]
+    },
+    {
+      "grader": "Muhammad Fouad Abd al-Baqi",
+      "defect": "TADLIS_WEAK",
+      "n_flagged": 203,
+      "reject_flagged": 0.197,
+      "n_clean": 2743,
+      "n_conflicting": 0,
+      "reject_clean": 0.0762,
+      "risk_ratio_mh": 1.574,
+      "risk_ratio_status": "finite",
+      "z_cmh": 2.7978,
+      "p_exact": 0.009689492959716505,
+      "n_informative_strata": 1,
+      "strata": [
+        {
+          "verdict": 0,
+          "flagged_rejected": 0,
+          "flagged_total": 0,
+          "clean_rejected": 39,
+          "clean_total": 1385
+        },
+        {
+          "verdict": 1,
+          "flagged_rejected": 40,
+          "flagged_total": 203,
+          "clean_rejected": 170,
+          "clean_total": 1358
+        }
+      ]
+    },
+    {
+      "grader": "Muhammad Muhyi Al-Din Abdul Hamid",
+      "defect": "TADLIS",
+      "n_flagged": 692,
+      "reject_flagged": 0.1315,
+      "n_clean": 3038,
+      "n_conflicting": 71,
+      "reject_clean": 0.105,
+      "risk_ratio_mh": 1.767,
+      "risk_ratio_status": "finite",
+      "z_cmh": 5.102,
+      "p_exact": 1.5774725388728264e-06,
+      "n_informative_strata": 2,
+      "strata": [
+        {
+          "verdict": 0,
+          "flagged_rejected": 40,
+          "flagged_total": 499,
+          "clean_rejected": 36,
+          "clean_total": 1639
+        },
+        {
+          "verdict": 1,
+          "flagged_rejected": 51,
+          "flagged_total": 193,
+          "clean_rejected": 283,
+          "clean_total": 1399
+        }
+      ]
+    },
+    {
+      "grader": "Muhammad Muhyi Al-Din Abdul Hamid",
+      "defect": "TADLIS_WEAK",
+      "n_flagged": 205,
+      "reject_flagged": 0.2683,
+      "n_clean": 3525,
+      "n_conflicting": 71,
+      "reject_clean": 0.1007,
+      "risk_ratio_mh": 1.334,
+      "risk_ratio_status": "finite",
+      "z_cmh": 2.203,
+      "p_exact": 0.03826003026649342,
+      "n_informative_strata": 1,
+      "strata": [
+        {
+          "verdict": 0,
+          "flagged_rejected": 0,
+          "flagged_total": 0,
+          "clean_rejected": 76,
+          "clean_total": 2138
+        },
+        {
+          "verdict": 1,
+          "flagged_rejected": 55,
+          "flagged_total": 205,
+          "clean_rejected": 279,
+          "clean_total": 1387
+        }
+      ]
+    },
+    {
+      "grader": "Salim al-Hilali",
+      "defect": "TADLIS",
+      "n_flagged": 99,
+      "reject_flagged": 0.0404,
+      "n_clean": 1094,
+      "n_conflicting": 8,
+      "reject_clean": 0.1079,
+      "risk_ratio_mh": 0.392,
+      "risk_ratio_status": "finite",
+      "z_cmh": -2.0053,
+      "p_exact": 0.05020986999942409,
+      "n_informative_strata": 2,
+      "strata": [
+        {
+          "verdict": 0,
+          "flagged_rejected": 4,
+          "flagged_total": 97,
+          "clean_rejected": 101,
+          "clean_total": 996
+        },
+        {
+          "verdict": 1,
+          "flagged_rejected": 0,
+          "flagged_total": 2,
+          "clean_rejected": 17,
+          "clean_total": 98
+        }
+      ]
+    },
+    {
+      "grader": "Salim al-Hilali",
+      "defect": "CHRONOLOGY",
+      "n_flagged": 34,
+      "reject_flagged": 0.7647,
+      "n_clean": 1159,
+      "n_conflicting": 8,
+      "reject_clean": 0.0828,
+      "risk_ratio_mh": 8.742,
+      "risk_ratio_status": "finite",
+      "z_cmh": 12.3871,
+      "p_exact": 1.1616866669059353e-19,
+      "n_informative_strata": 2,
+      "strata": [
+        {
+          "verdict": 0,
+          "flagged_rejected": 20,
+          "flagged_total": 27,
+          "clean_rejected": 85,
+          "clean_total": 1066
+        },
+        {
+          "verdict": 1,
+          "flagged_rejected": 6,
+          "flagged_total": 7,
+          "clean_rejected": 11,
+          "clean_total": 93
+        }
+      ]
+    },
+    {
+      "grader": "Shuaib Al Arnaut",
+      "defect": "TADLIS",
+      "n_flagged": 893,
+      "reject_flagged": 0.1075,
+      "n_clean": 3440,
+      "n_conflicting": 21,
+      "reject_clean": 0.1041,
+      "risk_ratio_mh": 1.508,
+      "risk_ratio_status": "finite",
+      "z_cmh": 3.9132,
+      "p_exact": 0.00019503392405024973,
+      "n_informative_strata": 2,
+      "strata": [
+        {
+          "verdict": 0,
+          "flagged_rejected": 27,
+          "flagged_total": 661,
+          "clean_rejected": 40,
+          "clean_total": 1949
+        },
+        {
+          "verdict": 1,
+          "flagged_rejected": 69,
+          "flagged_total": 232,
+          "clean_rejected": 318,
+          "clean_total": 1491
+        }
+      ]
+    },
+    {
+      "grader": "Shuaib Al Arnaut",
+      "defect": "TADLIS_WEAK",
+      "n_flagged": 249,
+      "reject_flagged": 0.3052,
+      "n_clean": 4084,
+      "n_conflicting": 21,
+      "reject_clean": 0.0926,
+      "risk_ratio_mh": 1.447,
+      "risk_ratio_status": "finite",
+      "z_cmh": 3.2946,
+      "p_exact": 0.001750448442409447,
+      "n_informative_strata": 1,
+      "strata": [
+        {
+          "verdict": 0,
+          "flagged_rejected": 0,
+          "flagged_total": 0,
+          "clean_rejected": 67,
+          "clean_total": 2610
+        },
+        {
+          "verdict": 1,
+          "flagged_rejected": 76,
+          "flagged_total": 249,
+          "clean_rejected": 311,
+          "clean_total": 1474
+        }
+      ]
+    },
+    {
+      "grader": "Zubair Ali Zai",
+      "defect": "TADLIS",
+      "n_flagged": 1214,
+      "reject_flagged": 0.4135,
+      "n_clean": 4479,
+      "n_conflicting": 59,
+      "reject_clean": 0.1938,
+      "risk_ratio_mh": 2.374,
+      "risk_ratio_status": "finite",
+      "z_cmh": 17.4945,
+      "p_exact": 4.785253888810115e-63,
+      "n_informative_strata": 2,
+      "strata": [
+        {
+          "verdict": 0,
+          "flagged_rejected": 242,
+          "flagged_total": 670,
+          "clean_rejected": 187,
+          "clean_total": 1475
+        },
+        {
+          "verdict": 1,
+          "flagged_rejected": 260,
+          "flagged_total": 544,
+          "clean_rejected": 681,
+          "clean_total": 3004
+        }
+      ]
+    },
+    {
+      "grader": "Zubair Ali Zai",
+      "defect": "TADLIS_WEAK",
+      "n_flagged": 467,
+      "reject_flagged": 0.4475,
+      "n_clean": 5226,
+      "n_conflicting": 59,
+      "reject_clean": 0.2222,
+      "risk_ratio_mh": 1.884,
+      "risk_ratio_status": "finite",
+      "z_cmh": 9.5761,
+      "p_exact": 8.04978687180896e-20,
+      "n_informative_strata": 1,
+      "strata": [
+        {
+          "verdict": 0,
+          "flagged_rejected": 0,
+          "flagged_total": 0,
+          "clean_rejected": 429,
+          "clean_total": 2145
+        },
+        {
+          "verdict": 1,
+          "flagged_rejected": 209,
+          "flagged_total": 467,
+          "clean_rejected": 732,
+          "clean_total": 3081
+        }
+      ]
+    }
+  ]
+}

@@ -21,6 +21,7 @@ from typing import NamedTuple
 
 import numpy as np
 import pandas as pd
+from scipy.stats import hypergeom
 
 from .sigha import AMBIGUOUS
 
@@ -113,6 +114,42 @@ def parse_grade(text: str) -> Grade:
     return Grade(verdict, scope)
 
 
+def stratified_inference(tables: list[tuple[int, int, int, int]]) -> dict:
+    """Tables are (flagged rejected, flagged total, clean rejected, clean total).
+
+    MH risk ratio and signed, uncorrected CMH score use the same strata.
+    The primary p-value is exact conditional, twice the smaller inclusive tail
+    of the sum of independent hypergeometrics given each stratum's margins.
+    No pseudocounts. Degenerate strata have zero score/variance and a point mass.
+    """
+    num = den = score = variance = 0.0
+    pmf = np.array([1.0])
+    offset = observed = informative = 0
+    for a, n1, b, n0 in tables:
+        t, r = n1 + n0, a + b
+        if not t:
+            continue
+        num += a * n0 / t
+        den += b * n1 / t
+        score += a - n1 * r / t
+        v = n1 * n0 * r * (t - r) / (t * t * (t - 1)) if t > 1 else 0.0
+        variance += v
+        informative += int(v > 0)
+        lo, hi = max(0, n1 + r - t), min(n1, r)
+        mass = hypergeom.pmf(np.arange(lo, hi + 1), t, r, n1)
+        pmf = np.convolve(pmf, mass)
+        pmf /= pmf.sum()  # floating-point normalization, not a continuity correction
+        offset += lo
+        observed += a
+    i = observed - offset
+    p_exact = min(1.0, 2 * min(float(pmf[:i + 1].sum()), float(pmf[i:].sum())))
+    return {"risk_ratio_mh": round(num / den, 3) if den else None,
+            "risk_ratio_status": "finite" if den else "infinite" if num else "undefined",
+            "z_cmh": round(score / np.sqrt(variance), 4) if variance else None,
+            "p_exact": p_exact if variance else None,
+            "n_informative_strata": informative}
+
+
 def defect_lift(reports: pd.DataFrame, grades: pd.DataFrame, min_flagged: int = 20,
                 defects: tuple[Defect, ...] = (Defect.TADLIS, Defect.TADLIS_WEAK,
                                                Defect.CHRONOLOGY)) -> pd.DataFrame:
@@ -136,18 +173,21 @@ def defect_lift(reports: pd.DataFrame, grades: pd.DataFrame, min_flagged: int = 
         flagged = (d.shared_defects & int(defect)).ne(0)  # Flag is iterable
         if flagged.sum() < min_flagged:
             continue
-        num = den = 0.0
-        for _, s in d.groupby("best_verdict"):
-            f = (s.shared_defects & int(defect)).ne(0)
-            a, b = s.reject[f].sum(), s.reject[~f].sum()
-            n1, n0, t = f.sum(), (~f).sum(), len(s)
-            num, den = num + a * n0 / t, den + b * n1 / t
-        p1, p0 = d.reject[flagged].mean(), d.reject[~flagged].mean()
-        p = d.reject.mean()
-        se = np.sqrt(p * (1 - p) * (1 / flagged.sum() + 1 / (~flagged).sum()))
+        tables = []
+        strata = []
+        for verdict, sub in d.groupby("best_verdict"):
+            f = (sub.shared_defects & int(defect)).ne(0)
+            a, b = int(sub.reject[f].sum()), int(sub.reject[~f].sum())
+            n1, n0 = int(f.sum()), int((~f).sum())
+            tables.append((a, n1, b, n0))
+            strata.append({"verdict": int(verdict), "flagged_rejected": a,
+                           "flagged_total": n1, "clean_rejected": b, "clean_total": n0})
+        p1 = d.reject[flagged].mean() if flagged.any() else None
+        p0 = d.reject[~flagged].mean() if (~flagged).any() else None
         rows.append({"grader": grader, "defect": defect.name, "n_flagged": int(flagged.sum()),
-                     "reject_flagged": round(p1, 4), "n_clean": int((~flagged).sum()),
+                     "reject_flagged": round(p1, 4) if p1 is not None else None,
+                     "n_clean": int((~flagged).sum()),
                      "n_conflicting": int(n_conflicting.get(grader, 0)),
-                     "reject_clean": round(p0, 4), "risk_ratio_mh": round(num / den, 3)
-                     if den else None, "z": round((p1 - p0) / se, 2) if se else None})
+                     "reject_clean": round(p0, 4) if p0 is not None else None,
+                     **stratified_inference(tables), "strata": strata})
     return pd.DataFrame(rows)

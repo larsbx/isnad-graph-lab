@@ -90,13 +90,21 @@ def _lift(g, grader, defect):
     return row
 
 
-def test_an_of_a_weaker_mudallis_predicts_rejection_for_major_graders(g):
-    for grader in ["Al-Albani", "Shuaib Al Arnaut", "Zubair Ali Zai", "Ahmad Muhammad Shakir"]:
-        row = _lift(g, grader, "TADLIS_WEAK")
-        assert row["z"] > 4 and row["risk_ratio_mh"] > 1.2, grader
+def test_corrected_grader_comparisons(g):
+    for grader in ["Al-Albani", "Shuaib Al Arnaut", "Zubair Ali Zai"]:
+        for defect in ["TADLIS", "TADLIS_WEAK"]:
+            row = _lift(g, grader, defect)
+            assert row["p_exact"] < 0.002 and row["risk_ratio_mh"] > 1.2
+            assert "z" not in row
+    for defect in ["TADLIS", "TADLIS_WEAK"]:
+        assert _lift(g, "Ahmad Muhammad Shakir", defect)["p_exact"] > 0.05
 
 
-def test_zubair_ali_zai_alone_rejects_an_of_thiqa_mudallisun(g):
-    assert _lift(g, "Zubair Ali Zai", "TADLIS")["z"] > 10
-    for lenient in ["Al-Albani", "Shuaib Al Arnaut", "Ahmad Muhammad Shakir"]:
-        assert _lift(g, lenient, "TADLIS")["z"] < 3, lenient
+def test_manifest_comparisons_reproduce_from_committed_inputs(g):
+    from isnad_graph.assess import defect_lift
+
+    reports = g.frame("hadiths").set_index("id")[["best_verdict", "shared_defects"]]
+    grades = g.frame("external_grades")
+    assessment = g.manifest["assessment"]
+    grades = grades[~grades.collection.isin(assessment["defect_lift_excludes"])]
+    assert defect_lift(reports, grades).to_dict("records") == assessment["defect_lift"]

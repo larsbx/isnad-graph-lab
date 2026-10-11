@@ -243,30 +243,36 @@ cross-recension associations
 (Nasāʾī), which are not grades of the source report (see
 [External editions](#external-editions)).
 
-| grader | ʿan of a ṣadūq-level mudallis | ʿan of a thiqa mudallis |
+| grader | ṣadūq-level mudallis: MH RR; exact p | thiqa mudallis: MH RR; exact p |
 |---|---|---|
-| Zubair ʿAlī Zaʾī | 45% vs 22% rejected, RR 1.88, z 10.9 | **41% vs 19%, RR 2.37, z 15.9** |
-| al-Albānī | 24% vs 9%, RR 1.43, z 11.3 | 11% vs 10%, z 0.7 |
-| Shuʿayb al-Arnaʾūṭ | 31% vs 9%, RR 1.45, z 10.6 | 11% vs 10%, z 0.3 |
-| Aḥmad Shākir | 22% vs 8%, RR 1.41, z 5.9 | 9% vs 9%, z −0.3 |
+| Zubair ʿAlī Zaʾī | 1.884; 8.05×10⁻²⁰ | 2.374; 4.79×10⁻⁶³ |
+| al-Albānī | 1.427; 5.44×10⁻⁵ | 1.404; 9.17×10⁻⁶ |
+| Shuʿayb al-Arnaʾūṭ | 1.447; 0.00175 | 1.508; 0.000195 |
+| Aḥmad Shākir | 1.412; 0.0604 | 1.271; 0.128 |
 
-Two findings stand out:
+These are observational associations in the aligned corpus. Both mudallis
+categories show positive adjusted evidence for the first three named graders;
+Shākir's comparisons do not meet a nominal two-sided 0.05 threshold. The earlier
+claims of significance for every grader and essentially only Zaʾī for thiqa
+mudallisūn are withdrawn. These results do not independently establish a
+grader's doctrine, a transmission defect's cause, or a historical or
+jurisprudential conclusion.
 
-* **A ṣadūq-level mudallis's ʿan predicts rejection by every grader.**
-* **A thiqa mudallis's ʿan matters essentially only to Zubair ʿAlī Zaʾī.**
-  His strict position, set out in his work on the ranks of the mudallisūn,
-  shows up in the data unprompted, against the more lenient practice of
-  al-Albānī and al-Arnaʾūṭ.
+`reject_flagged` and `reject_clean` remain **descriptive marginal rates**.
+`risk_ratio_mh` pools within structural-verdict strata. `z_cmh` is a signed,
+uncorrected stratified score; `p_exact` is the primary inferential statistic,
+an exact conditional two-sided test using twice the smaller inclusive tail.
+It conditions on each stratum's exposure and rejection totals, supports sparse
+and zero-cell tables without pseudocounts, and tests conditional independence,
+not the value of an estimated common risk ratio. The generic `z` field is removed.
+The exported stratum counts make overlap, sparsity and differing effects inspectable.
 
-Rates are raw. RR is the stratified Mantel–Haenszel ratio, and z is an
-unstratified two-proportion test. For the lenient graders the stratified RR on
-thiqa mudallisūn is about 1.3–1.5 even though the raw rates barely differ: a
-small within-stratum effect that does not reach significance.
-
-An impossible chronology is too rare among acceptable reports to measure for
-most graders. The one exception is Salīm al-Hilālī on the Muwaṭṭaʾ: 76% rejected
-against 8% (n = 34), plausibly Mālik's munqaṭiʿ reports. The full table is in
-`manifest.json` under `assessment.defect_lift`.
+The chronology association for Salīm al-Hilālī remains strong (MH RR 8.742,
+exact p 1.16×10⁻¹⁹; 34 flagged reports). It does not identify which historical
+mechanism explains the association. All comparisons, exclusions and attribution
+remain in `manifest.json` under `assessment.defect_lift`.
+See [the inference audit](docs/stratified-defect-inference.md) for full results,
+family-wise adjustment, assumptions, and reproducibility.
 
 ### External editions
 
