@@ -25,6 +25,13 @@ from .analysis import (
     hearing_profile,
     tadlis_risk,
 )
+from .assess import (
+    ACCEPTABLE,
+    assess_chains,
+    defect_lift,
+    parse_grade,
+    report_assessment,
+)
 from .chains import Chain, normalize
 from .corpus import EDITIONS, Edition, align_editions, alignment_table, grade_table
 from .graph import IsnadGraph
@@ -196,6 +203,22 @@ def explode_links(chains: pd.DataFrame) -> pd.DataFrame:
 
 # ── nodes ───────────────────────────────────────────────────────────────────
 
+def _with_parsed_grades(grades: pd.DataFrame) -> pd.DataFrame:
+    parsed = [parse_grade(g) for g in grades.grade]
+    return grades.assign(verdict=pd.array([None if p.verdict is None else int(p.verdict)
+                                           for p in parsed], dtype="Int8"),
+                         scope=[p.scope for p in parsed])
+
+
+def reproduction(chains: pd.DataFrame) -> dict:
+    """Agreement of the structural verdict with the source's own isnad verdicts."""
+    rec = chains[chains.provenance.eq(Provenance.RECORDED)]
+    ok = [int(v) for v in ACCEPTABLE]
+    return {"chains": len(rec), "exact": round(float(rec.verdict.eq(rec.isnad_hukm_no).mean()), 4),
+            "acceptable_vs_rejected": round(float(
+                rec.verdict.isin(ok).eq(rec.isnad_hukm_no.isin(ok)).mean()), 4)}
+
+
 def _counts(frame: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     """Missing count after a left join means zero."""
     return frame.fillna(dict.fromkeys(columns, 0)).astype(dict.fromkeys(columns, "int64"))
@@ -264,11 +287,19 @@ def build(db: Path, spec: SourceSpec = HADITH_KG, validate: bool = True,
             hearing_profile(links), on="id").pipe(_counts, ["n_links_read"])
         chains = chains.join(tadlis_risk(links, narrators).rename("n_tadlis_risk"),
                              on="chain_id").pipe(_counts, ["n_tadlis_risk"])
+        edges = chronology(edges, narrators)
+        chains = chains.merge(assess_chains(chains, links, narrators, edges).drop(
+            columns=["path", "head_gap", "tail_gap"], errors="ignore"), on="chain_id",
+            validate="1:1")
+        grades = grade_table(entries).pipe(_with_parsed_grades)
+        reports = report_assessment(chains)
         per_hadith = chains.pivot_table(index="hadith_id", columns="provenance",
                                         values="chain_id", aggfunc="size", fill_value=0)
         counts = [f"n_chains_{p}" for p in Provenance]
         hadiths = (hadiths.join(per_hadith.add_prefix("n_chains_"), on="id")
-                   .reindex(columns=[*hadiths.columns, *counts]).pipe(_counts, counts))
+                   .reindex(columns=[*hadiths.columns, *counts]).pipe(_counts, counts)
+                   .join(reports, on="id")
+                   .astype({"best_verdict": "Int8", "shared_defects": "Int16"}))
         live = links[links.provenance.eq(Provenance.RECORDED) & links.src.eq(PROPHET_ID)]
         groups = (read(con, "SELECT * FROM meaning_groups")
                   .join(hadiths.groupby("group_id").agg(n_hadiths=("id", "size"),
@@ -278,7 +309,7 @@ def build(db: Path, spec: SourceSpec = HADITH_KG, validate: bool = True,
                   .pipe(_counts, ["n_hadiths", "n_books", "n_chains", "n_companions"]))
         graph = IsnadGraph(
             narrators=narrators,
-            transmissions=chronology(edges, narrators),
+            transmissions=edges,
             chains=chains,
             hadiths=hadiths,
             books=read(con, "SELECT * FROM books"),
@@ -288,7 +319,7 @@ def build(db: Path, spec: SourceSpec = HADITH_KG, validate: bool = True,
             assessments=read(con, "SELECT * FROM aqwal"),
             common_links=common_links(links),
             alignments=alignment_table(entries),
-            external_grades=grade_table(entries),
+            external_grades=grades,
             manifest={
                 "builder": f"isnad_graph {__version__}",
                 "built_at": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -302,6 +333,10 @@ def build(db: Path, spec: SourceSpec = HADITH_KG, validate: bool = True,
                                       "license": EDITION_FILES[0].license,
                                       "files": {s.filename: s.sha256 for s in EDITION_FILES},
                                       "alignment": edition_stats} if use_editions else None,
+                "assessment": {
+                    "reproduction_of_source_verdicts": reproduction(chains),
+                    "defect_lift": defect_lift(reports, grades).to_dict("records"),
+                },
                 "inferred_layer": inference_stats,
                 "transmission_modes": {
                     "links_by_mode": {Mode(int(k)).name: int(v) for k, v in

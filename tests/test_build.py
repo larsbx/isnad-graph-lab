@@ -147,3 +147,32 @@ def test_external_edition_is_aligned_by_text(mini_graph):
 def test_external_grades_attach_to_source_reports(mini_graph):
     (row,) = mini_graph.frame("external_grades").itertuples()
     assert (row.hadith_id, row.grader, row.grade) == (2, "Al-Albani", "Sahih")
+
+
+def test_structural_verdicts_and_defects(mini_graph):
+    from isnad_graph.assess import Defect, Verdict
+
+    c = mini_graph.frame("chains").set_index("sanad_id")
+    # s1: Prophet → Abū Hurayra → A (thiqa mudallis, by ʿan) → B → C; all rank ≤ 3,
+    # and C (b. 194) cannot have heard B (d. 150)
+    assert (c.loc[1, "verdict"], c.loc[1, "defects"]) == (
+        Verdict.SAHIH, Defect.TADLIS | Defect.CHRONOLOGY)
+    assert c.loc[4, "verdict"] == Verdict.DAIF and c.loc[4, "defects"] & Defect.GAP  # mursal
+    assert c.loc[6, "defects"] & Defect.CHRONOLOGY  # D born after A died
+    assert c.loc[2, "verdict"] == Verdict.SAHIH
+
+
+def test_report_level_assessment(mini_graph):
+    h = mini_graph.frame("hadiths").set_index("id")
+    assert h.loc[2, "best_verdict"] == 2  # only route is mursal
+    assert h.loc[1, "shared_defects"] & 2  # every acceptable route of h1 has A's ʿan
+
+
+def test_grades_are_parsed(mini_graph):
+    (row,) = mini_graph.frame("external_grades").itertuples()
+    assert (row.verdict, row.scope) == (0, "hadith")
+
+
+def test_reproduction_is_reported(mini_graph):
+    r = mini_graph.manifest["assessment"]["reproduction_of_source_verdicts"]
+    assert r["chains"] == 7 and 0 <= r["exact"] <= 1

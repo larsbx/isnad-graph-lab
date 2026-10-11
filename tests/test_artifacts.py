@@ -77,3 +77,26 @@ def test_editions_align_with_preserved_order(g):
         assert s["aligned"] / s["entries"] > (0.7 if s["cross_recension"] else 0.9), collection
     a = g.frame("alignments")
     assert a[a.hadith_id.eq(1)].hadithnumber.tolist() == ["1"]  # Bukhārī 1 ↔ hadith-api 1
+
+
+def test_structural_verdict_reproduces_source_verdicts(g):
+    r = g.manifest["assessment"]["reproduction_of_source_verdicts"]
+    assert r["exact"] > 0.9 and r["acceptable_vs_rejected"] > 0.94
+
+
+def _lift(g, grader, defect):
+    (row,) = [r for r in g.manifest["assessment"]["defect_lift"]
+              if r["grader"] == grader and r["defect"] == defect]
+    return row
+
+
+def test_an_of_a_weaker_mudallis_predicts_rejection_for_major_graders(g):
+    for grader in ["Al-Albani", "Shuaib Al Arnaut", "Zubair Ali Zai", "Ahmad Muhammad Shakir"]:
+        row = _lift(g, grader, "TADLIS_WEAK")
+        assert row["z"] > 4 and row["risk_ratio_mh"] > 1.2, grader
+
+
+def test_zubair_ali_zai_alone_rejects_an_of_thiqa_mudallisun(g):
+    assert _lift(g, "Zubair Ali Zai", "TADLIS")["z"] > 10
+    for lenient in ["Al-Albani", "Shuaib Al Arnaut", "Ahmad Muhammad Shakir"]:
+        assert _lift(g, lenient, "TADLIS")["z"] < 3, lenient

@@ -10,6 +10,8 @@ Layers
 * **hadiths / books / groups / topics** — what the chains carry and where.
 * **critics / assessments** — the jarh-wa-ta'dil layer: critic → narrator.
 * **common_links** — Juynboll-style (partial) common links per meaning group.
+* chains and reports also carry a structural isnad **verdict** and the
+  **defects** read from the texts (see :mod:`.assess`).
 * **alignments / external_grades** — reports matched to the public-domain
   hadith-api editions (with English translations in the corpus) and the
   modern gradings attached to them.

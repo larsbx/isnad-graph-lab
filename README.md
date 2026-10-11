@@ -7,7 +7,9 @@ layered with jarḥ wa-taʿdīl assessments, gap annotations, chronology checks,
 Juynboll-style common links and, read from the texts themselves, the **mode of
 transmission of every link** (حدثنا / أخبرنا / عن / أنّ …), with tadlīs-risk
 flags. It is also aligned to public-domain Arabic and English editions of the
-seven canonical collections, which carry **67,716 modern gradings**.
+seven canonical collections, which carry **67,716 modern gradings**. A structural
+isnad verdict per chain is tested against those experts; see
+[Isnad assessment](#isnad-assessment).
 
 The built graph is committed in [`data/graph/`](data/graph) (≈ 35 MB of zstd
 Parquet plus `manifest.json`). The full text corpus (715,790 Arabic reports and
@@ -18,7 +20,7 @@ Everything is deterministically rebuildable from pinned, hash-verified sources.
 from isnad_graph import IsnadGraph
 
 g = IsnadGraph.load("data/graph")
-g.verify()                    # 15 structural invariants, all True
+g.verify()                    # 15 structural invariants, all True (also run in CI)
 G = g.to_networkx()           # nx.DiGraph, every node and edge annotated
 g.students(-1).head()         # the Prophet's busiest transmitters: Abū Hurayra, Anas, ʿĀʾisha, …
 ```
@@ -101,8 +103,8 @@ every marker, idempotence and marker-freeness.
 |---|---:|---|---|
 | `narrators` | 49,845 | a node | `kind` (narrator · prophet · marker · stub), name, nasab, grade `rank`/`rank_no` (1 companion … 12 fabricator), `tabaka` (generation), birth/death year (AH), residence, tadlīs/ikhtilāṭ flags, Bukhārī/Muslim narrator, `n_chains`, `n_hadiths`, `n_teachers`, `n_students`, `n_as_apex`, `n_as_compiler`; hearing profile `n_links_read`, `explicit_share`, `an_share` |
 | `transmissions` | 330,628 | an edge teacher `src` → student `dst` | `n_links`, `n_chains`, `n_hadiths`, `n_books`, `n_recorded`/`n_inferred`, `n_direct`, `n_irsal`, `n_inqita`, `n_taliq`, `n_mubham`, `tabaka_delta`, `death_gap`, `chronology`; mode histogram `mode_sama` … `mode_unread`, `top_mode` |
-| `chains` | 696,953 | a hyperedge (one isnad) | `path` (ids, apex → compiler), `links` (flag per link), `modes` (transmission mode per link), `n_modes_borrowed`, `n_tadlis_risk`, `head_gap`, `tail_gap`, `repeats`, `provenance`, `sanad_id`, `hadith_id`, `book_id`, `group_id`, isnad verdict (`isnad_hukm`, `isnad_verdict`) |
-| `hadiths` | 715,790 | a report | book, number, page, type (qudsī/marfūʿ/mawqūf/maqṭūʿ), grade `hukm`, meaning group, matn offsets, `n_chains_recorded`, `n_chains_inferred` |
+| `chains` | 696,953 | a hyperedge (one isnad) | `path` (ids, apex → compiler), `links` (flag per link), `modes` (transmission mode per link), `n_modes_borrowed`, `n_tadlis_risk`, structural `verdict`, `defects`, `worst_rank`, `head_gap`, `tail_gap`, `repeats`, `provenance`, `sanad_id`, `hadith_id`, `book_id`, `group_id`, isnad verdict (`isnad_hukm`, `isnad_verdict`) |
+| `hadiths` | 715,790 | a report | book, number, page, type (qudsī/marfūʿ/mawqūf/maqṭūʿ), grade `hukm`, meaning group, matn offsets, `n_chains_recorded`, `n_chains_inferred`, `best_verdict`, `shared_defects` |
 | `books` | 425 | a collection | author, death year, edition, genre (`tasnif`) |
 | `groups` | 20,745 | a *meaning*: all narrations of one matn | overall grade, live `n_hadiths`, `n_books`, `n_chains`, `n_companions` |
 | `topics` | 54,862 | a node of the subject tree | nested set (`lft`, `rgt`), parent, link to a group |
@@ -110,7 +112,7 @@ every marker, idempotence and marker-freeness.
 | `assessments` | 127,863 | an edge critic → narrator | the verdict `qawl` verbatim |
 | `common_links` | 187,616 | a (partial) common link | see below |
 | `alignments` | 33,729 | an external edition entry ↔ source report | `collection`, `hadithnumber` (the edition's numbering, as on sunnah.com), `chapter`, containment `score`, `cross_recension` |
-| `external_grades` | 67,716 | a modern grading of an entry | `grader` (al-Albānī, Zubair ʿAlī Zaʾī, al-Arnaʾūṭ, Abū Ghudda, Aḥmad Shākir, Bashshār ʿAwwād …), `grade`, `hadith_id` (NA for the 5,455 on unaligned entries) |
+| `external_grades` | 67,716 | a modern grading of an entry | `grader` (al-Albānī, Zubair ʿAlī Zaʾī, al-Arnaʾūṭ, Abū Ghudda, Aḥmad Shākir, Bashshār ʿAwwād …), `grade`, parsed `verdict` and `scope` (isnad / hadith / corroborated), `hadith_id` (NA for the 5,455 on unaligned entries) |
 
 `manifest.json` holds provenance: the source repo, revision, sha256, license and
 the source's own build report. It also holds the counts, the invariant results,
@@ -234,6 +236,58 @@ books' internal order, which the aligner never sees.
 The Nasāʾī alignment is cross-recension: the edition is al-Sunan al-Ṣughrā
 mapped onto the source's al-Kubrā. It is flagged `cross_recension`.
 
+### Isnad assessment
+
+`assess.py` gives every chain a **structural verdict**: the weakest narrator's
+rank (1 companion … 12 fabricator) decides ṣaḥīḥ / ḥasan / ḍaʿīf / very weak /
+accused / mawḍūʿ, and any gap caps the chain at ḍaʿīf. This is the source's own
+rule. Rebuilt from the graph alone, it reproduces the source's 577,024 per-chain
+verdicts **90.7% exactly** and **94.3% on acceptable vs rejected**.
+
+It cannot see how links were transmitted, so each chain also carries
+**defects** read from the texts:
+
+* `TADLIS`: ʿan, anna, qāla … by a mudallis graded thiqa;
+* `TADLIS_WEAK`: the same by a mudallis graded ṣadūq or below;
+* `CHRONOLOGY`: the student was born after the teacher died;
+* `GAP`: a gap marker on the chain.
+
+A report's `shared_defects` are those on *every* acceptable route; a single
+clean route rescues it.
+
+Do the defects matter? Folding them into the verdict naively *lowers* agreement
+with every expert, so the right test is predictive. Take reports whose
+structural verdict is acceptable. Does "every acceptable route carries the
+defect" raise the rate at which a grader rejects them? `defect_lift` answers
+this per grader. It compares within the ṣaḥīḥ and ḥasan strata, pooled by
+Mantel–Haenszel, because a ṣadūq mudallis makes a chain ḥasan by construction.
+It uses uncorroborated grades only.
+
+| grader | ʿan of a ṣadūq-level mudallis | ʿan of a thiqa mudallis |
+|---|---|---|
+| Zubair ʿAlī Zaʾī | 41% vs 19% rejected, RR 1.90, z 12.5 | **35% vs 17%, RR 2.35, z 17.4** |
+| al-Albānī | 22% vs 9%, RR 1.38, z 11.8 | 11% vs 10%, z 1.9 |
+| Shuʿayb al-Arnaʾūṭ | 31% vs 9%, RR 1.44, z 10.6 | 11% vs 10%, z 0.4 |
+| Aḥmad Shākir | 22% vs 8%, RR 1.40, z 6.0 | 9% vs 9%, z −0.4 |
+
+Two findings stand out:
+
+* **A ṣadūq-level mudallis's ʿan predicts rejection by every grader.**
+* **A thiqa mudallis's ʿan matters essentially only to Zubair ʿAlī Zaʾī.**
+  His strict position, set out in his work on the ranks of the mudallisūn,
+  shows up in the data unprompted, against the more lenient practice of
+  al-Albānī and al-Arnaʾūṭ.
+
+Rates are raw. RR is the stratified Mantel–Haenszel ratio, and z is an
+unstratified two-proportion test. For the lenient graders the stratified RR on
+thiqa mudallisūn is about 1.3–1.5 even though the raw rates barely differ: a
+small within-stratum effect that does not reach significance.
+
+An impossible chronology is too rare among acceptable reports to measure for
+most graders. The one exception is Salīm al-Hilālī on the Muwaṭṭaʾ: 76% rejected
+against 9% (n = 34), plausibly Mālik's munqaṭiʿ reports. The full table is in
+`manifest.json` under `assessment.defect_lift`.
+
 ## Usage
 
 ```bash
@@ -257,7 +311,7 @@ g.frame("common_links")    # any table as a DataFrame (tables are immutable Arro
 isnad-graph fetch    # pinned hadith-kg.db (1.6 GB) + 14 hadith-api editions, sha256-verified
 isnad-graph build    # ≈ 5 min, ≈ 3 GB RAM → data/graph/
 isnad-graph corpus   # ≈ 8 min → data/corpus/ (texts + translations)
-pytest               # 91 tests: unit, property and fixture tests, plus regressions on data/graph
+pytest               # 122 tests: unit, property and fixture tests, plus regressions on data/graph
 ```
 
 ## Layout
@@ -272,6 +326,7 @@ src/isnad_graph/
   align.py       text alignment of external editions (trigram containment)
   corpus.py      external editions, alignment and grade tables, corpus export
   analysis.py    edge aggregation, chronology, common links, tadlīs risk, hearing profiles
+  assess.py      structural verdicts, defects, grade parsing, defect lift vs experts
   build.py       the only SQL: source DB → IsnadGraph
   graph.py       IsnadGraph: immutable Arrow tables, queries, networkx view, invariants
   source.py      pinned sources, fetch + sha256 verification
