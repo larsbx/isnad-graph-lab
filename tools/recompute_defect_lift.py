@@ -1,6 +1,7 @@
 """Recompute only defect comparisons from committed graph, preserving source tables."""
 import hashlib
 import json
+from math import isclose
 from pathlib import Path
 
 import pandas as pd
@@ -23,7 +24,9 @@ new = defect_lift(reports, grades[~grades.collection.isin(excluded)]).to_dict("r
 # Counts, rates and MH estimates must match; inference alone is corrected.
 for before, after in zip(old, new, strict=True):
     for key, value in before.items():
-        if key != "z":
+        if key == "p_exact":
+            assert isclose(after[key], value, rel_tol=1e-12, abs_tol=0)
+        elif key != "z":
             assert after[key] == value, (key, before, after)
 manifest["assessment"]["defect_lift"] = new
 manifest["assessment"]["defect_lift_inference"] = {

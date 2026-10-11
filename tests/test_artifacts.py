@@ -107,4 +107,7 @@ def test_manifest_comparisons_reproduce_from_committed_inputs(g):
     grades = g.frame("external_grades")
     assessment = g.manifest["assessment"]
     grades = grades[~grades.collection.isin(assessment["defect_lift_excludes"])]
-    assert defect_lift(reports, grades).to_dict("records") == assessment["defect_lift"]
+    actual = defect_lift(reports, grades).to_dict("records")
+    for recomputed, saved in zip(actual, assessment["defect_lift"], strict=True):
+        assert recomputed.pop("p_exact") == pytest.approx(saved["p_exact"], rel=1e-12, abs=0)
+        assert recomputed == {k: v for k, v in saved.items() if k != "p_exact"}
