@@ -11,3 +11,12 @@ def test_export_and_verify_roundtrip(mini_graph, tmp_path, capsys):
     assert g.number_of_edges() == mini_graph.transmissions.num_rows
     assert main(["--graph", str(gdir), "chain", "2"]) == 0
     assert "⇢" in capsys.readouterr().out
+
+
+def test_tree_export(mini_graph, tmp_path):
+    import json
+
+    gdir = mini_graph.save(tmp_path / "g2")
+    assert main(["--graph", str(gdir), "tree", str(tmp_path / "t.json"), "1", "2"]) == 0
+    trees = json.loads((tmp_path / "t.json").read_text())
+    assert [t["group_id"] for t in trees] == [1, 2]

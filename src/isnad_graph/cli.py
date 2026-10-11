@@ -34,6 +34,9 @@ def main(argv: list[str] | None = None) -> int:
     e.add_argument("--format", choices=sorted(EXPORTS), default="graphml")
     e.add_argument("--min-chains", type=int, default=1)
     e.add_argument("--recorded-only", action="store_true")
+    t = sub.add_parser("tree", help="export laid-out isnad trees of meaning groups as JSON")
+    t.add_argument("out", type=Path)
+    t.add_argument("group_ids", type=int, nargs="+")
     c = sub.add_parser("chain", help="print the chains of a hadith")
     c.add_argument("hadith_id", type=int)
     p.add_argument("--graph", type=Path, default=GRAPH_DIR, help="graph directory")
@@ -68,6 +71,13 @@ def main(argv: list[str] | None = None) -> int:
         g = _load(a.graph).to_networkx(min_chains=a.min_chains, recorded_only=a.recorded_only)
         getattr(nx, EXPORTS[a.format])(g, a.out)
         print(f"{a.out}: {g.number_of_nodes()} nodes, {g.number_of_edges()} edges")
+    elif a.cmd == "tree":
+        from .subgraph import group_tree
+
+        g = _load(a.graph)
+        trees = [group_tree(g, gid) for gid in a.group_ids]
+        a.out.write_text(json.dumps(trees, ensure_ascii=False, separators=(",", ":")))
+        print(f"{a.out}: {len(trees)} groups, {sum(len(t['bundles']) for t in trees)} bundles")
     elif a.cmd == "chain":
         g = _load(a.graph)
         for row in g.chains_of(a.hadith_id).itertuples():

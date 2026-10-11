@@ -298,6 +298,7 @@ isnad-graph stats                                 # counts from the committed gr
 isnad-graph chain 1                               # render the chains of hadith 1
 isnad-graph export isnad.graphml --min-chains 2   # for Gephi / Cytoscape (also: --format gexf)
 isnad-graph verify                                # re-check invariants
+isnad-graph tree trees.json 319 397               # laid-out isnad trees of meaning groups, per companion
 ```
 
 ```python
@@ -329,6 +330,7 @@ src/isnad_graph/
   corpus.py      external editions, alignment and grade tables, corpus export
   analysis.py    edge aggregation, chronology, common links, tadlīs risk, hearing profiles
   assess.py      structural verdicts, defects, grade parsing, defect lift vs experts
+  subgraph.py    one meaning group's isnads as laid-out trees per companion bundle
   build.py       the only SQL: source DB → IsnadGraph
   graph.py       IsnadGraph: immutable Arrow tables, queries, networkx view, invariants
   source.py      pinned sources, fetch + sha256 verification
