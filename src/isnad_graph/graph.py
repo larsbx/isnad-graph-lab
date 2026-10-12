@@ -113,6 +113,28 @@ class IsnadGraph:
     def chains_of(self, hadith_id: int) -> pd.DataFrame:
         return self._where("chains", "hadith_id", hadith_id)
 
+    def grades_of(self, hadith_id: int, *, include_cross_recension: bool = False,
+                  include_ambiguous: bool = False, min_score_margin: float = 0.0) -> pd.DataFrame:
+        """Qualified external attributions, never source-report verdicts.
+
+        Defaults exclude cross-recension, tied and unknown-provenance associations.
+        A margin is an alignment diagnostic, not a calibrated probability.
+        Legacy bundles must be rebuilt; missing provenance never implies safe reuse.
+        """
+        if not 0 <= min_score_margin <= 1:
+            raise ValueError("min_score_margin must be between 0 and 1")
+        required = {"cross_recension", "alignment_status", "score_margin"}
+        if not required.issubset(self.external_grades.column_names):
+            raise ValueError("Legacy grading provenance: rebuild the bundle before grades_of")
+        grades = self._where("external_grades", "hadith_id", hadith_id)
+        mask = grades.alignment_status.eq("plausible")
+        if include_ambiguous:
+            mask |= grades.alignment_status.eq("ambiguous")
+        if not include_cross_recension:
+            mask &= grades.cross_recension.eq(False)  # unknown flags fail closed
+        mask &= grades.score_margin.ge(min_score_margin)
+        return grades.loc[mask].reset_index(drop=True)
+
     def render_chain(self, chain_id: int) -> str:
         """Human-readable chain, apex first; gaps shown on the arrows."""
         row = self._where("chains", "chain_id", chain_id).iloc[0]

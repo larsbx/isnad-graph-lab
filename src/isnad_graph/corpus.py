@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from collections.abc import Mapping
+from itertools import pairwise
 from pathlib import Path
 from typing import NamedTuple
 
@@ -27,18 +28,21 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from .align import align, order_consistency
+from .source import HADITH_API_REVISION, HADITH_KG
 
 
 class Edition(NamedTuple):
     book_id: int  # the source book it is aligned to
     cross_recension: bool = False  # different recension of the same work
+    external_work: str | None = None
+    source_work: str | None = None
 
 
 EDITIONS = {
     "bukhari": Edition(1), "muslim": Edition(2), "tirmidhi": Edition(3),
     "abudawud": Edition(4), "ibnmajah": Edition(6), "malik": Edition(8),
     # hadith-api has al-Sunan al-Ṣughrā (al-Mujtabā); the source has al-Sunan al-Kubrā.
-    "nasai": Edition(17, cross_recension=True),
+    "nasai": Edition(17, True, "al-Sunan al-Sughra (al-Mujtaba)", "al-Sunan al-Kubra"),
 }
 
 
@@ -68,11 +72,29 @@ def align_editions(con: sqlite3.Connection, directory: Path,
         entries = load_edition(directory, collection)
         rows = con.execute("SELECT id, nass, no_inbook FROM hadiths WHERE book_id = ?",
                            (ed.book_id,)).fetchall()
+        diagnostics = {}
         matches = align({e: t for e, t in zip(entries.entry, entries.arabic, strict=True)
-                         if t.strip()}, {i: t for i, t, _ in rows})
+                         if t.strip()}, {i: t for i, t, _ in rows}, diagnostics=diagnostics)
         hit = pd.DataFrame(matches, columns=["entry", "hadith_id", "score"])
-        frames.append(entries.merge(hit, on="entry", how="left")
-                      .assign(cross_recension=ed.cross_recension))
+        hit = hit.join(pd.DataFrame.from_dict(diagnostics, orient="index"), on="entry")
+        for col in ("runner_up_score", "score_margin", "tied_candidates", "text_relation"):
+            if col not in hit:
+                hit[col] = pd.Series(dtype=object)
+        multiplicity = hit.groupby("hadith_id").entry.transform("size")
+        hit["source_entry_count"] = multiplicity
+        hit["alignment_status"] = "plausible"
+        hit.loc[hit.tied_candidates.gt(1), "alignment_status"] = "ambiguous"
+        qualified = entries.merge(hit, on="entry", how="left").assign(
+            cross_recension=ed.cross_recension, source_book_id=ed.book_id,
+            external_work=ed.external_work, source_work=ed.source_work,
+            source_revision=HADITH_KG.revision,
+            edition_id=f"fawazahmed0/hadith-api:eng-{collection}@{HADITH_API_REVISION}",
+            arabic_edition_id=f"fawazahmed0/hadith-api:ara-{collection}@{HADITH_API_REVISION}",
+            independently_verified=False)
+        qualified["alignment_status"] = qualified.alignment_status.fillna("unmatched")
+        frames.append(qualified)
+        source_positions = {i: n for i, _, n in rows}
+        positions = [source_positions[m.right] for m in matches]
         stats[collection] = {
             "book_id": ed.book_id, "entries": len(entries), "aligned": len(matches),
             "reports_covered": hit.hadith_id.nunique(), "reports_in_book": len(rows),
@@ -81,22 +103,39 @@ def align_editions(con: sqlite3.Connection, directory: Path,
                 matches, dict(zip(entries.entry, entries.entry, strict=True)),
                 {i: n for i, _, n in rows}), 4),
             "cross_recension": ed.cross_recension,
+            "ambiguous": int(hit.tied_candidates.gt(1).sum()),
+            "many_to_one_entries": int(multiplicity.gt(1).sum()),
+            "equal_successive_positions": sum(
+                a == b for a, b in pairwise(positions)),
         }
     return pd.concat(frames, ignore_index=True).astype({"hadith_id": "Int64"}), stats
 
 
+PROVENANCE_COLUMNS = [
+    "entry", "score", "cross_recension", "source_book_id", "source_revision",
+    "external_work", "source_work",
+    "edition_id", "arabic_edition_id", "alignment_status", "runner_up_score",
+    "score_margin", "tied_candidates", "text_relation", "source_entry_count",
+    "independently_verified",
+]
+
+
 def alignment_table(entries: pd.DataFrame) -> pd.DataFrame:
-    return entries.loc[entries.hadith_id.notna(), [
-        "hadith_id", "collection", "hadithnumber", "arabicnumber", "chapter", "chapter_hadith",
-        "score", "cross_recension"]].reset_index(drop=True)
+    columns = ["hadith_id", "collection", "hadithnumber", "arabicnumber", "chapter",
+               "chapter_hadith", *PROVENANCE_COLUMNS]
+    return entries.loc[entries.hadith_id.notna()].reindex(columns=columns).reset_index(drop=True)
 
 
 def grade_table(entries: pd.DataFrame) -> pd.DataFrame:
-    rows = [(h, c, n, g["name"], g["grade"])
-            for h, c, n, gs in entries[["hadith_id", "collection", "hadithnumber", "grades"]]
-            .itertuples(index=False) for g in gs]
-    return pd.DataFrame(rows, columns=["hadith_id", "collection", "hadithnumber", "grader",
-                                       "grade"]).astype({"hadith_id": "Int64"})
+    """Preserve each attribution, including unmatched and cross-recension entries."""
+    columns = ["hadith_id", "collection", "hadithnumber", "grader", "grade",
+               *PROVENANCE_COLUMNS]
+    rows = []
+    for record in entries.to_dict("records"):
+        for grade in record["grades"]:
+            rows.append({**{k: record.get(k) for k in columns},
+                         "grader": grade["name"], "grade": grade["grade"]})
+    return pd.DataFrame(rows, columns=columns).astype({"hadith_id": "Int64"})
 
 
 def export_corpus(con: sqlite3.Connection, entries: pd.DataFrame, out: Path) -> Path:
@@ -111,7 +150,7 @@ def export_corpus(con: sqlite3.Connection, entries: pd.DataFrame, out: Path) -> 
     pq.write_table(pa.Table.from_pandas(texts, preserve_index=False), out / "texts.parquet",
                    compression="zstd", compression_level=9, row_group_size=50_000)
     translations = entries[["hadith_id", "collection", "hadithnumber", "chapter", "english",
-                            "arabic", "score"]].rename(columns={"english": "text_en",
+                            "arabic", *PROVENANCE_COLUMNS]].rename(columns={"english": "text_en",
                                                                "arabic": "text_ar_edition"})
     pq.write_table(pa.Table.from_pandas(translations, preserve_index=False),
                    out / "translations.parquet", compression="zstd", compression_level=19)
