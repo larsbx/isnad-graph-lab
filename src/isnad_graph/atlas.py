@@ -42,6 +42,7 @@ def build(g, out: Path, groups: Sequence[int] = GROUPS) -> Outcome:
                             "isnad_graph.subgraph.group_tree")
     html = (TEMPLATE.read_text(encoding="utf-8")
             .replace("__STAMP__", f"{provenance.stamp} · {CAVEAT}")
+            .replace("__SCOPE__", f"{len(trees)} report{'s' * (len(trees) != 1)}")
             .replace("__DATA__", payload.replace("</", "<\\/")))
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")
