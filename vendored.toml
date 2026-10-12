@@ -1,0 +1,25 @@
+# Vendored packages, checked by check_vendored_sync.py; re-pin with
+# `check_vendored_sync.py pin NAME COMMIT` after copying from upstream.
+
+[[package]]
+name = "vizops"
+repository = "larsbx/math-vizops"
+commit = "a6972ac83150a361dbac022e29d0402650a2a9ff"
+root = "vendor/python"
+
+[package.files]
+"vizops/adapters.py" = "313f186de1d9a6208db7f81089a6310a851114c013bbda41f635e25ec25cc28d"
+"vizops/figure.py" = "759f6bc5950cf989f168bd918c37cce215df0a8469cdfcc4758271059710b0b1"
+"vizops/layout.py" = "1086b83556422fb986f4b1d0d639099c4586925829efdd5fea40fa3849211b32"
+"vizops/outcome.py" = "452e4009c2eb52d2b9ac51c9215ef849576df149a70c22854c9acee76e3bad94"
+"vizops/palette.py" = "051b49ee62a8c5aa774bbac9cd11afb65cc096175c8aefcd0f989f68867321f5"
+
+[[package]]
+name = "vendoring"
+repository = "larsbx/finite-math-kernels"
+commit = "9d27bc4508844e72ffc61acb8ba172f7346707d8"
+root = "vendor/python"
+
+[package.files]
+"vendoring/__init__.py" = "959cdf7a89536784da18659db7cfe4099c885f5370249eccc71ce73775f8a584"
+"vendoring/check_vendored_sync.py" = "0e38721b19fcad261692f5424a4d580d82968a91f4baef01080486da372b4570"

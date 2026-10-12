@@ -299,6 +299,60 @@ books' internal order, which the aligner never sees.
 The Nasāʾī alignment is cross-recension: the edition is al-Sunan al-Ṣughrā
 mapped onto the source's al-Kubrā. It is flagged `cross_recension`.
 
+## Visualization (math-vizops)
+
+Drawing follows the estate's visualization repository,
+[math-vizops](https://github.com/larsbx/math-vizops): a surface depicts one
+artifact at one digest, carries its provenance, and authorizes nothing. Its
+figure core is vendored here rather than re-implemented (see
+[Vendored code](#vendored-code)), and two surfaces are built on it.
+
+* **`isnad-graph typed-graph OUT GROUP [--bundle N] [--min-chains K]`** writes
+  one companion bundle of a meaning group as `finite typed relationship
+  graph 1`, the estate's graph contract that math-vizops' scenes read. The
+  repository that owns the data declares the vocabulary:
+  * node classes are eight grade bands transcribed from the source's rank
+    scale: companion, thiqa, ṣadūq, maqbūl, majhūl, ḍaʿīf, rejected and
+    ungraded. Eight is vizops' palette limit, so the Prophet ﷺ, the apex of
+    every bundle, is not drawn.
+  * edge types are the four transmission-mode classes.
+
+  Only narrators on at least `K` of the bundle's chains are kept. Before the
+  file is written, it is read back through the vendored
+  `vizops.adapters.typed_graph`, `palette.assign` and `layout.columns`, so it
+  is refused here for every reason math-vizops would refuse it. The command
+  reports a vizops outcome: `rendered` (exit 0) or `refused` (exit 1).
+* **`isnad-graph page OUT [GROUP ...]`** builds the Isnad Atlas page from
+  `src/isnad_graph/templates/atlas.html`: per-companion isnad trees, edges
+  coloured by transmission mode, the common link marked. As on every vizops
+  page, the footer carries the provenance stamp, meaning the sha256 of the tree
+  payload it draws, beside the caveat «derived surface — depicts the source at
+  this digest; authorizes nothing».
+
+### Vendored code
+
+`vendor/python/` holds byte-for-byte copies, each pinned in `vendored.toml` to
+one upstream commit and the SHA-256 of every file:
+
+| package | upstream | files |
+|---|---|---|
+| `vizops` | `larsbx/math-vizops` @ `a6972ac8` | `figure`, `layout`, `palette`, `outcome`, `adapters`: the self-contained figure core |
+| `vendoring` | `larsbx/finite-math-kernels` @ `9d27bc45` | the checker |
+
+`vizops` is vendored as an import-only namespace package. Its `__init__` and
+its source registry, bridge and manim scenes belong to math-vizops' own sibling
+checkouts and renderer, and stay there. `pyproject.toml` installs the vendored
+package under its own name; nothing edits `sys.path`. Do not install the full
+math-vizops into the same environment, since both claim the name `vizops`.
+
+Never patch a vendored file; a fix goes upstream and is re-vendored:
+
+```sh
+git -C ../math-vizops show <sha>:vizops/figure.py > vendor/python/vizops/figure.py   # … each file
+python vendor/python/vendoring/check_vendored_sync.py pin vizops <sha>
+python vendor/python/vendoring/check_vendored_sync.py      # what CI runs
+```
+
 ## Usage
 
 ```bash
@@ -323,7 +377,7 @@ g.frame("common_links")    # any table as a DataFrame (tables are immutable Arro
 isnad-graph fetch    # pinned hadith-kg.db (1.6 GB) + 14 hadith-api editions, sha256-verified
 isnad-graph build    # ≈ 5 min, ≈ 3 GB RAM → data/graph/
 isnad-graph corpus   # ≈ 8 min → data/corpus/ (texts + translations)
-pytest               # 122 tests: unit, property and fixture tests, plus regressions on data/graph
+pytest               # 152 tests: unit, property and fixture tests, vendored pins, regressions on data/graph
 ```
 
 ## Layout
@@ -340,6 +394,8 @@ src/isnad_graph/
   analysis.py    edge aggregation, chronology, common links, tadlīs risk, hearing profiles
   assess.py      structural verdicts, defects, grade parsing, defect lift vs experts
   subgraph.py    one meaning group's isnads as laid-out trees per companion bundle
+  typed_graph.py a bundle as the estate's typed graph, read back through vendored vizops
+  atlas.py       the Isnad Atlas page, stamped as vizops stamps (templates/atlas.html)
   build.py       the only SQL: source DB → IsnadGraph
   graph.py       IsnadGraph: immutable Arrow tables, queries, networkx view, invariants
   source.py      pinned sources, fetch + sha256 verification
@@ -347,6 +403,7 @@ src/isnad_graph/
 tests/           fixture DB built from the source's verbatim DDL (tests/fixtures/schema.sql)
 data/graph/      the built graph (committed)
 data/corpus/     the text corpus (local, rebuilt by `isnad-graph corpus`)
+vendor/python/   vendored math-vizops figure core and the vendoring checker (vendored.toml)
 ```
 
 ## License and attribution

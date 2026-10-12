@@ -20,3 +20,12 @@ def test_tree_export(mini_graph, tmp_path):
     assert main(["--graph", str(gdir), "tree", str(tmp_path / "t.json"), "1", "2"]) == 0
     trees = json.loads((tmp_path / "t.json").read_text())
     assert [t["group_id"] for t in trees] == [1, 2]
+
+
+def test_vizops_commands_report_outcomes(mini_graph, tmp_path, capsys):
+    gdir = mini_graph.save(tmp_path / "g3")
+    assert main(["--graph", str(gdir), "typed-graph", str(tmp_path / "t.json"), "1",
+                 "--min-chains", "1"]) == 0
+    assert main(["--graph", str(gdir), "page", str(tmp_path / "p.html"), "1"]) == 0
+    assert main(["--graph", str(gdir), "page", str(tmp_path / "q.html"), "999"]) == 1
+    assert "refused" in capsys.readouterr().out
