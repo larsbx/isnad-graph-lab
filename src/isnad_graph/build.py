@@ -34,12 +34,27 @@ from .assess import (
 )
 from .chains import Chain, normalize
 from .corpus import EDITIONS, Edition, align_editions, alignment_table, grade_table
+from .geo import (
+    EMPTY_GAZETTEER,
+    GAZETTEER_PATH,
+    THURAYYA,
+    geo_edges,
+    geocode,
+    load_gazetteer,
+    used_places,
+)
 from .graph import IsnadGraph
+from .history import flows
+from .history import summary as timeline_geography
 from .inference import Mention, abstention, infer_source_chain
+from .lifespan import lifespans
 from .schema import (
     MARKER_NAMES,
+    PROPHET_BIRTH_YEAR,
+    PROPHET_DEATH_PLACE,
     PROPHET_DEATH_YEAR,
     PROPHET_ID,
+    PROPHET_IQAMA,
     PROPHET_NAME,
     PROPHETIC_TYPES,
     LinkFlag,
@@ -227,7 +242,9 @@ def _counts(frame: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
 def narrator_table(rawis: pd.DataFrame, markers: Mapping[int, LinkFlag],
                    chains: pd.DataFrame, edges: pd.DataFrame) -> pd.DataFrame:
     prophet = pd.DataFrame([{"id": PROPHET_ID, "name": PROPHET_NAME, "nickname": "",
-                             "death_year": PROPHET_DEATH_YEAR, "is_stub": 0}])
+                             "birth_year": PROPHET_BIRTH_YEAR, "death_year": PROPHET_DEATH_YEAR,
+                             "iqama": PROPHET_IQAMA, "death_place": PROPHET_DEATH_PLACE,
+                             "is_stub": 0}])
     nodes = pd.concat([prophet, rawis], ignore_index=True)
     kind = np.select(
         [nodes.id.eq(PROPHET_ID), nodes.id.isin(list(markers)), nodes.is_stub.eq(1)],
@@ -256,8 +273,12 @@ def narrator_table(rawis: pd.DataFrame, markers: Mapping[int, LinkFlag],
 
 def build(db: Path, spec: SourceSpec = HADITH_KG, validate: bool = True,
           editions_dir: Path | None = EDITIONS_DIR,
-          editions: Mapping[str, Edition] = EDITIONS) -> IsnadGraph:
-    """Build the graph; external editions are aligned when ``editions_dir`` exists."""
+          editions: Mapping[str, Edition] = EDITIONS,
+          gazetteer: Path | None = GAZETTEER_PATH) -> IsnadGraph:
+    """Build the graph; external editions are aligned when ``editions_dir`` exists,
+    and places geocoded when the ``gazetteer`` file does."""
+    use_gazetteer = gazetteer is not None and gazetteer.exists()
+    gaz = load_gazetteer(gazetteer) if use_gazetteer else EMPTY_GAZETTEER
     with closing(connect(db)) as con:
         use_editions = editions_dir is not None and editions_dir.exists()
         entries, edition_stats = (align_editions(con, editions_dir, editions) if use_editions
@@ -285,9 +306,11 @@ def build(db: Path, spec: SourceSpec = HADITH_KG, validate: bool = True,
         edges = aggregate_transmissions(links)
         narrators = narrator_table(rawis, markers, chains, edges).join(
             hearing_profile(links), on="id").pipe(_counts, ["n_links_read"])
+        narrators = (narrators.merge(lifespans(narrators), on="id", validate="1:1")
+                     .merge(geocode(narrators, gaz), on="id", validate="1:1"))
         chains = chains.join(tadlis_risk(links, narrators).rename("n_tadlis_risk"),
                              on="chain_id").pipe(_counts, ["n_tadlis_risk"])
-        edges = chronology(edges, narrators)
+        edges = geo_edges(chronology(edges, narrators), narrators)
         chains = chains.merge(assess_chains(chains, links, narrators, edges).drop(
             columns=["path", "head_gap", "tail_gap"], errors="ignore"), on="chain_id",
             validate="1:1")
@@ -320,6 +343,8 @@ def build(db: Path, spec: SourceSpec = HADITH_KG, validate: bool = True,
             common_links=common_links(links),
             alignments=alignment_table(entries),
             external_grades=grades,
+            places=used_places(narrators, gaz),
+            flows=flows(edges),
             manifest={
                 "builder": f"isnad_graph {__version__}",
                 "built_at": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -347,6 +372,10 @@ def build(db: Path, spec: SourceSpec = HADITH_KG, validate: bool = True,
                     "defect_lift_excludes": sorted(
                         c for c, e in editions.items() if e.cross_recension),
                 },
+                "gazetteer": {"repo": THURAYYA.repo, "file": THURAYYA.filename,
+                              "revision": THURAYYA.revision, "sha256": THURAYYA.sha256,
+                              "license": THURAYYA.license} if use_gazetteer else None,
+                "timeline_geography": timeline_geography(narrators, edges),
                 "inferred_layer": inference_stats,
                 "transmission_modes": {
                     "links_by_mode": {Mode(int(k)).name: int(v) for k, v in

@@ -44,6 +44,9 @@ PROPHETIC_TYPES = frozenset({0, 1})  # hadiths.type_no of qudsi / marfu'
 PROPHET_ID = -1
 PROPHET_NAME = "محمد رسول الله ﷺ"
 PROPHET_DEATH_YEAR = 11  # AH
+PROPHET_BIRTH_YEAR = -53  # 53 lunar years before the hijra
+PROPHET_IQAMA = "المدينة ، مكة"  # home: Medina, where he taught the companions
+PROPHET_DEATH_PLACE = "المدينة"
 
 # Gap markers are identified by name, not id, so a re-cut source still resolves.
 MARKER_NAMES = MappingProxyType(

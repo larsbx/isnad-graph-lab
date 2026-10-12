@@ -27,6 +27,7 @@ from types import MappingProxyType
 from typing import Any
 
 import networkx as nx
+import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
@@ -41,8 +42,10 @@ def _table(x: pa.Table | pd.DataFrame) -> pa.Table:
 
 def _attrs(row: Mapping[str, Any]) -> dict[str, Any]:
     """Plain-Python, NA-free attributes (GraphML/GEXF cannot hold NA or numpy scalars)."""
-    return {k: v.item() if hasattr(v, "item") else v for k, v in row.items()
-            if v is not None and not pd.isna(v)}
+    plain = {k: " ".join(map(str, v)) if isinstance(v, list | tuple | np.ndarray) else v
+             for k, v in row.items()}
+    return {k: v.item() if hasattr(v, "item") else v for k, v in plain.items()
+            if v is not None and v != "" and not pd.isna(v)}
 
 
 @dataclass(frozen=True)
@@ -59,6 +62,8 @@ class IsnadGraph:
     common_links: pa.Table
     alignments: pa.Table
     external_grades: pa.Table
+    places: pa.Table
+    flows: pa.Table
     manifest: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:

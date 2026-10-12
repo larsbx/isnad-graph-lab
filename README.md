@@ -49,6 +49,7 @@ verified one-for-one by an invariant. Its limits are worth stating precisely:
 |---|---|---|
 | [«الجامع» Hadith Knowledge Graph](https://huggingface.co/datasets/emadjumaah/hadith-kg) @ `8ae7e3d5` | CC‑BY‑4.0 | reports, chains, narrators, critics; the Arabic texts with narrator-mention offsets |
 | [fawazahmed0/hadith-api](https://github.com/fawazahmed0/hadith-api) @ `df57907b` | Unlicense (public domain) | Arabic and English editions of Bukhārī, Muslim, Abū Dāwūd, Tirmidhī, Nasāʾī, Ibn Mājah and the Muwaṭṭaʾ, with modern gradings |
+| [al-Thurayya gazetteer](https://github.com/althurayya/althurayya.github.io) @ `f244e65d` | Apache‑2.0 | coordinates, settlement type and province of 2,518 toponyms of the early Islamic world (Seydi & Romanov, after Cornu) |
 
 Every file is pinned by revision and sha256 (`source.py`). `isnad-graph corpus`
 writes:
@@ -101,8 +102,8 @@ every marker, idempotence and marker-freeness.
 
 | table | rows | one row is … | key annotations |
 |---|---:|---|---|
-| `narrators` | 49,845 | a node | `kind` (narrator · prophet · marker · stub), name, nasab, grade `rank`/`rank_no` (1 companion … 12 fabricator), `tabaka` (generation), birth/death year (AH), residence, tadlīs/ikhtilāṭ flags, Bukhārī/Muslim narrator, `n_chains`, `n_hadiths`, `n_teachers`, `n_students`, `n_as_apex`, `n_as_compiler`; hearing profile `n_links_read`, `explicit_share`, `an_share` |
-| `transmissions` | 330,628 | an edge teacher `src` → student `dst` | `n_links`, `n_chains`, `n_hadiths`, `n_books`, `n_recorded`/`n_inferred`, `n_direct`, `n_irsal`, `n_inqita`, `n_taliq`, `n_mubham`, `tabaka_delta`, `death_gap`, `chronology`; mode histogram `mode_sama` … `mode_unread`, `top_mode` |
+| `narrators` | 49,845 | a node | `kind` (narrator · prophet · marker · stub), name, nasab, grade `rank`/`rank_no` (1 companion … 12 fabricator), `tabaka` (generation), birth/death year (AH), residence; lifespan intervals `birth_lo`/`birth_hi`/`death_lo`/`death_hi` with `birth_basis`/`death_basis` and `bio_conflict`; geocoded `home_*` (place, uri, lat, lon, region, level) and `death_*`, all `places`; tadlīs/ikhtilāṭ flags, Bukhārī/Muslim narrator, `n_chains`, `n_hadiths`, `n_teachers`, `n_students`, `n_as_apex`, `n_as_compiler`; hearing profile `n_links_read`, `explicit_share`, `an_share` |
+| `transmissions` | 330,628 | an edge teacher `src` → student `dst` | `n_links`, `n_chains`, `n_hadiths`, `n_books`, `n_recorded`/`n_inferred`, `n_direct`, `n_irsal`, `n_inqita`, `n_taliq`, `n_mubham`, `tabaka_delta`, `death_gap`, `chronology`, `overlap`, `student_age_at_teacher_death`, `ante_quem`, `distance_km`, `same_city`, `src_region`/`dst_region`; mode histogram `mode_sama` … `mode_unread`, `top_mode` |
 | `chains` | 696,953 | a hyperedge (one isnad) | `path` (ids, apex → compiler), `links` (flag per link), `modes` (transmission mode per link), `n_modes_borrowed`, `n_tadlis_risk`, structural `verdict`, `defects`, `worst_rank`, `head_gap`, `tail_gap`, `repeats`, `provenance`, `sanad_id`, `hadith_id`, `book_id`, `group_id`, isnad verdict (`isnad_hukm`, `isnad_verdict`) |
 | `hadiths` | 715,790 | a report | book, number, page, type (qudsī/marfūʿ/mawqūf/maqṭūʿ), grade `hukm`, meaning group, matn offsets, `n_chains_recorded`, `n_chains_inferred`, `best_verdict`, `shared_defects` |
 | `books` | 425 | a collection | author, death year, edition, genre (`tasnif`) |
@@ -112,6 +113,8 @@ every marker, idempotence and marker-freeness.
 | `assessments` | 127,863 | an edge critic → narrator | the verdict `qawl` verbatim |
 | `common_links` | 187,616 | a (partial) common link | see below |
 | `alignments` | 33,729 | an external edition entry ↔ source report | `collection`, `hadithnumber` (the edition's numbering, as on sunnah.com), `chapter`, containment `score`, `cross_recension` |
+| `places` | 439 | a place some narrator lived or died in | al-Thurayya `uri`, Arabic `name`, `translit`, `lat`/`lon`, province `region`, settlement `type` (or `province`), `n_home`, `n_narrators` |
+| `flows` | 1,073 | (century, province → province) | `n_edges`, `n_chains` of transmission from teachers at home in one province to students in another (or the same) |
 | `external_grades` | 67,716 | a modern grading of an entry | `grader` (al-Albānī, Zubair ʿAlī Zaʾī, al-Arnaʾūṭ, Abū Ghudda, Aḥmad Shākir, Bashshār ʿAwwād …), `grade`, parsed `verdict` and `scope` (isnad / hadith / corroborated), `hadith_id` (NA for the 5,455 on unaligned entries) |
 
 `manifest.json` holds provenance: the source repo, revision, sha256, license and
@@ -120,9 +123,8 @@ the inferred-layer accounting and the inference validation.
 
 ### Edge annotations
 
-* **`chronology`**: `impossible` if the student was born after the teacher died,
-  `consistent` if both dates are known and compatible, otherwise `unknown`. Counts:
-  13,754 impossible, 59,089 consistent, 257,785 unknown. Birth years are sparse.
+* **`chronology`**: whether the two lifespans can overlap; see
+  [Timeline and geography](#timeline-and-geography).
 * **`tabaka_delta`** = generation(student) − generation(teacher). It uses the
   source's 1–38 generation scale (not Ibn Ḥajar's 12). A negative value is an
   inversion worth inspecting.
@@ -299,6 +301,105 @@ books' internal order, which the aligner never sees.
 The Nasāʾī alignment is cross-recension: the edition is al-Sunan al-Ṣughrā
 mapped onto the source's al-Kubrā. It is flagged `cross_recension`.
 
+## Timeline and geography
+
+### Lifespans (`lifespan.py`)
+
+Every narrator gets a death interval and a birth interval (AH), each with a
+*basis*:
+
+* **Death**:
+  * `recorded`: the source's year or range («130 - 121»);
+  * else `tabaqa`: the central 95% of the recorded deaths of the narrator's
+    tabaqa (the source's 38 layers are about 25 years apart from the 7th on),
+    provided the tabaqa has at least 30 recorded deaths.
+* **Birth**:
+  * `recorded`: the source's birth year;
+  * `age`: recorded death − age at death;
+  * else `prior`: `[death_lo − 120, death_hi]`. 99.8% of the source's
+    recorded ages are ≤ 120.
+
+A biography contradicts itself (`bio_conflict`, 60 narrators) when the birth is
+after the death, or the age is off by more than 2 years from death − birth.
+
+A link t → s requires the two lifespans to meet:
+b(s) ≤ d(t) ∧ b(t) ≤ d(s). The link is *refuted* when
+b_lo(s) > d_hi(t) ∨ b_lo(t) > d_hi(s). `chronology` is the first of these that
+applies:
+
+| verdict | rule | edges | share of chains |
+|---|---|---:|---:|
+| `unknown` | a death interval is missing | 33,995 | 2.0% |
+| `conflict` | an endpoint's biography contradicts itself | 2,311 | 1.6% |
+| `impossible` | refuted by documented dates alone | 14,194 | 1.1% |
+| `implausible` | refuted only with the 120-year prior or a tabaqa | 9,614 | 0.4% |
+| `consistent` | not refuted (no stronger claim) | 270,514 | 94.9% |
+
+Before this layer, 78% of edges were `unknown`, because birth years are
+sparse. Only `impossible` raises the `CHRONOLOGY` defect in the assessment.
+
+Per edge, `ante_quem` = min(d_hi(t), d_hi(s)): the last year the transmission
+can be from, used to date it.
+
+`student_age_at_teacher_death` is computed on the 79,476 documented,
+consistent links:
+
+| p5 | p25 | p50 | p75 | p95 |
+|---:|---:|---:|---:|---:|
+| 5 | 21 | 33 | 49 | 84 |
+
+In 9.2% of them the student was under 10 when the teacher died. This is
+Bulliet's age structure, the hearing of children that made isnads short
+(ʿuluww).
+
+### Places (`geo.py`)
+
+`iqama` («الشام ، دمشق») and `death_place` are split into tokens. Each token is
+resolved against al-Thurayya, in this order:
+
+1. a province named outright is drawn at the centroid of its settlements;
+2. otherwise the source spelling is mapped to the gazetteer's (`ALIASES`:
+   بخارى → بخارة; Baghdad quarters → بغداد; …), and homonyms are ranked by:
+   1. agreement with the province of the narrator's other places;
+   2. settlement type (metropolis > capital > town > …);
+   3. how many narrators the corpus places in each province (a two-pass prior).
+
+A tie that survives all three is left unresolved. Of 23,630 narrators with a
+residence, 97.7% get a home (21,577 a city, 1,642 only a province), which is
+91.8% of chain-weighted activity. The 1,844 unresolved tokens are mostly
+tribes (تجيب، بجيلة، كندة) and places Cornu lacks.
+
+A home is where the biographical record says a narrator lived, not where a
+hearing took place. For companions, that is where they settled after the
+conquests.
+
+### Over time (`history.py`)
+
+Each link is dated by century of its `ante_quem` and weighted by the chains it
+carries.
+
+| c. AH | links | chains | same city | median km | lifespans cannot meet | busiest teacher homes |
+|---:|---:|---:|---:|---:|---:|---|
+| 1 | 45,673 | 1.42M | 48% | 962 | 2.3% | المدينة، الكوفة، البصرة، مكة، اليمن |
+| 2 | 108,263 | 1.59M | 42% | 450 | 0.8% | الكوفة، المدينة، البصرة، مكة، بغداد |
+| 3 | 92,839 | 0.85M | 28% | 480 | 1.5% | بغداد، البصرة، الكوفة، دمشق، مصر |
+| 4 | 30,483 | 347k | 36% | 684 | 2.4% | بغداد، دمشق، نيسابور، إصبهان، البصرة |
+| 5 | 10,795 | 188k | 31% | 257 | 1.7% | نيسابور، بغداد، دمشق، إصبهان، شيراز |
+| 6 | 4,601 | 42k | 52% | 684 | 1.8% | إصبهان، بغداد، دمشق، مكة، نيسابور |
+| 7 | 3,598 | 22k | 12% | 619 | 3.2% | دمشق، الموصل، بغداد، إصبهان، الشام |
+
+Two patterns stand out:
+
+* The centre of gravity moves Medina → Kūfa/Baṣra → Baghdad →
+  Nīshāpūr/Iṣbahān → Damascus, which matches the computational regional curves
+  in the secondary literature.
+* The same-city share falls to its minimum in the 3rd century, the age of the
+  riḥla.
+
+The 1st century's distances are inflated by companions' later homes.
+`docs/secondary-literature.md` lists the studies and datasets this layer is
+measured against.
+
 ## Visualization (math-vizops)
 
 Drawing follows the estate's visualization repository,
@@ -328,6 +429,14 @@ figure core is vendored here rather than re-implemented (see
   page, the footer carries the provenance stamp, meaning the sha256 of the tree
   payload it draws, beside the caveat «derived surface — depicts the source at
   this digest; authorizes nothing».
+* **`isnad-graph chronicle OUT`** builds the Isnad Chronicle page
+  (`templates/chronicle.html`), stamped the same way. It has:
+  * a map of teacher homes and the busiest home → home flows, per century,
+    with a century slider;
+  * a city panel;
+  * the century series: same-city share, median distance, and lifespans that
+    cannot meet;
+  * the age-structure histogram.
 
 ### Vendored code
 
@@ -374,10 +483,10 @@ g.frame("common_links")    # any table as a DataFrame (tables are immutable Arro
 ### Rebuild from source
 
 ```bash
-isnad-graph fetch    # pinned hadith-kg.db (1.6 GB) + 14 hadith-api editions, sha256-verified
+isnad-graph fetch    # pinned hadith-kg.db (1.6 GB) + 14 hadith-api editions + gazetteer, sha256-verified
 isnad-graph build    # ≈ 5 min, ≈ 3 GB RAM → data/graph/
 isnad-graph corpus   # ≈ 8 min → data/corpus/ (texts + translations)
-pytest               # 152 tests: unit, property and fixture tests, vendored pins, regressions on data/graph
+pytest               # 186 tests: unit, property and fixture tests, vendored pins, regressions on data/graph
 ```
 
 ## Layout
@@ -396,6 +505,10 @@ src/isnad_graph/
   subgraph.py    one meaning group's isnads as laid-out trees per companion bundle
   typed_graph.py a bundle as the estate's typed graph, read back through vendored vizops
   atlas.py       the Isnad Atlas page, stamped as vizops stamps (templates/atlas.html)
+  lifespan.py    lifespans as intervals with their basis; edge feasibility
+  geo.py         al-Thurayya gazetteer: resolution of residences, homes, distances
+  history.py     per-century profile, province flows, hubs; the manifest summary
+  chronicle.py   the Isnad Chronicle page (templates/chronicle.html)
   build.py       the only SQL: source DB → IsnadGraph
   graph.py       IsnadGraph: immutable Arrow tables, queries, networkx view, invariants
   source.py      pinned sources, fetch + sha256 verification
@@ -414,5 +527,6 @@ The code is MIT. The graph in `data/graph/` is a derivative of
 `8ae7e3d5`. It is redistributed under the same license. The alignments, English
 translations and modern gradings come from
 [hadith-api](https://github.com/fawazahmed0/hadith-api), which is in the public
-domain. Narrator grades, verdicts, dates and gradings are their authors'
+domain. Coordinates come from the al-Thurayya gazetteer (Apache-2.0,
+Masoumeh Seydi and Maxim Romanov, after Georgette Cornu). Narrator grades, verdicts, dates and gradings are their authors'
 judgements, not this project's.

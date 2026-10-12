@@ -5,6 +5,8 @@
 * hadith-api (public domain, Unlicense) — Arabic and English editions of the
   canonical collections with modern gradings:
   https://github.com/fawazahmed0/hadith-api
+* al-Thurayya gazetteer (Apache-2.0) — places and coordinates of the early
+  Islamic world (``geo.THURAYYA``): https://github.com/althurayya/althurayya.github.io
 """
 
 from __future__ import annotations

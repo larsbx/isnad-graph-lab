@@ -52,6 +52,32 @@ def test_chronology(mini_graph):
     assert edge(mini_graph, 2, 5).chronology == "impossible"
     assert edge(mini_graph, 2, 3).chronology == "consistent"
     assert edge(mini_graph, 3, 4).tabaka_delta == 5
+    e = edge(mini_graph, 2, 3)  # A 20–100 → B 60–150
+    assert (e.overlap, e.student_age_at_teacher_death, e.ante_quem) == (40, 40, 100)
+    apex = edge(mini_graph, PROPHET_ID, 1)  # Abu Hurayra: death 57, birth only by the prior
+    assert apex.chronology == "consistent" and pd.isna(apex.overlap)
+
+
+def test_places(mini_graph):
+    n = mini_graph.frame("narrators").set_index("id")
+    assert n.loc[PROPHET_ID, "home_uri"] == "madina" and n.loc[4, "home_uri"] == "bukhara"
+    assert n.loc[5, ["home_uri", "home_level"]].tolist() == ["dimashq", "city"]
+    assert edge(mini_graph, 2, 7).same_city and edge(mini_graph, 2, 7).distance_km == 0
+    assert edge(mini_graph, 2, 3).src_region == "Iraq"
+    p = mini_graph.frame("places").set_index("uri")
+    assert p.loc["basra", ["n_home", "n_narrators"]].tolist() == [2, 2]
+    assert mini_graph.manifest["gazetteer"]["license"] == "Apache-2.0"
+
+
+def test_flows_and_timeline(mini_graph):
+    f = mini_graph.frame("flows")
+    assert f.n_chains.sum() == mini_graph.frame("transmissions").pipe(
+        lambda e: e[e.ante_quem.notna() & e.src.map(
+            mini_graph.frame("narrators").set_index("id").home_region).notna()
+            & e.dst.map(mini_graph.frame("narrators").set_index("id").home_region).notna()]
+    ).n_chains.sum()
+    t = mini_graph.manifest["timeline_geography"]
+    assert sum(t["chronology"]["edges"].values()) == mini_graph.transmissions.num_rows
 
 
 def test_narrator_annotations(mini_graph):
