@@ -1,0 +1,391 @@
+<title>Isnad Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a working instrument — report tabs, a summary strip, then the tree canvas beside a narrator panel. RTL tree: Prophet at right, compilers at left. */
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --ink: #18202e; --muted: #5a6475; --line: #dbe0e8;
+  --accent: #2c5aa0; --accent-soft: #e3ebf7;
+  --explicit: #23806a; --ambiguous: #c0861b; --written: #7a56b3; --unread: #a3abb8; --defect: #c23b35;
+  --display: "Amiri", "Noto Naskh Arabic", "Times New Roman", serif;
+  --arabic: "Noto Naskh Arabic", "Amiri", "Geeza Pro", "Arial", sans-serif;
+  --ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f131a; --surface: #161b24; --ink: #e5e9f0; --muted: #98a2b3; --line: #2a3240;
+  --accent: #7ea6e6; --accent-soft: #1d2a40;
+  --explicit: #4fbf9f; --ambiguous: #e3a93f; --written: #a98be0; --unread: #5f6878; --defect: #ef6a63;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f131a; --surface: #161b24; --ink: #e5e9f0; --muted: #98a2b3; --line: #2a3240;
+  --accent: #7ea6e6; --accent-soft: #1d2a40;
+  --explicit: #4fbf9f; --ambiguous: #e3a93f; --written: #a98be0; --unread: #5f6878; --defect: #ef6a63;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 14px/1.5 var(--ui); margin: 0; }
+.wrap { max-width: 1440px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 32px; display: grid; gap: 16px; }
+h1 { font: 600 20px/1.2 var(--ui); margin: 0; letter-spacing: .01em; }
+h1 small { font-weight: 400; color: var(--muted); font-size: 14px; margin-inline-start: 8px; }
+.eyebrow { font: 500 11px/1 var(--ui); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+.reports { display: flex; flex-wrap: wrap; gap: 8px; }
+.reports button { font: 500 16px/1.4 var(--arabic); direction: rtl; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+.reports button[aria-selected="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.reports button:focus-visible, .chips button:focus-visible, .tools button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.summary { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px 24px; align-items: start;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+.matn { font: 400 22px/1.7 var(--display); direction: rtl; text-align: right; margin: 4px 0 0; text-wrap: balance; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.stat b { display: block; font: 500 22px/1.2 var(--mono); }
+.stat span { color: var(--muted); font-size: 12px; }
+.bar { display: flex; height: 10px; border-radius: 3px; overflow: hidden; background: var(--line); margin-top: 6px; }
+.bar i { display: block; height: 100%; }
+.barlegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+.barlegend span::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-inline-end: 4px; background: var(--c); }
+.defects { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chips button { font: 400 13px/1.3 var(--arabic); direction: rtl; background: transparent; color: var(--ink);
+  border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; cursor: pointer; }
+.chips button .num { font-size: 11px; color: var(--muted); margin-inline-start: 6px; }
+.chips button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.chips button[aria-pressed="true"] .num { color: var(--bg); opacity: .75; }
+.chips .tag { font: 500 10px/1 var(--ui); color: var(--ambiguous); margin-inline-start: 4px; }
+
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+.canvaswrap { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; display: grid; }
+.tools { display: flex; gap: 6px; align-items: center; padding: 8px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.tools button { font: 500 12px/1 var(--ui); background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 6px 10px; cursor: pointer; }
+.tools .hint { color: var(--muted); font-size: 12px; margin-inline-start: auto; }
+.canvas { overflow: auto; height: min(72vh, 860px); }
+svg text.label { font: 400 12px var(--arabic); fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 3.5px; stroke-linejoin: round; }
+svg text.label.cl { font-weight: 600; fill: var(--accent); }
+svg .node { cursor: pointer; }
+svg .node circle { fill: var(--surface); stroke: var(--muted); stroke-width: 1.2; }
+svg .node.cl circle { fill: var(--accent); stroke: var(--accent); }
+svg .node.partial circle { stroke: var(--accent); stroke-width: 2; }
+svg .node.sel circle { stroke: var(--defect); stroke-width: 3; }
+svg .node:focus-visible circle { stroke: var(--accent); stroke-width: 3; }
+svg .edge { fill: none; stroke-linecap: round; }
+svg .dim { opacity: .12; }
+svg .tadlis { fill: var(--defect); }
+@media (prefers-reduced-motion: no-preference) { svg .edge, svg .node, svg .tadlis { transition: opacity .15s; } }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: grid; gap: 12px; position: sticky; top: env(safe-area-inset-top, 0px); }
+.panel h2 { font: 600 19px/1.5 var(--arabic); direction: rtl; text-align: right; margin: 0; }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.badge { font: 500 11px/1 var(--ui); padding: 4px 7px; border-radius: 3px; background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.badge.cl { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+.badge.partial { color: var(--accent); border-color: var(--accent); }
+.badge.mud { color: var(--defect); border-color: var(--defect); }
+dl.kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; margin: 0; font-size: 13px; }
+dl.kv dt { color: var(--muted); }
+dl.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+dl.kv dd.ar { font-family: var(--arabic); direction: rtl; text-align: right; }
+.modes { display: grid; gap: 4px; font-size: 12px; }
+.modes div { display: grid; grid-template-columns: 92px minmax(0, 1fr) 36px; gap: 8px; align-items: center; }
+.modes i { display: block; height: 8px; border-radius: 2px; background: var(--c); }
+.books { margin: 0; padding: 0; list-style: none; font: 13px/1.6 var(--arabic); direction: rtl; text-align: right; }
+.books .num { font-size: 11px; color: var(--muted); margin-inline-start: 6px; }
+.note { font-size: 12px; color: var(--muted); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 12px; color: var(--muted); align-items: center; }
+.legend svg { vertical-align: middle; margin-inline-end: 6px; }
+footer.src { font-size: 12px; color: var(--muted); max-width: 80ch; }
+footer.src a { color: var(--accent); }
+footer.src .stamp { margin: 0 0 6px; font-size: 11px; overflow-wrap: anywhere; }
+
+@media (max-width: 900px) {
+  .summary { grid-template-columns: minmax(0, 1fr); }
+  .stage { grid-template-columns: minmax(0, 1fr); }
+  .panel { position: static; }
+  .canvas { height: 64vh; }
+}
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:10px">
+    <h1>Isnad Atlas <small>every recorded chain of __SCOPE__, merged into one tree per companion</small></h1>
+    <div class="reports" id="reports" role="tablist" aria-label="Reports"></div>
+  </header>
+
+  <section class="summary" aria-live="polite">
+    <div>
+      <div class="eyebrow">Matn</div>
+      <p class="matn" id="matn"></p>
+    </div>
+    <div style="display:grid;gap:10px">
+      <div class="stats">
+        <div class="stat"><b class="num" id="sChains"></b><span>chains in this bundle</span></div>
+        <div class="stat"><b class="num" id="sNarr"></b><span>narrators</span></div>
+        <div class="stat"><b id="sCl" style="font:600 16px/1.4 var(--arabic);direction:rtl"></b><span>common link</span></div>
+      </div>
+      <div>
+        <div class="eyebrow">Structural isnad verdicts</div>
+        <div class="bar" id="vbar" role="img"></div>
+        <div class="barlegend" id="vlegend"></div>
+        <div class="defects" id="defects"></div>
+      </div>
+    </div>
+  </section>
+
+  <div>
+    <div class="eyebrow" style="margin-bottom:6px">Companion bundles <span style="text-transform:none;letter-spacing:0">(the narrator below the Prophet ﷺ)</span></div>
+    <div class="chips" id="bundles"></div>
+  </div>
+
+  <div class="stage">
+    <div class="canvaswrap">
+      <div class="tools">
+        <button type="button" id="zin" aria-label="Zoom in">Zoom in</button>
+        <button type="button" id="zout" aria-label="Zoom out">Zoom out</button>
+        <button type="button" id="zfit">Fit width</button>
+        <button type="button" id="zcl">Go to common link</button>
+        <span class="hint">Select a narrator to trace every chain through them</span>
+      </div>
+      <div class="canvas" id="canvas"><svg id="tree" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Isnad tree"></svg></div>
+    </div>
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <footer class="src">
+    <p class="stamp num">__STAMP__</p>
+    Chains, narrator grades and dates: «الجامع» Hadith Knowledge Graph (CC-BY-4.0). Transmission modes, gaps, tadlīs defects and common links are computed by
+    <a href="https://github.com/larsbx/isnad-graph-lab" rel="noopener">isnad-graph-lab</a>.
+    Verdicts are the structural rule (weakest narrator, gaps cap at ḍaʿīf), not a scholar's judgement. Common link: the first node, descending from the companion, where no single student carries ≥ 80% of the chains.
+  </footer>
+</div>
+
+<script type="application/json" id="data">__DATA__</script>
+<script>
+(() => {
+  const DATA = JSON.parse(document.getElementById("data").textContent);
+  const PROPHET = -1;
+  const CLASS = { sama: "explicit", tahdith: "explicit", ikhbar: "explicit", qiraa: "explicit", liqa: "explicit",
+    kitaba: "written", ijaza: "written", wijada: "written",
+    an: "ambiguous", anna: "ambiguous", qala: "ambiguous", dhakara: "ambiguous", rawa: "ambiguous", unread: "unread" };
+  const MODE_LABEL = { sama: "samāʿ سمعت", tahdith: "taḥdīth حدثنا", ikhbar: "ikhbār أخبرنا", qiraa: "qirāʾa", liqa: "liqāʾ",
+    kitaba: "kitāba", ijaza: "ijāza", wijada: "wijāda", an: "ʿan عن", anna: "anna أنّ", qala: "qāla قال",
+    dhakara: "dhakara", rawa: "rawā", unread: "unread" };
+  const MODE_CODE = ["unread","sama","tahdith","ikhbar","qiraa","liqa","kitaba","ijaza","wijada","an","anna","qala","dhakara","rawa"];
+  const VERDICTS = [["ṣaḥīḥ", "--explicit"], ["ḥasan", "--accent"], ["ḍaʿīf", "--ambiguous"], ["very weak", "--written"], ["accused", "--defect"], ["mawḍūʿ", "--ink"]];
+  const COL = 168, ROWH = 24, PAD = 28;
+  const $ = (id) => document.getElementById(id);
+  const svgNS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(svgNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+  const cssVar = (v) => `var(${v})`;
+  const fmt = (n) => n.toLocaleString("en-US");
+
+  let state = { report: 0, bundle: 0, selected: null, scale: 1 };
+  const report = () => DATA[state.report];
+  const bundle = () => report().bundles[state.bundle];
+
+  // Report tabs: incipit of each matn
+  DATA.forEach((r, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.role = "tab"; b.textContent = r.text.split(/\s+/).slice(0, 4).join(" ");
+    b.title = r.text; b.addEventListener("click", () => selectReport(i));
+    $("reports").appendChild(b);
+  });
+
+  function selectReport(i) {
+    state.report = i; state.bundle = 0;
+    [...$("reports").children].forEach((b, j) => b.setAttribute("aria-selected", String(j === i)));
+    $("matn").textContent = report().text;
+    try { history.replaceState(null, "", "#r" + report().group_id); } catch (e) {}
+    renderBundles(); selectBundle(0);
+  }
+
+  function renderBundles() {
+    const box = $("bundles"); box.textContent = "";
+    report().bundles.forEach((b, i) => {
+      const btn = document.createElement("button");
+      btn.type = "button"; btn.setAttribute("aria-pressed", "false");
+      btn.append(b.name);
+      if (b.mursal) { const t = document.createElement("span"); t.className = "tag"; t.textContent = "mursal"; btn.append(t); }
+      const n = document.createElement("span"); n.className = "num"; n.textContent = b.n_chains; btn.append(n);
+      btn.addEventListener("click", () => selectBundle(i));
+      box.appendChild(btn);
+    });
+  }
+
+  function selectBundle(i) {
+    state.bundle = i;
+    [...$("bundles").children].forEach((b, j) => b.setAttribute("aria-pressed", String(j === i)));
+    const b = bundle();
+    b.byId = new Map(b.nodes.map((n) => [n.id, n]));
+    b.through = new Map(b.nodes.map((n) => [n.id, []]));
+    b.chains.forEach((c, k) => c.path.forEach((p) => b.through.get(p)?.push(k)));
+    summary(b); draw(b);
+    const cl = b.nodes.find((n) => n.cl === "common_link") || b.byId.get(b.companion);
+    select(cl ? cl.id : null);
+    state.scale = 0.85; applyScale(); requestAnimationFrame(() => scrollToNode(state.selected));
+  }
+
+  function summary(b) {
+    $("sChains").textContent = fmt(b.n_chains);
+    $("sNarr").textContent = fmt(b.nodes.length - 1);
+    const cl = b.nodes.find((n) => n.cl === "common_link");
+    $("sCl").textContent = cl ? cl.name : "none found";
+    const counts = VERDICTS.map((_, v) => b.chains.filter((c) => c.verdict === v).length);
+    const bar = $("vbar"); bar.textContent = "";
+    const leg = $("vlegend"); leg.textContent = "";
+    counts.forEach((n, v) => {
+      if (!n) return;
+      const seg = document.createElement("i"); seg.style.width = (100 * n / b.chains.length) + "%"; seg.style.background = cssVar(VERDICTS[v][1]);
+      bar.appendChild(seg);
+      const s = document.createElement("span"); s.style.setProperty("--c", cssVar(VERDICTS[v][1])); s.textContent = `${VERDICTS[v][0]} ${n}`;
+      leg.appendChild(s);
+    });
+    bar.setAttribute("aria-label", "Verdicts: " + leg.textContent);
+    const d = (name) => b.chains.filter((c) => c.defects.includes(name)).length;
+    $("defects").textContent = `Chains with ʿan of a mudallis: ${d("TADLIS") + d("TADLIS_WEAK")} · with a gap: ${d("GAP")} · with an impossible date: ${d("CHRONOLOGY")}`;
+  }
+
+  function edgeClass(e) { return CLASS[e.top] || "unread"; }
+
+  function draw(b) {
+    const svg = $("tree"); svg.textContent = "";
+    const maxX = Math.max(...b.nodes.map((n) => n.x));
+    const ys = b.nodes.map((n) => n.y), minY = Math.min(...ys), maxY = Math.max(...ys);
+    const W = maxX * COL + 2 * PAD + 150, H = (maxY - minY) * ROWH + 2 * PAD;
+    b.pos = new Map(b.nodes.map((n) => [n.id, { x: W - PAD - 40 - n.x * COL, y: PAD + (n.y - minY) * ROWH }]));
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.dataset.w = W; svg.dataset.h = H;
+    const gE = el("g", {}, svg), gT = el("g", {}, svg), gN = el("g", {}, svg);
+    b.edgeEls = new Map();
+    b.edges.forEach((e) => {
+      const a = b.pos.get(e.src), c = b.pos.get(e.dst); if (!a || !c) return;
+      const mx = (a.x + c.x) / 2;
+      const p = el("path", { d: `M${a.x},${a.y} C${mx},${a.y} ${mx},${c.y} ${c.x},${c.y}`, class: "edge",
+        stroke: cssVar("--" + edgeClass(e)), "stroke-width": (1 + Math.log2(e.n) * .9).toFixed(2),
+        "stroke-dasharray": e.gap ? "5 4" : "none" }, gE);
+      const t = el("title", {}, p); t.textContent = `${e.n} chain${e.n > 1 ? "s" : ""} · ` + Object.entries(e.modes).map(([m, k]) => `${MODE_LABEL[m]} ${k}`).join(", ");
+      b.edgeEls.set(e.src + ">" + e.dst, p);
+      if (e.tadlis) {
+        const r = el("rect", { x: c.x + (a.x - c.x) * .25 - 3.5, y: c.y + (a.y - c.y) * .25 - 3.5, width: 7, height: 7, class: "tadlis",
+          transform: `rotate(45 ${c.x + (a.x - c.x) * .25} ${c.y + (a.y - c.y) * .25})` }, gT);
+        el("title", {}, r).textContent = `ʿan of a mudallis on ${e.tadlis} chain${e.tadlis > 1 ? "s" : ""}`;
+        b.edgeEls.set(e.src + ">" + e.dst + "#t", r);
+      }
+    });
+    b.nodeEls = new Map();
+    b.nodes.forEach((n) => {
+      const p = b.pos.get(n.id), k = b.through.get(n.id).length;
+      const g = el("g", { class: "node" + (n.cl === "common_link" ? " cl" : n.cl === "partial" ? " partial" : ""), tabindex: "0", role: "button",
+        "aria-label": `${n.name}, ${k} chains` }, gN);
+      el("circle", { cx: p.x, cy: p.y, r: Math.min(3 + Math.sqrt(k) * .7, 12).toFixed(1) }, g);
+      const label = n.id === PROPHET ? "النبي ﷺ" : n.name;
+      el("text", { x: p.x - 6 - Math.min(3 + Math.sqrt(k) * .7, 12), y: p.y - 6, "text-anchor": "end",
+        class: "label" + (n.cl === "common_link" ? " cl" : "") }, g).textContent = label;
+      g.addEventListener("click", () => select(n.id));
+      g.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); select(n.id); } });
+      b.nodeEls.set(n.id, g);
+    });
+    applyScale();
+  }
+
+  function select(id) {
+    state.selected = id;
+    const b = bundle();
+    const chains = id == null ? [] : b.through.get(id) || [];
+    const onPath = new Set(), onEdge = new Set();
+    chains.forEach((k) => { const p = b.chains[k].path; p.forEach((x) => onPath.add(x)); for (let i = 1; i < p.length; i++) onEdge.add(p[i - 1] + ">" + p[i]); });
+    const active = id != null;
+    b.nodeEls.forEach((g, nid) => { g.classList.toggle("dim", active && !onPath.has(nid)); g.classList.toggle("sel", nid === id); });
+    b.edgeEls.forEach((p, key) => p.classList.toggle("dim", active && !onEdge.has(key.replace("#t", ""))));
+    panel(b, id, chains);
+  }
+
+  function panel(b, id, chains) {
+    const box = $("panel"); box.textContent = "";
+    if (id == null) { box.textContent = "Select a narrator."; return; }
+    const n = b.byId.get(id);
+    const h = document.createElement("h2"); h.textContent = id === PROPHET ? "محمد رسول الله ﷺ" : n.full; box.appendChild(h);
+    const badges = document.createElement("div"); badges.className = "badges";
+    const badge = (cls, txt) => { const s = document.createElement("span"); s.className = "badge " + cls; s.textContent = txt; badges.appendChild(s); };
+    if (n.cl === "common_link") badge("cl", "Common link");
+    if (n.cl === "partial") badge("partial", "Partial common link");
+    if (n.mudallis) badge("mud", "Mudallis");
+    if (id === b.companion) badge("", b.mursal ? "Successor (mursal)" : "Companion");
+    if (badges.children.length) box.appendChild(badges);
+
+    const students = new Set(b.edges.filter((e) => e.src === id).map((e) => e.dst));
+    const incoming = b.edges.filter((e) => e.dst === id);
+    const kv = document.createElement("dl"); kv.className = "kv";
+    const row = (k, v, ar) => { const dt = document.createElement("dt"); dt.textContent = k; const dd = document.createElement("dd"); dd.textContent = v; if (ar) dd.className = "ar"; kv.append(dt, dd); };
+    if (n.rank) row("Grade", n.rank, true);
+    if (n.death != null) row("Died", n.death + " AH");
+    row("Chains through", fmt(chains.length) + " of " + fmt(b.chains.length));
+    row("Students here", fmt(students.size));
+    if (n.an_share != null) row("ʿan share", Math.round(n.an_share * 100) + "% of all links read as student, corpus-wide");
+    box.appendChild(kv);
+
+    if (incoming.length) {
+      const modes = {}; incoming.forEach((e) => Object.entries(e.modes).forEach(([m, k]) => { modes[m] = (modes[m] || 0) + k; }));
+      const total = Object.values(modes).reduce((a, b) => a + b, 0);
+      const t = document.createElement("div"); t.className = "eyebrow"; t.textContent = "How he received it here"; box.appendChild(t);
+      const list = document.createElement("div"); list.className = "modes";
+      Object.entries(modes).sort((a, b) => b[1] - a[1]).forEach(([m, k]) => {
+        const r = document.createElement("div");
+        const name = document.createElement("span"); name.textContent = MODE_LABEL[m];
+        const track = document.createElement("span"); const fill = document.createElement("i");
+        fill.style.width = (100 * k / total) + "%"; fill.style.setProperty("--c", cssVar("--" + CLASS[m])); track.appendChild(fill);
+        const num = document.createElement("span"); num.className = "num"; num.textContent = k;
+        r.append(name, track, num); list.appendChild(r);
+      });
+      box.appendChild(list);
+    }
+
+    const books = {}; chains.forEach((k) => { const bk = b.chains[k].book; books[bk] = (books[bk] || 0) + 1; });
+    const top = Object.entries(books).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    if (top.length) {
+      const t = document.createElement("div"); t.className = "eyebrow"; t.textContent = "Recorded in"; box.appendChild(t);
+      const ul = document.createElement("ul"); ul.className = "books";
+      top.forEach(([bk, k]) => { const li = document.createElement("li"); li.textContent = bk; const s = document.createElement("span"); s.className = "num"; s.textContent = k; li.appendChild(s); ul.appendChild(li); });
+      box.appendChild(ul);
+      if (Object.keys(books).length > top.length) { const p = document.createElement("div"); p.className = "note"; p.textContent = `and ${Object.keys(books).length - top.length} more collections`; box.appendChild(p); }
+    }
+  }
+
+  function applyScale() {
+    const svg = $("tree");
+    svg.setAttribute("width", (svg.dataset.w * state.scale).toFixed(0));
+    svg.setAttribute("height", (svg.dataset.h * state.scale).toFixed(0));
+  }
+  function fitWidth() { const svg = $("tree"); state.scale = Math.max(.25, Math.min(1.2, ($("canvas").clientWidth - 4) / svg.dataset.w)); applyScale(); }
+  function scrollToNode(id) {
+    const p = bundle().pos?.get(id); if (!p) return;
+    const c = $("canvas");
+    c.scrollTo({ left: p.x * state.scale - c.clientWidth / 2, top: p.y * state.scale - c.clientHeight / 2 });
+  }
+  $("zin").addEventListener("click", () => { state.scale = Math.min(3, state.scale * 1.25); applyScale(); scrollToNode(state.selected); });
+  $("zout").addEventListener("click", () => { state.scale = Math.max(.2, state.scale / 1.25); applyScale(); scrollToNode(state.selected); });
+  $("zfit").addEventListener("click", () => { fitWidth(); });
+  $("zcl").addEventListener("click", () => {
+    const cl = bundle().nodes.find((n) => n.cl === "common_link"); if (!cl) return;
+    state.scale = Math.max(state.scale, .9); applyScale(); select(cl.id); scrollToNode(cl.id);
+  });
+
+  // Legend
+  const legend = $("legend");
+  const sw = (draw, text) => { const s = document.createElement("span"); const svg = el("svg", { width: 28, height: 12 }); draw(svg); s.appendChild(svg); s.append(text); legend.appendChild(s); };
+  [["explicit", "Explicit hearing (samāʿ, ḥaddathanā, akhbaranā)"], ["ambiguous", "Ambiguous (ʿan, anna, qāla)"], ["written", "Written (kitāba, ijāza)"], ["unread", "Not read from the text"]]
+    .forEach(([c, t]) => sw((s) => el("line", { x1: 2, y1: 6, x2: 26, y2: 6, stroke: cssVar("--" + c), "stroke-width": 3, "stroke-linecap": "round" }, s), t));
+  sw((s) => el("line", { x1: 2, y1: 6, x2: 26, y2: 6, stroke: cssVar("--muted"), "stroke-width": 2, "stroke-dasharray": "5 4" }, s), "Gap (irsāl, inqiṭāʿ, unnamed)");
+  sw((s) => el("rect", { x: 10, y: 2, width: 7, height: 7, fill: cssVar("--defect"), transform: "rotate(45 13.5 5.5)" }, s), "ʿan of a mudallis");
+  sw((s) => el("circle", { cx: 14, cy: 6, r: 5, fill: cssVar("--accent") }, s), "Common link");
+  sw((s) => el("circle", { cx: 14, cy: 6, r: 4, fill: cssVar("--surface"), stroke: cssVar("--accent"), "stroke-width": 2 }, s), "Partial common link");
+  const note = document.createElement("span"); note.textContent = "Line width grows with the number of chains."; legend.appendChild(note);
+
+  const fromHash = DATA.findIndex((r) => location.hash === "#r" + r.group_id);
+  selectReport(fromHash >= 0 ? fromHash : 0);
+})();
+</script>

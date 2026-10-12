@@ -17,6 +17,8 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           cache: pip
+      - name: every vendored file matches its pin in vendored.toml
+        run: python vendor/python/vendoring/check_vendored_sync.py
       - run: pip install -e ".[dev]"
       - run: ruff check src tests
       - run: pytest -q  # includes regressions against the committed data/graph

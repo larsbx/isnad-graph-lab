@@ -37,6 +37,14 @@ def main(argv: list[str] | None = None) -> int:
     t = sub.add_parser("tree", help="export laid-out isnad trees of meaning groups as JSON")
     t.add_argument("out", type=Path)
     t.add_argument("group_ids", type=int, nargs="+")
+    v = sub.add_parser("typed-graph", help="one bundle as the estate's typed graph (math-vizops)")
+    v.add_argument("out", type=Path)
+    v.add_argument("group_id", type=int)
+    v.add_argument("--bundle", type=int, default=0, help="companion bundle, largest first")
+    v.add_argument("--min-chains", type=int, default=3, help="keep narrators on ≥ this many chains")
+    pg = sub.add_parser("page", help="build the Isnad Atlas page, stamped as vizops stamps")
+    pg.add_argument("out", type=Path)
+    pg.add_argument("group_ids", type=int, nargs="*")
     c = sub.add_parser("chain", help="print the chains of a hadith")
     c.add_argument("hadith_id", type=int)
     p.add_argument("--graph", type=Path, default=GRAPH_DIR, help="graph directory")
@@ -78,6 +86,18 @@ def main(argv: list[str] | None = None) -> int:
         trees = [group_tree(g, gid) for gid in a.group_ids]
         a.out.write_text(json.dumps(trees, ensure_ascii=False, separators=(",", ":")))
         print(f"{a.out}: {len(trees)} groups, {sum(len(t['bundles']) for t in trees)} bundles")
+    elif a.cmd == "typed-graph":
+        from .typed_graph import write
+
+        outcome = write(_load(a.graph), a.group_id, a.out, a.bundle, a.min_chains)
+        print(outcome)
+        return outcome.exit_code
+    elif a.cmd == "page":
+        from .atlas import GROUPS, build
+
+        outcome = build(_load(a.graph), a.out, a.group_ids or GROUPS)
+        print(outcome)
+        return outcome.exit_code
     elif a.cmd == "chain":
         g = _load(a.graph)
         for row in g.chains_of(a.hadith_id).itertuples():
