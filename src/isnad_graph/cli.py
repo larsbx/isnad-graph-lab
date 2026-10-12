@@ -53,11 +53,12 @@ def main(argv: list[str] | None = None) -> int:
     a = p.parse_args(argv)
 
     if a.cmd == "fetch":
+        from .basemap import BASEMAP_DIR, BASEMAP_FILES
         from .geo import GAZETTEER_PATH, THURAYYA
         from .source import fetch, fetch_editions
 
         print(fetch(dest=DEFAULT_PATH), fetch_editions(), fetch(THURAYYA, GAZETTEER_PATH),
-              sep="\n")
+              *(fetch(s, BASEMAP_DIR / s.filename) for s in BASEMAP_FILES), sep="\n")
     elif a.cmd == "corpus":
         from .corpus import align_editions, export_corpus
         from .source import EDITIONS_DIR, connect

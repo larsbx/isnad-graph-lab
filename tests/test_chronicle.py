@@ -25,6 +25,11 @@ def test_page_is_stamped(mini_graph, tmp_path):
     assert data["centuries"] == payload(mini_graph, min_chains=1)["centuries"]
 
 
+def test_the_page_draws_without_a_basemap(mini_graph, tmp_path):
+    assert payload(mini_graph, min_chains=1, basemap_dir=tmp_path / "none")["basemap"] == {}
+    assert isinstance(build(mini_graph, tmp_path / "c.html", 1, tmp_path / "none"), Rendered)
+
+
 def test_nothing_to_draw_is_refused(mini_graph, tmp_path):
     assert isinstance(build(mini_graph, tmp_path / "x.html", min_chains=10**9), Refused)
     assert not (tmp_path / "x.html").exists()

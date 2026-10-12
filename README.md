@@ -49,7 +49,8 @@ verified one-for-one by an invariant. Its limits are worth stating precisely:
 |---|---|---|
 | [«الجامع» Hadith Knowledge Graph](https://huggingface.co/datasets/emadjumaah/hadith-kg) @ `8ae7e3d5` | CC‑BY‑4.0 | reports, chains, narrators, critics; the Arabic texts with narrator-mention offsets |
 | [fawazahmed0/hadith-api](https://github.com/fawazahmed0/hadith-api) @ `df57907b` | Unlicense (public domain) | Arabic and English editions of Bukhārī, Muslim, Abū Dāwūd, Tirmidhī, Nasāʾī, Ibn Mājah and the Muwaṭṭaʾ, with modern gradings |
-| [al-Thurayya gazetteer](https://github.com/althurayya/althurayya.github.io) @ `f244e65d` | Apache‑2.0 | coordinates, settlement type and province of 2,518 toponyms of the early Islamic world (Seydi & Romanov, after Cornu) |
+| [al-Thurayya gazetteer](https://github.com/althurayya/althurayya.github.io) @ `f244e65d` | Apache‑2.0 | coordinates, settlement type and province of 2,518 toponyms of the early Islamic world (Seydi & Romanov, after Cornu); its road network for the map |
+| [Natural Earth](https://github.com/nvkelso/natural-earth-vector) 1:50m @ `ca96624a` | public domain | land, lakes and rivers drawn as the map's context (`basemap.py`) |
 
 Every file is pinned by revision and sha256 (`source.py`). `isnad-graph corpus`
 writes:
@@ -432,7 +433,15 @@ figure core is vendored here rather than re-implemented (see
 * **`isnad-graph chronicle OUT`** builds the Isnad Chronicle page
   (`templates/chronicle.html`), stamped the same way. It has:
   * a map of teacher homes and the busiest home → home flows, per century,
-    with a century slider;
+    with a century slider. The map's context comes from `basemap.py`:
+    * coast, lakes and the great rivers (Natural Earth 1:50m), clipped to the
+      frame, without reservoirs or canals;
+    * the roads of Cornu's atlas (al-Thurayya), one stage per section;
+    * the seas and rivers under the period's names (بحر الروم، بحر القلزم،
+      الفرات، جيحون …);
+    * province labels.
+
+    Without the fetched basemap files the map is drawn without context;
   * a city panel;
   * the century series: same-city share, median distance, and lifespans that
     cannot meet;
@@ -483,10 +492,10 @@ g.frame("common_links")    # any table as a DataFrame (tables are immutable Arro
 ### Rebuild from source
 
 ```bash
-isnad-graph fetch    # pinned hadith-kg.db (1.6 GB) + 14 hadith-api editions + gazetteer, sha256-verified
+isnad-graph fetch    # pinned hadith-kg.db (1.6 GB) + 14 hadith-api editions + gazetteer + basemap, sha256-verified
 isnad-graph build    # ≈ 5 min, ≈ 3 GB RAM → data/graph/
 isnad-graph corpus   # ≈ 8 min → data/corpus/ (texts + translations)
-pytest               # 186 tests: unit, property and fixture tests, vendored pins, regressions on data/graph
+pytest               # 192 tests: unit, property and fixture tests, vendored pins, regressions on data/graph
 ```
 
 ## Layout
@@ -509,6 +518,7 @@ src/isnad_graph/
   geo.py         al-Thurayya gazetteer: resolution of residences, homes, distances
   history.py     per-century profile, province flows, hubs; the manifest summary
   chronicle.py   the Isnad Chronicle page (templates/chronicle.html)
+  basemap.py     the map's context: Natural Earth coast/rivers/lakes, al-Thurayya roads, clipped
   build.py       the only SQL: source DB → IsnadGraph
   graph.py       IsnadGraph: immutable Arrow tables, queries, networkx view, invariants
   source.py      pinned sources, fetch + sha256 verification

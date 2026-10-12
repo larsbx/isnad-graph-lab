@@ -7,6 +7,7 @@
 :root {
   --bg: #f6f7f9; --surface: #ffffff; --ink: #18202e; --muted: #5a6475; --line: #dbe0e8;
   --accent: #2c5aa0; --accent-soft: #e3ebf7; --flow: #c0861b; --land: #c9d0db; --defect: #c23b35; --ok: #23806a;
+  --sea: #e3eaf2; --landfill: #f8f7f3; --coast: #b4bfcc; --river: #6f97c2; --road: #c7b28c; --label: #7d8797;
   --display: "Amiri", "Noto Naskh Arabic", "Times New Roman", serif;
   --arabic: "Noto Naskh Arabic", "Amiri", "Geeza Pro", "Arial", sans-serif;
   --ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -15,10 +16,12 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #0f131a; --surface: #161b24; --ink: #e5e9f0; --muted: #98a2b3; --line: #2a3240;
   --accent: #7ea6e6; --accent-soft: #1d2a40; --flow: #e3a93f; --land: #3a4352; --defect: #ef6a63; --ok: #4fbf9f;
+  --sea: #0c131d; --landfill: #19202a; --coast: #34404f; --river: #3d6894; --road: #5e5442; --label: #6e798b;
   color-scheme: dark; } }
 :root[data-theme="dark"] {
   --bg: #0f131a; --surface: #161b24; --ink: #e5e9f0; --muted: #98a2b3; --line: #2a3240;
   --accent: #7ea6e6; --accent-soft: #1d2a40; --flow: #e3a93f; --land: #3a4352; --defect: #ef6a63; --ok: #4fbf9f;
+  --sea: #0c131d; --landfill: #19202a; --coast: #34404f; --river: #3d6894; --road: #5e5442; --label: #6e798b;
   color-scheme: dark; }
 
 * { box-sizing: border-box; }
@@ -50,7 +53,16 @@ h2 { font: 600 15px/1.3 var(--ui); margin: 0; }
 .tools button { font: 500 12px/1 var(--ui); background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 6px 10px; cursor: pointer; }
 .mapbox { overflow-x: auto; }
 svg#map { overflow: hidden; display: block; width: 100%; min-width: 560px; height: auto; }
-svg .base { fill: var(--land); }
+svg .base { fill: var(--coast); }
+svg .sea { fill: var(--sea); }
+svg .landp { fill: var(--landfill); stroke: var(--coast); stroke-width: .7; stroke-linejoin: round; }
+svg .lake { fill: var(--sea); stroke: var(--coast); stroke-width: .5; }
+svg .river { fill: none; stroke: var(--river); stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+svg .road { fill: none; stroke: var(--road); stroke-width: .7; stroke-dasharray: 1.5 2.5; stroke-linecap: round; }
+svg text.seaname { font: italic 400 13px var(--display); fill: var(--river); text-anchor: middle; }
+svg text.seaname tspan.en { font: italic 400 10px var(--ui); }
+svg text.rivername { font: italic 400 11px var(--display); fill: var(--river); paint-order: stroke; stroke: var(--landfill); stroke-width: 3px; }
+svg text.province { font: 500 9.5px var(--ui); letter-spacing: .18em; text-transform: uppercase; fill: var(--label); text-anchor: middle; }
 svg .flow { fill: none; stroke: var(--flow); stroke-linecap: round; }
 svg .home { fill: var(--accent); fill-opacity: .28; stroke: var(--accent); stroke-width: 1; cursor: pointer; }
 svg .home.sel { fill-opacity: .6; stroke: var(--defect); stroke-width: 2; }
@@ -106,8 +118,9 @@ footer.src .stamp { margin: 0 0 6px; font-size: 11px; overflow-wrap: anywhere; }
 
   <div class="stage">
     <div class="mapwrap">
-      <div class="tools"><span id="maptitle"></span><span>al-Andalus and the Maghrib lie west of the frame</span><span style="margin-inline-start:auto">Select a city to see its flows</span><button type="button" id="clear">Show all flows</button></div>
+      <div class="tools"><span id="maptitle"></span><span style="margin-inline-start:auto">Select a city to see its flows</span><button type="button" id="clear">Show all flows</button></div>
       <div class="mapbox"><svg id="map" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Map of transmission"></svg></div>
+      <p class="note" style="padding:8px 12px;border-top:1px solid var(--line)">Dotted lines are the roads of Cornu's atlas, one day's stage per section. Coast and rivers are present-day. Seas and rivers carry the names the period's geographers used. al-Andalus and the Maghrib lie west of the frame.</p>
     </div>
     <aside class="panel" id="panel" aria-live="polite"></aside>
   </div>
@@ -121,7 +134,7 @@ footer.src .stamp { margin: 0 0 6px; font-size: 11px; overflow-wrap: anywhere; }
 
   <footer class="src">
     <p class="stamp num">__STAMP__</p>
-    Narrators, dates, residences and chains: «الجامع» Hadith Knowledge Graph (CC-BY-4.0). Places and coordinates: <a href="https://althurayya.github.io/" rel="noopener">al-Thurayya</a> gazetteer (Seydi &amp; Romanov, after Cornu; Apache-2.0); a province named without a city is drawn at the centre of its settlements.
+    Narrators, dates, residences and chains: «الجامع» Hadith Knowledge Graph (CC-BY-4.0). Places, coordinates and roads: <a href="https://althurayya.github.io/" rel="noopener">al-Thurayya</a> gazetteer (Seydi &amp; Romanov, after Cornu; Apache-2.0); coast, rivers and lakes: <a href="https://www.naturalearthdata.com/" rel="noopener">Natural Earth</a> 1:50m (public domain), present-day; a province named without a city is drawn at the centre of its settlements.
     Lifespan checks, dating and flows are computed by <a href="https://github.com/larsbx/isnad-graph-lab" rel="noopener">isnad-graph-lab</a>. A home is where the biographical record says a narrator lived, not where a given hearing took place.
   </footer>
 </div>
@@ -168,8 +181,36 @@ footer.src .stamp { margin: 0 0 6px; font-size: 11px; overflow-wrap: anywhere; }
   const X = lon => (lon - lon0) / (lon1 - lon0) * W, Y = lat => (lat1 - lat) / (lat1 - lat0) * H;
   const map = document.getElementById("map");
   map.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  const gBase = el("g", {}, map), gFlow = el("g", {}, map), gHome = el("g", {}, map), gText = el("g", {}, map);
-  for (const p of D.places) el("circle", { class: "base", cx: X(p.lon).toFixed(1), cy: Y(p.lat).toFixed(1), r: 1.6 }, gBase);
+  const gGeo = el("g", { "aria-hidden": "true" }, map), gBase = el("g", {}, map), gFlow = el("g", {}, map), gHome = el("g", {}, map), gText = el("g", {}, map);
+  drawGeography(D.basemap || {});
+  for (const p of D.places) el("circle", { class: "base", cx: X(p.lon).toFixed(1), cy: Y(p.lat).toFixed(1), r: 1.3 }, gBase);
+
+  function trace(flat, close) {
+    let d = "";
+    for (let i = 0; i < flat.length; i += 2) d += (i ? "L" : "M") + X(flat[i]).toFixed(1) + "," + Y(flat[i + 1]).toFixed(1);
+    return close ? d + "Z" : d;
+  }
+  function drawGeography(B) {
+    if (!B.land) return;  // drawn without context when the basemap is not fetched
+    el("rect", { class: "sea", x: 0, y: 0, width: W, height: H }, gGeo);
+    el("path", { class: "landp", d: B.land.map(r => trace(r, true)).join(" "), "fill-rule": "evenodd" }, gGeo);
+    el("path", { class: "lake", d: B.lakes.map(r => trace(r, true)).join(" ") }, gGeo);
+    el("path", { class: "road", d: B.routes.map(r => trace(r, false)).join(" ") }, gGeo);
+    el("path", { class: "river", d: B.rivers.map(r => trace(r.line, false)).join(" ") }, gGeo);
+    const longest = new Map();  // label each named river once, on its longest piece in view
+    for (const r of B.rivers) if (r.ar) {
+      const inView = []; for (let i = 0; i < r.line.length; i += 2) { const x = X(r.line[i]), y = Y(r.line[i + 1]); if (x > 20 && x < W - 60 && y > 20 && y < H - 20) inView.push([x, y]); }
+      if (inView.length > (longest.get(r.ar)?.length || 0)) longest.set(r.ar, inView);
+    }
+    for (const [name, pts] of longest) if (pts.length > 4) { const [x, y] = pts[Math.floor(pts.length / 2)];
+      el("text", { class: "rivername", x: (x + 6).toFixed(1), y: (y - 4).toFixed(1) }, gGeo).textContent = name; }
+    for (const s of B.seas) { const t = el("text", { class: "seaname", x: X(s.lon).toFixed(1), y: Y(s.lat).toFixed(1) }, gGeo);
+      t.textContent = s.name; const e = el("tspan", { class: "en", x: X(s.lon).toFixed(1), dy: 13 }, t); e.textContent = s.en; }
+    for (const p of D.places) if (p.type === "province") {
+      const label = { "Jazirat al-Arab": "Arabia", "Aqur": "Jazira", "Sham": "al-Sham" }[p.translit] || p.translit;
+      el("text", { class: "province", x: X(p.lon).toFixed(1), y: (Y(p.lat) + 22).toFixed(1) }, gGeo).textContent = label;
+    }
+  }
   const maxHome = Math.max(...D.centuries.flatMap(c => Object.values(D.homes[c] || {})));
   const R = n => 2 + 34 * Math.sqrt(n / maxHome);
 
