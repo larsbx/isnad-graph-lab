@@ -47,6 +47,9 @@ import pandas as pd
 L_MAX = 120
 #: Tolerance between a recorded age and death − birth (lunar-year rounding).
 AGE_TOL = 2
+#: Median of the source's recorded ages at death: the point estimate of a birth
+#: known only through the prior (``estimate``).
+TYPICAL_LIFE = 80
 TABAQA_COVERAGE = 0.95
 MIN_TABAQA_N = 30
 _YEARS = re.compile(r"^\s*(\d{1,4})\s*(?:[-:]\s*(\d{1,4})\s*)?$")
@@ -130,3 +133,12 @@ def feasibility(edges: pd.DataFrame, spans: pd.DataFrame) -> pd.DataFrame:
         student_age_at_teacher_death=keep(mid(t, "death") - bu),
         ante_quem=keep(np.minimum(t.death_hi, u.death_hi)),
     )
+
+
+def estimate(spans: pd.DataFrame) -> pd.DataFrame:
+    """Point estimates: ``birth_est`` (the documented birth's midpoint, else death
+    − ``TYPICAL_LIFE``) and ``death_est`` (the death interval's midpoint)."""
+    death = (spans.death_lo + spans.death_hi) / 2
+    documented = spans.birth_basis.isin(["recorded", "age"])
+    birth = ((spans.birth_lo + spans.birth_hi) / 2).where(documented, death - TYPICAL_LIFE)
+    return spans.assign(birth_est=birth, death_est=death)

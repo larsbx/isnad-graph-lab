@@ -442,6 +442,22 @@ figure core is vendored here rather than re-implemented (see
     * province labels.
 
     Without the fetched basemap files the map is drawn without context;
+  * **a life in transmission** (`lives.py`), embedded for the 300 narrators
+    on the most chains:
+    * the lifeline runs from estimated birth to death, over AH ticks with their
+      CE equivalents, shaded by era (Prophetic, Rāshidūn, Umayyad, ʿAbbāsid,
+      Buyid/Seljuq ʿAbbāsid, after 656);
+    * stops above the line are the home cities of the narrator's teachers, and
+      below it those of the students. Each sits at the chain-weighted median
+      year its links can date to, and the window of a link t → s is
+      [max(b(t) + 20, b(s) + 5), min(d(t), d(s))];
+    * the line is coloured by phase (hearing possible, teaching possible,
+      both, neither), the spans those windows cover;
+    * an inset map shows the same stops, the teachers' cities joined in date
+      order.
+
+    Links that fit the lifespans but not those ages are counted, not placed.
+    The phases are what the dates allow, not attested events;
   * a city panel;
   * the century series: same-city share, median distance, and lifespans that
     cannot meet;
@@ -495,7 +511,7 @@ g.frame("common_links")    # any table as a DataFrame (tables are immutable Arro
 isnad-graph fetch    # pinned hadith-kg.db (1.6 GB) + 14 hadith-api editions + gazetteer + basemap, sha256-verified
 isnad-graph build    # ≈ 5 min, ≈ 3 GB RAM → data/graph/
 isnad-graph corpus   # ≈ 8 min → data/corpus/ (texts + translations)
-pytest               # 192 tests: unit, property and fixture tests, vendored pins, regressions on data/graph
+pytest               # 197 tests: unit, property and fixture tests, vendored pins, regressions on data/graph
 ```
 
 ## Layout
@@ -518,6 +534,7 @@ src/isnad_graph/
   geo.py         al-Thurayya gazetteer: resolution of residences, homes, distances
   history.py     per-century profile, province flows, hubs; the manifest summary
   chronicle.py   the Isnad Chronicle page (templates/chronicle.html)
+  lives.py       a narrator's lifeline: phases, stops at teachers'/students' cities, eras
   basemap.py     the map's context: Natural Earth coast/rivers/lakes, al-Thurayya roads, clipped
   build.py       the only SQL: source DB → IsnadGraph
   graph.py       IsnadGraph: immutable Arrow tables, queries, networkx view, invariants

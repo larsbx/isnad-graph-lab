@@ -2,11 +2,16 @@
 
     isnad-graph chronicle out/isnad-chronicle.html
 
-It embeds, per century of transmission (``history``): the chains carried by
-teachers at home in each place, the busiest flows between two different
-homes, the century profile, and the age-structure histogram of students at
-their teacher's death; the map's context (coast, rivers, lakes, roads; ``basemap``);
-stamped and reported like the Atlas (``atlas.stamp_page``).
+It embeds:
+
+* per century of transmission (``history``): the chains carried by teachers at
+  home in each place, the busiest flows between two different homes, the
+  century profile;
+* the age-structure histogram of students at their teacher's death;
+* the lifelines of the most-cited narrators (``lives``);
+* the map's context: coast, rivers, lakes, roads (``basemap``).
+
+It is stamped and reported like the Atlas (``atlas.stamp_page``).
 """
 
 from __future__ import annotations
@@ -19,6 +24,7 @@ from vizops.outcome import Outcome, Refused
 from .atlas import stamp_page
 from .basemap import BASEMAP_DIR, basemap
 from .history import _records, century, century_profile
+from .lives import A_HEAR, A_TEACH, ERAS, lifeline
 
 TEMPLATE = Path(__file__).resolve().parent / "templates" / "chronicle.html"
 PAGE = "isnad-chronicle"
@@ -26,10 +32,20 @@ PAGE = "isnad-chronicle"
 MIN_CENTURY_CHAINS = 1000
 TOP_FLOWS = 60
 AGE_BINS = np.arange(0, 125, 5)
+#: Lifelines embedded: the narrators on the most chains, with a death to anchor them.
+LIVES = 300
+
+
+def lives(g, k: int = LIVES) -> list[dict]:
+    """Lifelines of the ``k`` narrators on the most chains whose death is known."""
+    n, e, p = g.frame("narrators"), g.frame("transmissions"), g.frame("places")
+    top = n[n.kind.eq("narrator") & n.death_basis.ne("none")].nlargest(k, "n_chains")
+    return [{**lifeline(g, i, narrators=n, edges=e, places=p), "n_chains": int(c)}
+            for i, c in zip(top.id, top.n_chains, strict=True)]
 
 
 def payload(g, top_flows: int = TOP_FLOWS, min_chains: int = MIN_CENTURY_CHAINS,
-            basemap_dir: Path = BASEMAP_DIR) -> dict:
+            basemap_dir: Path = BASEMAP_DIR, k_lives: int = LIVES) -> dict:
     n = g.frame("narrators").set_index("id")
     e = g.frame("transmissions").assign(
         century=lambda d: century(d.ante_quem),
@@ -60,6 +76,9 @@ def payload(g, top_flows: int = TOP_FLOWS, min_chains: int = MIN_CENTURY_CHAINS,
         "chronology": g.manifest.get("timeline_geography", {}).get("chronology", {}),
         "coverage": g.manifest.get("timeline_geography", {}).get("narrators", {}),
         "basemap": basemap(basemap_dir),
+        "lives": lives(g, k_lives),
+        "eras": list(ERAS),
+        "ages_assumed": {"hear": A_HEAR, "teach": A_TEACH},
     }
 
 

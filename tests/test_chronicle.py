@@ -1,5 +1,6 @@
 import json
 import re
+from itertools import pairwise
 
 from vizops.outcome import Refused, Rendered
 
@@ -33,3 +34,13 @@ def test_the_page_draws_without_a_basemap(mini_graph, tmp_path):
 def test_nothing_to_draw_is_refused(mini_graph, tmp_path):
     assert isinstance(build(mini_graph, tmp_path / "x.html", min_chains=10**9), Refused)
     assert not (tmp_path / "x.html").exists()
+
+
+def test_lives_are_embedded_with_contiguous_phases(mini_graph):
+    p = payload(mini_graph, min_chains=1)
+    ids = [x["id"] for x in p["lives"]]
+    assert ids and len(ids) == len(set(ids)) and p["eras"][0]["name"] == "Prophetic"
+    for life in p["lives"]:
+        ph = life["phases"]
+        assert ph[0]["from"] == life["birth"]["mid"] and ph[-1]["to"] == life["death"]["mid"]
+        assert all(a["to"] == b["from"] for a, b in pairwise(ph))
