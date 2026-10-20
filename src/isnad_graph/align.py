@@ -37,7 +37,8 @@ def shingles(text: str, k: int = K) -> frozenset[str]:
 
 
 def align(left: Mapping[int, str], right: Mapping[int, str],
-          threshold: float = 0.5, max_df: int = 64) -> list[Match]:
+          threshold: float = 0.5, max_df: int = 64, *,
+          diagnostics: dict[int, dict] | None = None) -> list[Match]:
     """Map each left text to the right text containing the largest share of its
     trigrams (ties: lowest id), if that share ≥ ``threshold``.
 
@@ -51,23 +52,36 @@ def align(left: Mapping[int, str], right: Mapping[int, str],
             postings[g].append(j)
     index = {g: ids for g, ids in postings.items() if len(ids) <= max_df}
 
-    def best(s: frozenset[str]) -> tuple[int, float] | None:
+    result = []
+    for i, t in left.items():
+        s = shingles(t)
+        if not s:
+            continue
         shared = Counter(j for g in s for j in index.get(g, ()))
-        j, n = max(shared.items(), key=lambda x: (x[1], -x[0]), default=(None, 0))
-        return None if j is None else (j, n / len(s))
-
-    return sorted(
-        Match(i, j, round(score, 4))
-        for i, t in left.items() if (s := shingles(t))
-        for j, score in [best(s) or (None, 0.0)]
-        if j is not None and score >= threshold
-    )
+        ranked = sorted(shared, key=lambda j: (-shared[j], j))
+        if not ranked:
+            continue
+        j = ranked[0]
+        score = shared[j] / len(s)
+        if score < threshold:
+            continue
+        if diagnostics is not None:
+            runner_up = shared[ranked[1]] / len(s) if len(ranked) > 1 else 0.0
+            diagnostics[i] = {
+                "runner_up_score": runner_up,
+                "score_margin": score - runner_up,
+                "tied_candidates": sum(n == shared[j] for n in shared.values()),
+                "text_relation": ("normalized_exact" if normalize(t) == normalize(right[j])
+                                  else "textual_correspondence"),
+            }
+        result.append(Match(i, j, round(score, 4)))
+    return sorted(result)
 
 
 def order_consistency(matches: Sequence[Match], left_rank: Mapping[int, float],
                       right_rank: Mapping[int, float]) -> float:
     """Share of consecutive matches (in left order) whose right order agrees —
-    an independent check, since alignment never looks at numbering."""
+    a non-strict order check (equal positions count), not a correctness probability."""
     seq = [right_rank[m.right] for m in sorted(matches, key=lambda m: left_rank[m.left])]
     steps = list(pairwise(seq))
     return sum(b >= a for a, b in steps) / max(len(steps), 1)
