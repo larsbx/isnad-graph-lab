@@ -1,6 +1,6 @@
 {
   "builder": "isnad_graph 0.1.0",
-  "built_at": "2026-10-12T13:37:00+00:00",
+  "built_at": "2026-10-20T12:39:16+00:00",
   "source": {
     "repo": "emadjumaah/hadith-kg",
     "file": "hadith-kg.db",
@@ -86,7 +86,10 @@
         "reports_in_book": 7031,
         "median_score": 0.84545,
         "order_consistency": 0.9928,
-        "cross_recension": false
+        "cross_recension": false,
+        "ambiguous": 58,
+        "many_to_one_entries": 995,
+        "equal_successive_positions": 477
       },
       "muslim": {
         "book_id": 2,
@@ -96,7 +99,10 @@
         "reports_in_book": 5367,
         "median_score": 0.7903,
         "order_consistency": 0.9976,
-        "cross_recension": false
+        "cross_recension": false,
+        "ambiguous": 16,
+        "many_to_one_entries": 3329,
+        "equal_successive_positions": 1833
       },
       "tirmidhi": {
         "book_id": 3,
@@ -106,7 +112,10 @@
         "reports_in_book": 3924,
         "median_score": 0.76305,
         "order_consistency": 0.9961,
-        "cross_recension": false
+        "cross_recension": false,
+        "ambiguous": 4,
+        "many_to_one_entries": 264,
+        "equal_successive_positions": 130
       },
       "abudawud": {
         "book_id": 4,
@@ -116,7 +125,10 @@
         "reports_in_book": 4592,
         "median_score": 0.8545,
         "order_consistency": 0.9979,
-        "cross_recension": false
+        "cross_recension": false,
+        "ambiguous": 12,
+        "many_to_one_entries": 1216,
+        "equal_successive_positions": 671
       },
       "ibnmajah": {
         "book_id": 6,
@@ -126,7 +138,10 @@
         "reports_in_book": 4340,
         "median_score": 0.7917,
         "order_consistency": 0.9983,
-        "cross_recension": false
+        "cross_recension": false,
+        "ambiguous": 11,
+        "many_to_one_entries": 41,
+        "equal_successive_positions": 14
       },
       "malik": {
         "book_id": 8,
@@ -136,7 +151,10 @@
         "reports_in_book": 1823,
         "median_score": 0.8367,
         "order_consistency": 0.9989,
-        "cross_recension": false
+        "cross_recension": false,
+        "ambiguous": 3,
+        "many_to_one_entries": 61,
+        "equal_successive_positions": 30
       },
       "nasai": {
         "book_id": 17,
@@ -146,7 +164,10 @@
         "reports_in_book": 11385,
         "median_score": 0.6707,
         "order_consistency": 0.9003,
-        "cross_recension": true
+        "cross_recension": true,
+        "ambiguous": 80,
+        "many_to_one_entries": 305,
+        "equal_successive_positions": 53
       }
     }
   },

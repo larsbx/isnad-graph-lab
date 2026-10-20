@@ -303,8 +303,8 @@ of correctness. The aligner never sees numbering.
 The Nasāʾī alignment is cross-recension: the edition is al-Sunan al-Ṣughrā
 mapped onto the source's al-Kubrā. It is flagged `cross_recension` in newly built alignment, grading and translation
 tables. See [the provenance audit and guarded-query policy](docs/external-grade-provenance.md).
-The committed bundle predates these fields on grading rows; rebuild before using
-`grades_of`, which rejects legacy grading schemas.
+The committed bundle is built with these fields, so `grades_of` works on it
+directly. It rejects bundles with the older grading schema.
 
 ## Timeline and geography
 
@@ -490,6 +490,14 @@ git -C ../math-vizops show <sha>:vizops/figure.py > vendor/python/vizops/figure.
 python vendor/python/vendoring/check_vendored_sync.py pin vizops <sha>
 python vendor/python/vendoring/check_vendored_sync.py      # what CI runs
 ```
+
+## Roadmap
+
+[docs/ROADMAP.md](docs/ROADMAP.md) lists what is built and the open refinements
+in priority order. Each comes with its evidence and an acceptance criterion.
+The P0 items concern the correctness of published figures: the cause of the
+"impossible" links, a second source for dates and places, and the lifeline
+phases.
 
 ## Usage
 
