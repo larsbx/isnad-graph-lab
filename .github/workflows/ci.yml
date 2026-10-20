@@ -23,3 +23,31 @@ jobs:
       - run: ruff check src tests
       - run: pytest -q  # includes regressions against the committed data/graph
       - run: isnad-graph verify
+
+  formal:
+    # The proof gate: Lean theorems + axiom audit + conformance, Quint tests,
+    # simulation and Apalache model checking, with the toolchains pinned in
+    # formal/toolchain.toml. Same script as the session hooks: tools/verify.sh.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/isnad-formal
+            ~/.quint
+          key: formal-${{ hashFiles('formal/toolchain.toml') }}
+      - run: pip install -e ".[dev]"
+      - run: tools/formal-setup.sh
+      - run: tools/verify.sh

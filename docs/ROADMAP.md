@@ -24,6 +24,7 @@ introduced this file.
 | Visualization | #6 | vendored math-vizops core, typed-graph export, Isnad Atlas page |
 | Grade provenance | #3 | cross-recension and edition identity on every grading row |
 | Time and place | #7 | the parts listed below |
+| Formal foundations | #8 | Lean theorems on the classical rules, conformance against the graph, Quint/Apalache model of transmission, pinned toolchains, session hooks ([PROCESS](PROCESS.md)) |
 
 The time-and-place milestone (#7) consists of:
 
@@ -178,3 +179,5 @@ companions at the homes they settled in after the conquests.
 | P2.4 Route-network distances | distances are great-circle | travel days over al-Thurayya `routes.json` (about 30 km per stage) |
 | P2.5 Comparison with Sanadset | chains have one source | align Sanadset 650K (CC BY 4.0) chains to measure agreement of `chains` |
 | P2.6 Quantitative comparison with the literature | comparison is qualitative (`docs/secondary-literature.md`) | reproduce Romanov's regional curves and Bulliet's age structure where the data allow |
+| P2.7 Formalize what is still informal | common links, lifeline phases, the defect lift's statistics and the inference of chains have no Lean statement | state and prove: the common link lies on every chain of a single-strand bundle; the phases partition the life; extend the vectors to lifelines |
+| P2.8 A second model checker | the Quint model is checked only by Apalache | run TLC on the TLA+ that `quint compile` emits, at the same bound |

@@ -494,6 +494,30 @@ python vendor/python/vendoring/check_vendored_sync.py pin vizops <sha>
 python vendor/python/vendoring/check_vendored_sync.py      # what CI runs
 ```
 
+## Formal foundations
+
+The classical rules the graph applies are formalized in Lean 4 and proved
+(`formal/lean`):
+
+* Ibn al-Ṣalāḥ's definition of ṣaḥīḥ, conditions 1–3 (`sahih_iff`);
+* Ibn Ḥajar's marātib, with an unranked narrator read as majhūl
+  (`unknown_not_sahih`);
+* the weakest link (`append_no_better`);
+* gaps (`gap_caps`, `mursal_not_sahih`);
+* Muslim's muʿāṣara and al-Bukhārī's liqāʾ (`refuted_sound`,
+  `unrefuted_complete`, `liqa_muasara`);
+* al-Shāfiʿī's rule on tadlīs (`tadlis_iff_rejected`).
+
+Two checks tie the proofs to the code and the data:
+
+* the Python verdicts on the committed graph are checked against the Lean
+  model (`formal/vectors`, 8,014 rows, all agree);
+* the transmission process is a Quint model whose invariants Apalache, a TLA+
+  model checker, checks.
+
+The process, the pins and the hooks are in [docs/PROCESS.md](docs/PROCESS.md).
+To run the gate: `tools/formal-setup.sh && tools/verify.sh`.
+
 ## Roadmap
 
 [docs/ROADMAP.md](docs/ROADMAP.md) lists what is built and the open refinements
@@ -550,6 +574,13 @@ src/isnad_graph/
   history.py     per-century profile, province flows, hubs; the manifest summary
   chronicle.py   the Isnad Chronicle page (templates/chronicle.html)
   lives.py       a narrator's lifeline: phases, stops at teachers'/students' cities, eras
+formal/
+  lean/          Lean 4 theorems on the classical rules, axiom audit, conformance runner
+  quint/         the transmission process as a Quint model (Apalache-checked)
+  vectors/       conformance vectors exported from data/graph (tools/export_vectors.py)
+  toolchain.toml pinned Lean, Quint and Apalache, with sha256
+tools/
+  formal-setup.sh  install the pinned toolchains;  verify.sh  the gate
   basemap.py     the map's context: Natural Earth coast/rivers/lakes, al-Thurayya roads, clipped
   build.py       the only SQL: source DB → IsnadGraph
   graph.py       IsnadGraph: immutable Arrow tables, queries, networkx view, invariants

@@ -23,6 +23,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import hypergeom
 
+from .schema import PROPHET_ID
 from .sigha import AMBIGUOUS
 
 
@@ -46,9 +47,16 @@ class Defect(IntFlag):
     CHRONOLOGY = 8  # student born after the teacher died
 
 
+#: The rank of a narrator the source does not grade: *majhūl* (unknown).
+MAJHUL_RANK = 9
+
+
 def structural_verdict(worst_rank: float, gap: bool) -> Verdict:
-    """Verdict from the weakest narrator's rank (1 companion … 12 fabricator)."""
-    v = (Verdict.SAHIH if not worst_rank > 3 else Verdict.HASAN if worst_rank <= 6
+    """Verdict from the weakest narrator's rank (1 companion … 12 fabricator); an
+    unknown rank is *majhūl*. Specified and proved in ``formal/lean``
+    (``Isnad.structuralVerdict``, ``Isnad.sahih_iff``)."""
+    worst_rank = MAJHUL_RANK if pd.isna(worst_rank) else worst_rank
+    v = (Verdict.SAHIH if worst_rank <= 3 else Verdict.HASAN if worst_rank <= 6
          else Verdict.DAIF if worst_rank <= 9 else Verdict.VERY_DAIF if worst_rank == 10
          else Verdict.ACCUSED if worst_rank == 11 else Verdict.MAWDU)
     return max(v, Verdict.DAIF) if gap else v
@@ -59,6 +67,7 @@ def assess_chains(chains: pd.DataFrame, links: pd.DataFrame, narrators: pd.DataF
     """Per chain: weakest rank on the path, structural verdict and defects."""
     n = narrators.set_index("id")
     rank = n.rank_no.astype("float64")
+    rank = rank.mask(rank.isna() & rank.index.to_series().ne(PROPHET_ID), MAJHUL_RANK)
     mudallis = n.has_tadlis.fillna(False).astype(bool)
     impossible = edges.set_index(["src", "dst"]).chronology.eq("impossible")
     student_rank = links.dst.map(rank)

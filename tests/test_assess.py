@@ -15,7 +15,9 @@ from isnad_graph.assess import (
     (1, False, Verdict.SAHIH), (3, False, Verdict.SAHIH), (4, False, Verdict.HASAN),
     (6, False, Verdict.HASAN), (7, False, Verdict.DAIF), (10, False, Verdict.VERY_DAIF),
     (11, False, Verdict.ACCUSED), (12, False, Verdict.MAWDU),
-    (3, True, Verdict.DAIF), (10, True, Verdict.VERY_DAIF), (float("nan"), False, Verdict.SAHIH),
+    (3, True, Verdict.DAIF), (10, True, Verdict.VERY_DAIF),
+    # an unranked narrator is majhul (rank 9): never sahih (formal/lean: unknown_not_sahih)
+    (float("nan"), False, Verdict.DAIF), (float("nan"), True, Verdict.DAIF),
 ])
 def test_structural_verdict(rank, gap, verdict):
     assert structural_verdict(rank, gap) == verdict
@@ -71,6 +73,22 @@ def test_apex_rank_counts_toward_the_weakest_narrator():
     edges = pd.DataFrame({"src": [10, 11], "dst": [11, 12], "chronology": ["unknown"] * 2})
     (row,) = assess_chains(chains, links, narrators, edges).itertuples()
     assert (row.worst_rank, row.verdict) == (7, Verdict.DAIF)
+
+
+def test_an_unranked_narrator_is_majhul():
+    from isnad_graph.assess import assess_chains
+    from isnad_graph.schema import PROPHET_ID
+
+    chains = pd.DataFrame({"chain_id": [0], "path": [[PROPHET_ID, 10, 11, 12]], "head_gap": [0],
+                           "tail_gap": [0]})
+    links = pd.DataFrame({"chain_id": [0] * 3, "src": [PROPHET_ID, 10, 11], "dst": [10, 11, 12],
+                          "flag": [0] * 3, "mode": [2] * 3})
+    narrators = pd.DataFrame({"id": [PROPHET_ID, 10, 11, 12], "rank_no": [None, 1, None, 3],
+                              "has_tadlis": [False] * 4})
+    edges = pd.DataFrame({"src": [PROPHET_ID, 10, 11], "dst": [10, 11, 12],
+                          "chronology": ["unknown"] * 3})
+    (row,) = assess_chains(chains, links, narrators, edges).itertuples()
+    assert (row.worst_rank, row.verdict) == (9, Verdict.DAIF)  # the Prophet is not ranked
 
 
 def test_each_report_counts_once_per_grader():

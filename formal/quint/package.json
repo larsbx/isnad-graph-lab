@@ -1,0 +1,12 @@
+{
+  "name": "isnad-formal-quint",
+  "private": true,
+  "description": "Pinned Quint toolchain for the isnad transmission model",
+  "scripts": {
+    "test": "quint test transmission.qnt",
+    "verify": "quint verify transmission.qnt --invariant=safety --max-steps=8"
+  },
+  "devDependencies": {
+    "@informalsystems/quint": "0.33.0"
+  }
+}

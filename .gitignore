@@ -8,3 +8,6 @@ data/source/
 
 *.graphml*
 data/corpus/
+formal/lean/.lake/
+formal/quint/node_modules/
+formal/quint/_apalache-out/
