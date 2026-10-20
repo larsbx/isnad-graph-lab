@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 
+from .lifespan import feasibility
 from .schema import FLAG_COLUMNS, PROPHET_ID, Provenance
 from .sigha import AMBIGUOUS, EXPLICIT, Mode
 
@@ -60,16 +60,14 @@ def hearing_profile(links: pd.DataFrame) -> pd.DataFrame:
 
 
 def chronology(edges: pd.DataFrame, narrators: pd.DataFrame) -> pd.DataFrame:
-    """Annotate edges with generation and lifetime consistency of teacher → student."""
-    bio = narrators.set_index("id")[["tabaka", "birth_year", "death_year"]].astype("Float64")
+    """Annotate edges with generation gap, death gap and lifespan feasibility
+    (``lifespan.feasibility``; ``narrators`` carries ``lifespan.lifespans``)."""
+    bio = narrators.set_index("id")[["tabaka", "death_year"]].astype("Float64")
     t, s = (bio.reindex(edges[end].to_numpy()).reset_index(drop=True) for end in ("src", "dst"))
-    impossible = s.birth_year > t.death_year  # student born after teacher died; NA if unknown
-    return edges.assign(
+    return feasibility(edges.assign(
         tabaka_delta=(s.tabaka - t.tabaka).astype("Int16").set_axis(edges.index),
         death_gap=(s.death_year - t.death_year).astype("Int32").set_axis(edges.index),
-        chronology=np.select([impossible.fillna(False), impossible.notna()],
-                             ["impossible", "consistent"], "unknown"),
-    )
+    ), narrators)
 
 
 def common_links(links: pd.DataFrame, dominance: float = 0.8, min_chains: int = 3) -> pd.DataFrame:

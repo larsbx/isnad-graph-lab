@@ -1,0 +1,10 @@
+name = "isnad_formal"
+version = "0.1.0"
+defaultTargets = ["IsnadFormal", "conformance"]
+
+[[lean_lib]]
+name = "IsnadFormal"
+
+[[lean_exe]]
+name = "conformance"
+root = "Conformance"

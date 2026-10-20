@@ -45,15 +45,20 @@ def main(argv: list[str] | None = None) -> int:
     pg = sub.add_parser("page", help="build the Isnad Atlas page, stamped as vizops stamps")
     pg.add_argument("out", type=Path)
     pg.add_argument("group_ids", type=int, nargs="*")
+    ch = sub.add_parser("chronicle", help="build the Isnad Chronicle page (time and place)")
+    ch.add_argument("out", type=Path)
     c = sub.add_parser("chain", help="print the chains of a hadith")
     c.add_argument("hadith_id", type=int)
     p.add_argument("--graph", type=Path, default=GRAPH_DIR, help="graph directory")
     a = p.parse_args(argv)
 
     if a.cmd == "fetch":
+        from .basemap import BASEMAP_DIR, BASEMAP_FILES
+        from .geo import GAZETTEER_PATH, THURAYYA
         from .source import fetch, fetch_editions
 
-        print(fetch(dest=DEFAULT_PATH), fetch_editions(), sep="\n")
+        print(fetch(dest=DEFAULT_PATH), fetch_editions(), fetch(THURAYYA, GAZETTEER_PATH),
+              *(fetch(s, BASEMAP_DIR / s.filename) for s in BASEMAP_FILES), sep="\n")
     elif a.cmd == "corpus":
         from .corpus import align_editions, export_corpus
         from .source import EDITIONS_DIR, connect
@@ -96,6 +101,12 @@ def main(argv: list[str] | None = None) -> int:
         from .atlas import GROUPS, build
 
         outcome = build(_load(a.graph), a.out, a.group_ids or GROUPS)
+        print(outcome)
+        return outcome.exit_code
+    elif a.cmd == "chronicle":
+        from .chronicle import build as chronicle
+
+        outcome = chronicle(_load(a.graph), a.out)
         print(outcome)
         return outcome.exit_code
     elif a.cmd == "chain":

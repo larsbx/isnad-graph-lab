@@ -30,6 +30,7 @@ RAWIS = {  # id: (name, rank_no, tabaka, birth, death)
     30001: ("موضع تعليق", 12, 0, None, None), 30002: ("موضع إرسال", 12, 0, None, None),
 }
 MUDALLIS = {2}  # A narrates with tadlis
+IQAMA = {1: "المدينة", 2: "البصرة", 3: "الكوفة", 7: "البصرة", 4: "بخارى", 5: "الشام ، دمشق"}
 
 SANADS = {1: (1, [4, 3, 2, 1]), 2: (1, [5, 3, 2, 1]), 3: (1, [4, 7, 2, 1]),
           4: (2, [4, 3, 30002]), 5: (5, [30001, 2, 1]), 6: (1, [5, 2, 1]), 7: (8, [4, 7, 2, 1])}
@@ -56,7 +57,8 @@ def make_db(path: Path) -> Path:
     ins = lambda t, rows: con.executemany(  # noqa: E731
         f"INSERT INTO {t} VALUES ({','.join('?' * len(rows[0]))})", rows)
     ins("rawis", [(i, n, "", r, None, t, 0, 0, 0, int(i in MUDALLIS), 0, b, None, d, None,
-                   None, None, None, None, None, 0) for i, (n, r, t, b, d) in RAWIS.items()])
+                   None, None, None, IQAMA.get(i), None, 0)
+                  for i, (n, r, t, b, d) in RAWIS.items()])
     ins("books", [(1, "كتاب", 1, "مصنف", 256, None, None, None, 1, "صحاح", 5)])
     rows, mentions = [], []
     for hid, (type_no, gid, ids, tahwil) in HADITHS.items():
@@ -96,6 +98,34 @@ def make_editions(directory: Path) -> Path:
     return directory
 
 
+def feature(uri, ar, lat, lon, region, kind, other=""):
+    return {"type": "Feature", "geometry": {"type": "Point", "coordinates": [lon, lat]},
+            "properties": {"cornuData": {
+                "cornu_URI": uri, "toponym_arabic": ar, "toponym_arabic_other": other or ar,
+                "toponym_translit": uri.title(), "coord_lat": str(lat), "coord_lon": str(lon),
+                "region_code": region, "top_type_hom": kind}}}
+
+
+GAZETTEER = [feature("basra", "البصرة", 30.4, 47.7, "Iraq", "capitals"),
+       feature("basra_m", "البصرة", 35.0, -5.9, "Maghrib", "towns"),
+       feature("madina", "المدينة", 24.5, 39.6, "Jazirat al-Arab", "towns"),
+       feature("kufa", "الكوفة", 32.0, 44.4, "Iraq", "capitals"),
+       feature("dimashq", "دمشق", 33.5, 36.3, "Sham", "metropoles"),
+       feature("hims", "حمص", 34.7, 36.7, "Sham", "capitals"),
+       feature("bayrut", "بيروت", 33.9, 35.5, "Sham", "towns"),
+       feature("bayrut_k", "بيروت", 31.0, 49.0, "Khuzistan", "towns"),
+       feature("isbahan", "إصبهان", 32.7, 51.7, "Jibal", "capitals"),
+       feature("isbahan_r", "إصبهان", 32.7, 51.7, "Jibal", "regions"),
+       feature("bukhara", "بخارة", 39.8, 64.4, "Transoxiana", "capitals")]
+
+
+def make_gazetteer(path: Path) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"type": "FeatureCollection", "features": GAZETTEER}),
+                    encoding="utf-8")
+    return path
+
+
 @pytest.fixture(scope="session")
 def mini_db(tmp_path_factory) -> Path:
     return make_db(tmp_path_factory.mktemp("src") / "mini.db")
@@ -107,4 +137,5 @@ def mini_graph(mini_db):
     from isnad_graph.corpus import Edition
 
     return build(mini_db, editions_dir=make_editions(mini_db.parent / "editions"),
-                 editions={"mini": Edition(1)})
+                 editions={"mini": Edition(1)},
+                 gazetteer=make_gazetteer(mini_db.parent / "gazetteer" / "places.geojson"))

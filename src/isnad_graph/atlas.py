@@ -37,13 +37,21 @@ def build(g, out: Path, groups: Sequence[int] = GROUPS) -> Outcome:
     if not groups or empty:
         return Refused(PAGE, f"no recorded chains for group(s) {empty}" if empty
                        else "no groups asked for")
-    payload = json.dumps(trees, ensure_ascii=False, separators=(",", ":"))
+    return stamp_page(TEMPLATE, PAGE, trees, "isnad_graph.subgraph.group_tree", out,
+                      f"{len(trees)} report{'s' * (len(trees) != 1)}")
+
+
+def stamp_page(template: Path, page: str, data: object, generator: str, out: Path,
+               scope: str = "") -> Rendered:
+    """Fill a template's ``__DATA__``, ``__SCOPE__`` and ``__STAMP__`` (the vizops
+    ``Provenance`` of the embedded payload, beside the vizops caveat) and write it."""
+    payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
     provenance = Provenance(REPO, "data/graph", hashlib.sha256(payload.encode()).hexdigest(),
-                            "isnad_graph.subgraph.group_tree")
-    html = (TEMPLATE.read_text(encoding="utf-8")
+                            generator)
+    html = (template.read_text(encoding="utf-8")
             .replace("__STAMP__", f"{provenance.stamp} · {CAVEAT}")
-            .replace("__SCOPE__", f"{len(trees)} report{'s' * (len(trees) != 1)}")
+            .replace("__SCOPE__", scope)
             .replace("__DATA__", payload.replace("</", "<\\/")))
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")
-    return Rendered(PAGE, str(out), hashlib.sha256(out.read_bytes()).hexdigest())
+    return Rendered(page, str(out), hashlib.sha256(out.read_bytes()).hexdigest())

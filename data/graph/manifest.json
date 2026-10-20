@@ -1,6 +1,6 @@
 {
   "builder": "isnad_graph 0.1.0",
-  "built_at": "2026-10-11T13:08:15+00:00",
+  "built_at": "2026-10-20T12:51:25+00:00",
   "source": {
     "repo": "emadjumaah/hadith-kg",
     "file": "hadith-kg.db",
@@ -86,7 +86,10 @@
         "reports_in_book": 7031,
         "median_score": 0.84545,
         "order_consistency": 0.9928,
-        "cross_recension": false
+        "cross_recension": false,
+        "ambiguous": 58,
+        "many_to_one_entries": 995,
+        "equal_successive_positions": 477
       },
       "muslim": {
         "book_id": 2,
@@ -96,7 +99,10 @@
         "reports_in_book": 5367,
         "median_score": 0.7903,
         "order_consistency": 0.9976,
-        "cross_recension": false
+        "cross_recension": false,
+        "ambiguous": 16,
+        "many_to_one_entries": 3329,
+        "equal_successive_positions": 1833
       },
       "tirmidhi": {
         "book_id": 3,
@@ -106,7 +112,10 @@
         "reports_in_book": 3924,
         "median_score": 0.76305,
         "order_consistency": 0.9961,
-        "cross_recension": false
+        "cross_recension": false,
+        "ambiguous": 4,
+        "many_to_one_entries": 264,
+        "equal_successive_positions": 130
       },
       "abudawud": {
         "book_id": 4,
@@ -116,7 +125,10 @@
         "reports_in_book": 4592,
         "median_score": 0.8545,
         "order_consistency": 0.9979,
-        "cross_recension": false
+        "cross_recension": false,
+        "ambiguous": 12,
+        "many_to_one_entries": 1216,
+        "equal_successive_positions": 671
       },
       "ibnmajah": {
         "book_id": 6,
@@ -126,7 +138,10 @@
         "reports_in_book": 4340,
         "median_score": 0.7917,
         "order_consistency": 0.9983,
-        "cross_recension": false
+        "cross_recension": false,
+        "ambiguous": 11,
+        "many_to_one_entries": 41,
+        "equal_successive_positions": 14
       },
       "malik": {
         "book_id": 8,
@@ -136,7 +151,10 @@
         "reports_in_book": 1823,
         "median_score": 0.8367,
         "order_consistency": 0.9989,
-        "cross_recension": false
+        "cross_recension": false,
+        "ambiguous": 3,
+        "many_to_one_entries": 61,
+        "equal_successive_positions": 30
       },
       "nasai": {
         "book_id": 17,
@@ -146,7 +164,10 @@
         "reports_in_book": 11385,
         "median_score": 0.6707,
         "order_consistency": 0.9003,
-        "cross_recension": true
+        "cross_recension": true,
+        "ambiguous": 80,
+        "many_to_one_entries": 305,
+        "equal_successive_positions": 53
       }
     }
   },
@@ -638,14 +659,447 @@
         ]
       }
     ],
-    "defect_lift_excludes": [
-      "nasai"
-    ],
     "defect_lift_inference": {
       "score": "signed uncorrected CMH, conditional on structural-verdict strata",
       "p_value": "exact conditional, twice smaller inclusive tail",
       "rates": "descriptive marginal rejection proportions"
-    }
+    },
+    "defect_lift_excludes": [
+      "nasai"
+    ]
+  },
+  "gazetteer": {
+    "repo": "althurayya/althurayya.github.io",
+    "file": "places.geojson",
+    "revision": "f244e65ddf782baef08e410870c61c8096ff9f90",
+    "sha256": "9ceef49582106441fc63fc230a17045fdb6f5ef778f77d8c63eebbea2e2137d3",
+    "license": "Apache-2.0"
+  },
+  "timeline_geography": {
+    "narrators": {
+      "death_basis": {
+        "tabaqa": 27159,
+        "recorded": 14522,
+        "none": 8134
+      },
+      "birth_basis": {
+        "prior": 36491,
+        "none": 8131,
+        "recorded": 5077,
+        "age": 116
+      },
+      "bio_conflict": 60,
+      "home_level": {
+        "city": 21577,
+        "region": 1642
+      },
+      "chain_weighted_with_home": 0.9181,
+      "chain_weighted_with_recorded_death": 0.889,
+      "place_tokens_unresolved": 1844
+    },
+    "chronology": {
+      "edges": {
+        "consistent": 270514,
+        "unknown": 33995,
+        "impossible": 14194,
+        "implausible": 9614,
+        "conflict": 2311
+      },
+      "chain_share": {
+        "conflict": 0.0155,
+        "consistent": 0.9488,
+        "implausible": 0.0042,
+        "impossible": 0.0114,
+        "unknown": 0.02
+      }
+    },
+    "student_age_at_teacher_death": {
+      "n_edges": 59693,
+      "quantiles": {
+        "p5": 8.0,
+        "p25": 22.0,
+        "p50": 33.0,
+        "p75": 48.0,
+        "p95": 85.0
+      },
+      "share_under_10": 0.0659
+    },
+    "by_century": [
+      {
+        "century": 1,
+        "n_edges": 45673,
+        "n_chains": 1418938,
+        "median_km": 344.0,
+        "same_city_share": 0.4802,
+        "consistent_share": 0.9682,
+        "implausible_share": 0.0054,
+        "impossible_share": 0.018,
+        "conflict_share": 0.0084,
+        "unknown_share": 0.0
+      },
+      {
+        "century": 2,
+        "n_edges": 108263,
+        "n_chains": 1592481,
+        "median_km": 239.4,
+        "same_city_share": 0.4221,
+        "consistent_share": 0.9719,
+        "implausible_share": 0.0031,
+        "impossible_share": 0.0049,
+        "conflict_share": 0.0201,
+        "unknown_share": 0.0
+      },
+      {
+        "century": 3,
+        "n_edges": 92839,
+        "n_chains": 851085,
+        "median_km": 618.8,
+        "same_city_share": 0.2833,
+        "consistent_share": 0.9656,
+        "implausible_share": 0.0045,
+        "impossible_share": 0.0104,
+        "conflict_share": 0.0194,
+        "unknown_share": 0.0
+      },
+      {
+        "century": 4,
+        "n_edges": 30483,
+        "n_chains": 346681,
+        "median_km": 653.3,
+        "same_city_share": 0.3578,
+        "consistent_share": 0.9576,
+        "implausible_share": 0.0057,
+        "impossible_share": 0.0178,
+        "conflict_share": 0.0189,
+        "unknown_share": 0.0
+      },
+      {
+        "century": 5,
+        "n_edges": 10795,
+        "n_chains": 188496,
+        "median_km": 103.4,
+        "same_city_share": 0.3072,
+        "consistent_share": 0.9746,
+        "implausible_share": 0.0021,
+        "impossible_share": 0.0144,
+        "conflict_share": 0.0089,
+        "unknown_share": 0.0
+      },
+      {
+        "century": 6,
+        "n_edges": 4601,
+        "n_chains": 42393,
+        "median_km": 340.7,
+        "same_city_share": 0.5163,
+        "consistent_share": 0.959,
+        "implausible_share": 0.0063,
+        "impossible_share": 0.0119,
+        "conflict_share": 0.0228,
+        "unknown_share": 0.0
+      },
+      {
+        "century": 7,
+        "n_edges": 3598,
+        "n_chains": 21726,
+        "median_km": 747.4,
+        "same_city_share": 0.1163,
+        "consistent_share": 0.9406,
+        "implausible_share": 0.0087,
+        "impossible_share": 0.0233,
+        "conflict_share": 0.0274,
+        "unknown_share": 0.0
+      },
+      {
+        "century": 8,
+        "n_edges": 342,
+        "n_chains": 993,
+        "median_km": 91.6,
+        "same_city_share": 0.4545,
+        "consistent_share": 0.8993,
+        "implausible_share": 0.0,
+        "impossible_share": 0.0292,
+        "conflict_share": 0.0715,
+        "unknown_share": 0.0
+      },
+      {
+        "century": 9,
+        "n_edges": 39,
+        "n_chains": 100,
+        "median_km": 0.0,
+        "same_city_share": 0.5333,
+        "consistent_share": 0.95,
+        "implausible_share": 0.0,
+        "impossible_share": 0.05,
+        "conflict_share": 0.0,
+        "unknown_share": 0.0
+      }
+    ],
+    "hubs": [
+      {
+        "century": 1,
+        "home_uri": "MADINA_396E244N_S",
+        "home_place": "المدينة",
+        "n_chains": 872312
+      },
+      {
+        "century": 1,
+        "home_uri": "KUFA_443E320N_S",
+        "home_place": "الكوفة",
+        "n_chains": 103050
+      },
+      {
+        "century": 1,
+        "home_uri": "BASRA_477E304N_S",
+        "home_place": "البصرة",
+        "n_chains": 89094
+      },
+      {
+        "century": 1,
+        "home_uri": "MAKKA_398E213N_S",
+        "home_place": "مكة",
+        "n_chains": 84143
+      },
+      {
+        "century": 1,
+        "home_uri": "region:Yemen",
+        "home_place": "اليمن",
+        "n_chains": 69136
+      },
+      {
+        "century": 2,
+        "home_uri": "KUFA_443E320N_S",
+        "home_place": "الكوفة",
+        "n_chains": 379797
+      },
+      {
+        "century": 2,
+        "home_uri": "MADINA_396E244N_S",
+        "home_place": "المدينة",
+        "n_chains": 369184
+      },
+      {
+        "century": 2,
+        "home_uri": "BASRA_477E304N_S",
+        "home_place": "البصرة",
+        "n_chains": 325926
+      },
+      {
+        "century": 2,
+        "home_uri": "MAKKA_398E213N_S",
+        "home_place": "مكة",
+        "n_chains": 86666
+      },
+      {
+        "century": 2,
+        "home_uri": "BAGHDAD_443E333N_S",
+        "home_place": "بغداد",
+        "n_chains": 64047
+      },
+      {
+        "century": 3,
+        "home_uri": "BAGHDAD_443E333N_S",
+        "home_place": "بغداد",
+        "n_chains": 204773
+      },
+      {
+        "century": 3,
+        "home_uri": "BASRA_477E304N_S",
+        "home_place": "البصرة",
+        "n_chains": 154826
+      },
+      {
+        "century": 3,
+        "home_uri": "KUFA_443E320N_S",
+        "home_place": "الكوفة",
+        "n_chains": 85184
+      },
+      {
+        "century": 3,
+        "home_uri": "DIMASHQ_363E335N_S",
+        "home_place": "دمشق",
+        "n_chains": 54336
+      },
+      {
+        "century": 3,
+        "home_uri": "region:Egypt",
+        "home_place": "مصر",
+        "n_chains": 41902
+      },
+      {
+        "century": 4,
+        "home_uri": "BAGHDAD_443E333N_S",
+        "home_place": "بغداد",
+        "n_chains": 97985
+      },
+      {
+        "century": 4,
+        "home_uri": "DIMASHQ_363E335N_S",
+        "home_place": "دمشق",
+        "n_chains": 54617
+      },
+      {
+        "century": 4,
+        "home_uri": "NAYSABUR_587E361N_S",
+        "home_place": "نيسابور",
+        "n_chains": 31644
+      },
+      {
+        "century": 4,
+        "home_uri": "ISBAHAN_516E326N_S",
+        "home_place": "إصبهان",
+        "n_chains": 26325
+      },
+      {
+        "century": 4,
+        "home_uri": "BASRA_477E304N_S",
+        "home_place": "البصرة",
+        "n_chains": 9449
+      },
+      {
+        "century": 5,
+        "home_uri": "NAYSABUR_587E361N_S",
+        "home_place": "نيسابور",
+        "n_chains": 50297
+      },
+      {
+        "century": 5,
+        "home_uri": "BAGHDAD_443E333N_S",
+        "home_place": "بغداد",
+        "n_chains": 42238
+      },
+      {
+        "century": 5,
+        "home_uri": "DIMASHQ_363E335N_S",
+        "home_place": "دمشق",
+        "n_chains": 17469
+      },
+      {
+        "century": 5,
+        "home_uri": "ISBAHAN_516E326N_S",
+        "home_place": "إصبهان",
+        "n_chains": 10358
+      },
+      {
+        "century": 5,
+        "home_uri": "SHIRAZ_525E296N_S",
+        "home_place": "شيراز",
+        "n_chains": 4333
+      },
+      {
+        "century": 6,
+        "home_uri": "ISBAHAN_516E326N_S",
+        "home_place": "إصبهان",
+        "n_chains": 12457
+      },
+      {
+        "century": 6,
+        "home_uri": "BAGHDAD_443E333N_S",
+        "home_place": "بغداد",
+        "n_chains": 4786
+      },
+      {
+        "century": 6,
+        "home_uri": "DIMASHQ_363E335N_S",
+        "home_place": "دمشق",
+        "n_chains": 4159
+      },
+      {
+        "century": 6,
+        "home_uri": "MAKKA_398E213N_S",
+        "home_place": "مكة",
+        "n_chains": 2189
+      },
+      {
+        "century": 6,
+        "home_uri": "NAYSABUR_587E361N_S",
+        "home_place": "نيسابور",
+        "n_chains": 2180
+      },
+      {
+        "century": 7,
+        "home_uri": "DIMASHQ_363E335N_S",
+        "home_place": "دمشق",
+        "n_chains": 3380
+      },
+      {
+        "century": 7,
+        "home_uri": "MAWSIL_431E363N_S",
+        "home_place": "الموصل",
+        "n_chains": 2636
+      },
+      {
+        "century": 7,
+        "home_uri": "BAGHDAD_443E333N_S",
+        "home_place": "بغداد",
+        "n_chains": 2344
+      },
+      {
+        "century": 7,
+        "home_uri": "ISBAHAN_516E326N_S",
+        "home_place": "إصبهان",
+        "n_chains": 1702
+      },
+      {
+        "century": 7,
+        "home_uri": "region:Sham",
+        "home_place": "الشام",
+        "n_chains": 862
+      },
+      {
+        "century": 8,
+        "home_uri": "DIMASHQ_363E335N_S",
+        "home_place": "دمشق",
+        "n_chains": 232
+      },
+      {
+        "century": 8,
+        "home_uri": "QADAS_354E331N_S",
+        "home_place": "قدس",
+        "n_chains": 64
+      },
+      {
+        "century": 8,
+        "home_uri": "HALAB_371E361N_S",
+        "home_place": "حلب",
+        "n_chains": 48
+      },
+      {
+        "century": 8,
+        "home_uri": "BAGHDAD_443E333N_S",
+        "home_place": "بغداد",
+        "n_chains": 34
+      },
+      {
+        "century": 8,
+        "home_uri": "QAHIRA_312E300N_S",
+        "home_place": "القاهرة",
+        "n_chains": 23
+      },
+      {
+        "century": 9,
+        "home_uri": "DIMASHQ_363E335N_S",
+        "home_place": "دمشق",
+        "n_chains": 23
+      },
+      {
+        "century": 9,
+        "home_uri": "BALABAKK_361E340N_S",
+        "home_place": "بعلبك",
+        "n_chains": 3
+      },
+      {
+        "century": 9,
+        "home_uri": "QAHIRA_312E300N_S",
+        "home_place": "القاهرة",
+        "n_chains": 2
+      },
+      {
+        "century": 9,
+        "home_uri": "MAKKA_398E213N_S",
+        "home_place": "مكة",
+        "n_chains": 1
+      }
+    ]
   },
   "inferred_layer": {
     "unrecorded_hadiths": 312422,
@@ -709,7 +1163,9 @@
       "assessments": 127863,
       "common_links": 187616,
       "alignments": 33729,
-      "external_grades": 67716
+      "external_grades": 67716,
+      "places": 439,
+      "flows": 1073
     },
     "narrators_by_kind": {
       "narrator": 49815,
@@ -733,9 +1189,11 @@
       "n_inferred": 208649
     },
     "chronology": {
-      "unknown": 257785,
-      "consistent": 59089,
-      "impossible": 13754
+      "consistent": 270514,
+      "unknown": 33995,
+      "impossible": 14194,
+      "implausible": 9614,
+      "conflict": 2311
     },
     "common_links": 26432
   },

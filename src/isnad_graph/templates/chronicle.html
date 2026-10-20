@@ -1,0 +1,491 @@
+<title>Isnad Chronicle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: the Atlas's instrument, turned to time and place. A century strip on top, then the map beside a century panel, then the long view across centuries. */
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --ink: #18202e; --muted: #5a6475; --line: #dbe0e8;
+  --accent: #2c5aa0; --accent-soft: #e3ebf7; --flow: #c0861b; --land: #c9d0db; --defect: #c23b35; --ok: #23806a;
+  --sea: #e3eaf2; --landfill: #f8f7f3; --coast: #b4bfcc; --river: #6f97c2; --road: #c7b28c; --label: #7d8797;
+  --hear: #23806a; --teach: #c0861b; --both: #7a56b3; --quiet: #c9d0db; --era-a: #eef1f5; --era-b: #f7f8fa;
+  --display: "Amiri", "Noto Naskh Arabic", "Times New Roman", serif;
+  --arabic: "Noto Naskh Arabic", "Amiri", "Geeza Pro", "Arial", sans-serif;
+  --ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f131a; --surface: #161b24; --ink: #e5e9f0; --muted: #98a2b3; --line: #2a3240;
+  --accent: #7ea6e6; --accent-soft: #1d2a40; --flow: #e3a93f; --land: #3a4352; --defect: #ef6a63; --ok: #4fbf9f;
+  --sea: #0c131d; --landfill: #19202a; --coast: #34404f; --river: #3d6894; --road: #5e5442; --label: #6e798b;
+  --hear: #4fbf9f; --teach: #e3a93f; --both: #a98be0; --quiet: #3a4352; --era-a: #18202b; --era-b: #141a23;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f131a; --surface: #161b24; --ink: #e5e9f0; --muted: #98a2b3; --line: #2a3240;
+  --accent: #7ea6e6; --accent-soft: #1d2a40; --flow: #e3a93f; --land: #3a4352; --defect: #ef6a63; --ok: #4fbf9f;
+  --sea: #0c131d; --landfill: #19202a; --coast: #34404f; --river: #3d6894; --road: #5e5442; --label: #6e798b;
+  --hear: #4fbf9f; --teach: #e3a93f; --both: #a98be0; --quiet: #3a4352; --era-a: #18202b; --era-b: #141a23;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 14px/1.5 var(--ui); margin: 0; }
+.wrap { max-width: 1440px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 32px; display: grid; gap: 16px; }
+h1 { font: 600 20px/1.2 var(--ui); margin: 0; letter-spacing: .01em; text-wrap: balance; }
+h1 small { font-weight: 400; color: var(--muted); font-size: 14px; margin-inline-start: 8px; }
+h2 { font: 600 15px/1.3 var(--ui); margin: 0; }
+.eyebrow { font: 500 11px/1 var(--ui); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.ar { font-family: var(--arabic); direction: rtl; }
+
+.summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 24px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+.stat b { display: block; font: 500 22px/1.2 var(--mono); }
+.stat span { color: var(--muted); font-size: 12px; }
+
+.centuries { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.centuries button { font: 500 13px/1 var(--ui); background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; cursor: pointer; }
+.centuries button .num { font-size: 11px; color: var(--muted); display: block; margin-top: 4px; }
+.centuries button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.centuries button:focus-visible, .tools button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.centuries .play { margin-inline-start: auto; }
+
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+.mapwrap { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; display: grid; }
+.mapwrap .tools { display: flex; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line); flex-wrap: wrap; font-size: 12px; color: var(--muted); align-items: center; }
+.tools button { font: 500 12px/1 var(--ui); background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 6px 10px; cursor: pointer; }
+.mapbox { overflow-x: auto; }
+svg#map { overflow: hidden; display: block; width: 100%; min-width: 560px; height: auto; }
+svg .base { fill: var(--coast); }
+svg .sea { fill: var(--sea); }
+svg .landp { fill: var(--landfill); stroke: var(--coast); stroke-width: .7; stroke-linejoin: round; }
+svg .lake { fill: var(--sea); stroke: var(--coast); stroke-width: .5; }
+svg .river { fill: none; stroke: var(--river); stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+svg .road { fill: none; stroke: var(--road); stroke-width: .7; stroke-dasharray: 1.5 2.5; stroke-linecap: round; }
+svg text.seaname { font: italic 400 13px var(--display); fill: var(--river); text-anchor: middle; }
+svg text.seaname tspan.en { font: italic 400 10px var(--ui); }
+svg text.rivername { font: italic 400 11px var(--display); fill: var(--river); paint-order: stroke; stroke: var(--landfill); stroke-width: 3px; }
+svg text.province { font: 500 9.5px var(--ui); letter-spacing: .18em; text-transform: uppercase; fill: var(--label); text-anchor: middle; }
+svg .flow { fill: none; stroke: var(--flow); stroke-linecap: round; }
+svg .home { fill: var(--accent); fill-opacity: .28; stroke: var(--accent); stroke-width: 1; cursor: pointer; }
+svg .home.sel { fill-opacity: .6; stroke: var(--defect); stroke-width: 2; }
+svg .home:focus-visible { stroke: var(--defect); stroke-width: 2.5; outline: none; }
+svg text.city { font: 400 12px var(--arabic); fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 3.5px; stroke-linejoin: round; pointer-events: none; }
+svg .dim { opacity: .1; }
+@media (prefers-reduced-motion: no-preference) { svg .flow, svg .home { transition: opacity .2s, r .3s; } }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: grid; gap: 14px; position: sticky; top: env(safe-area-inset-top, 0px); }
+.panel h3 { font: 600 19px/1.4 var(--arabic); direction: rtl; text-align: right; margin: 0; }
+.rank { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.rank li { display: grid; grid-template-columns: minmax(0, 7.5em) minmax(0, 1fr) 4.5em; gap: 8px; align-items: center; font-size: 12px; }
+.rank li .ar { font-size: 14px; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank i { display: block; height: 8px; border-radius: 2px; background: var(--accent); }
+.rank .num { text-align: end; color: var(--muted); }
+dl.kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; margin: 0; font-size: 13px; }
+dl.kv dt { color: var(--muted); }
+dl.kv dd { margin: 0; text-align: end; }
+.note { font-size: 12px; color: var(--muted); margin: 0; }
+
+.long { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: grid; gap: 8px; min-width: 0; }
+.card svg { width: 100%; height: auto; display: block; }
+.card svg text { font: 11px var(--mono); fill: var(--muted); }
+.card svg .grid { stroke: var(--line); stroke-width: 1; }
+.card svg .line { fill: none; stroke: var(--accent); stroke-width: 2; }
+.card svg .area { fill: var(--accent); fill-opacity: .12; }
+.card svg .pt { fill: var(--accent); }
+.card svg .pt.cur { fill: var(--defect); }
+.card svg .barc { fill: var(--accent); fill-opacity: .7; }
+.card svg .barc.young { fill: var(--flow); fill-opacity: .85; }
+
+.lives { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; display: grid; }
+.lives .head { display: grid; gap: 10px; padding: 16px; border-bottom: 1px solid var(--line); }
+.picker { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.picker input { font: 15px/1.4 var(--arabic); direction: rtl; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); min-width: 0; width: min(100%, 22em); }
+.picker input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.picker button { font: 400 14px/1.3 var(--arabic); direction: rtl; background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; cursor: pointer; }
+.picker button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.picker button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.who { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: baseline; }
+.who h3 { font: 600 22px/1.4 var(--display); direction: rtl; margin: 0; }
+.who span { color: var(--muted); font-size: 13px; }
+.lifebody { display: grid; grid-template-columns: minmax(0, 1fr) 300px; }
+.lifebox { overflow-x: auto; border-inline-end: 1px solid var(--line); }
+svg#life { display: block; width: 100%; min-width: 640px; height: auto; }
+svg#life .era { stroke: none; }
+svg#life .era.a { fill: var(--era-a); } svg#life .era.b { fill: var(--era-b); }
+svg#life text.eraname { font: 500 10px var(--ui); letter-spacing: .12em; text-transform: uppercase; fill: var(--label); }
+svg#life text.tick { font: 10.5px var(--mono); fill: var(--muted); text-anchor: middle; }
+svg#life text.tick.ce { fill: var(--label); font-size: 9.5px; }
+svg#life .tickline { stroke: var(--line); }
+svg#life .seg { stroke-width: 9; stroke-linecap: butt; fill: none; }
+svg#life .seg.hearing { stroke: var(--hear); } svg#life .seg.teaching { stroke: var(--teach); }
+svg#life .seg.both { stroke: var(--both); } svg#life .seg.quiet { stroke: var(--quiet); }
+svg#life .uncertain { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 2 3; fill: none; }
+svg#life .stem { stroke: var(--line); stroke-width: 1; }
+svg#life .whisker { stroke-width: 2.5; stroke-linecap: round; opacity: 0; }
+svg#life .stopg:hover .whisker, svg#life .stopg:focus-within .whisker { opacity: .55; }
+svg#life .stopg:focus-visible { outline: none; }
+svg#life .stopg:focus-visible circle { stroke: var(--ink); }
+svg#life .stop { stroke: var(--surface); stroke-width: 1.5; cursor: default; }
+svg#life .stop.teacher, svg#life .whisker.teacher { fill: var(--hear); stroke: var(--hear); }
+svg#life .stop.student, svg#life .whisker.student { fill: var(--teach); stroke: var(--teach); }
+svg#life .stop.teacher, svg#life .stop.student { stroke: var(--surface); }
+svg#life text.stopname { font: 400 13px var(--arabic); fill: var(--ink); text-anchor: middle; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; }
+svg#life text.stopn { font: 10px var(--mono); fill: var(--muted); text-anchor: middle; }
+svg#life text.end { font: 400 12px var(--arabic); fill: var(--ink); }
+svg#life text.endyr { font: 10.5px var(--mono); fill: var(--muted); }
+svg#life text.side { font: 500 10px var(--ui); letter-spacing: .1em; text-transform: uppercase; fill: var(--label); }
+svg#life .mark { fill: var(--ink); }
+.lifeside { display: grid; gap: 12px; padding: 16px; align-content: start; }
+svg#inset { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 6px; }
+svg#inset .ipath { fill: none; stroke: var(--hear); stroke-width: 1.5; stroke-dasharray: 3 3; }
+svg#inset .ipt.teacher { fill: var(--hear); } svg#inset .ipt.student { fill: var(--teach); }
+svg#inset .ipt { stroke: var(--surface); stroke-width: 1; fill-opacity: .85; }
+svg#inset .ihome { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+svg#inset text.iname { font: 400 11px var(--arabic); fill: var(--ink); paint-order: stroke; stroke: var(--landfill); stroke-width: 3px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 18px; height: 6px; border-radius: 1px; vertical-align: middle; margin-inline-end: 5px; }
+@media (max-width: 900px) { .lifebody { grid-template-columns: minmax(0, 1fr); } .lifebox { border-inline-end: 0; border-bottom: 1px solid var(--line); } }
+
+footer.src { font-size: 12px; color: var(--muted); max-width: 90ch; }
+footer.src a { color: var(--accent); }
+footer.src .stamp { margin: 0 0 6px; font-size: 11px; overflow-wrap: anywhere; }
+
+@media (max-width: 900px) {
+  .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stage { grid-template-columns: minmax(0, 1fr); }
+  .panel { position: static; }
+}
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:6px">
+    <h1>Isnad Chronicle <small>where and when the chains were handed on, over __SCOPE__ of the hijra</small></h1>
+    <p class="note" style="max-width:90ch">Each teacher → student link is dated by the earlier of the two deaths, the last year it can have happened, and placed at the two narrators' recorded homes. Circle area is the chains a city's teachers handed on in the century. Arcs join two different homes.</p>
+  </header>
+
+  <section class="summary" id="summary" aria-label="Summary"></section>
+
+  <div class="centuries" id="centuries" role="group" aria-label="Century (AH)"></div>
+
+  <div class="stage">
+    <div class="mapwrap">
+      <div class="tools"><span id="maptitle"></span><span style="margin-inline-start:auto">Select a city to see its flows</span><button type="button" id="clear">Show all flows</button></div>
+      <div class="mapbox"><svg id="map" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Map of transmission"></svg></div>
+      <p class="note" style="padding:8px 12px;border-top:1px solid var(--line)">Dotted lines are the roads of Cornu's atlas, one day's stage per section. Coast and rivers are present-day. Seas and rivers carry the names the period's geographers used. al-Andalus and the Maghrib lie west of the frame.</p>
+    </div>
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+
+  <section class="lives" aria-label="Lives">
+    <div class="head">
+      <div class="eyebrow">A life in transmission</div>
+      <div class="picker" id="picker">
+        <input id="who" type="search" list="whoList" placeholder="ابحث عن راوٍ" aria-label="Find a narrator (Arabic name)" autocomplete="off">
+        <datalist id="whoList"></datalist>
+      </div>
+      <div class="who" id="whoHead"></div>
+    </div>
+    <div class="lifebody">
+      <div class="lifebox"><svg id="life" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Lifeline"></svg></div>
+      <div class="lifeside">
+        <svg id="inset" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Places on the lifeline"></svg>
+        <div class="legend" id="lifeLegend"></div>
+        <p class="note" id="lifeNote"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="long" aria-label="Across centuries">
+    <div class="card"><h2>Local transmission</h2><p class="note">Share of chains whose teacher and student lived in the same city (where both are placed in one).</p><svg id="cLocal"></svg></div>
+    <div class="card"><h2>Distance between homes</h2><p class="note">Median distance in km between teacher's and student's homes, weighted by the chains each link carries.</p><svg id="cKm"></svg></div>
+    <div class="card"><h2>Lifespans that cannot meet</h2><p class="note">Share of chains over links whose documented lifespans do not overlap (impossible) or that would need a life over 120 years (implausible).</p><svg id="cBad"></svg></div>
+    <div class="card"><h2>Age of the student at the teacher's death</h2><p class="note" id="ageNote"></p><svg id="cAge"></svg></div>
+  </section>
+
+  <footer class="src">
+    <p class="stamp num">__STAMP__</p>
+    Narrators, dates, residences and chains: «الجامع» Hadith Knowledge Graph (CC-BY-4.0). Places, coordinates and roads: <a href="https://althurayya.github.io/" rel="noopener">al-Thurayya</a> gazetteer (Seydi &amp; Romanov, after Cornu; Apache-2.0); coast, rivers and lakes: <a href="https://www.naturalearthdata.com/" rel="noopener">Natural Earth</a> 1:50m (public domain), present-day; a province named without a city is drawn at the centre of its settlements.
+    Lifespan checks, dating and flows are computed by <a href="https://github.com/larsbx/isnad-graph-lab" rel="noopener">isnad-graph-lab</a>. A home is where the biographical record says a narrator lived, not where a given hearing took place.
+  </footer>
+</div>
+
+<script type="application/json" id="data">__DATA__</script>
+<script>
+(() => {
+  const D = JSON.parse(document.getElementById("data").textContent);
+  const P = new Map(D.places.map(p => [p.uri, p]));
+  const PROF = new Map(D.profile.map(r => [r.century, r]));
+  const fmt = n => n >= 1e6 ? (n / 1e6).toFixed(2) + "M" : n >= 1e4 ? Math.round(n / 1e3) + "k" : n.toLocaleString("en");
+  const pct = x => x == null ? "–" : (100 * x).toFixed(1) + "%";
+  const ord = c => { const s = ["th", "st", "nd", "rd"], v = c % 100; return c + (s[(v - 20) % 10] || s[v] || s[0]); };
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); parent && parent.appendChild(e); return e; };
+  let cur = D.centuries[Math.min(1, D.centuries.length - 1)], sel = null, timer = null;
+
+  // ── summary ──────────────────────────────────────────────────────────────
+  const share = D.chronology.chain_share || {}, cov = D.coverage || {};
+  document.getElementById("summary").innerHTML = [
+    [pct(share.consistent), "of chains run over links whose lifespans fit"],
+    [pct((share.impossible || 0) + (share.implausible || 0)), "over links whose lifespans cannot meet"],
+    [pct(cov.chain_weighted_with_home), "of narrator activity placed on the map"],
+    [D.ages.median == null ? "–" : D.ages.median + " yrs", "median age of a student when the teacher died"],
+  ].map(([b, s]) => `<div class="stat"><b class="num">${b}</b><span>${s}</span></div>`).join("");
+
+  // ── century strip ────────────────────────────────────────────────────────
+  const strip = document.getElementById("centuries");
+  strip.innerHTML = D.centuries.map(c => `<button type="button" data-c="${c}">${ord(c)} c. AH<span class="num">${fmt(PROF.get(c).n_chains)} chains</span></button>`).join("")
+    + `<button type="button" class="play" id="play">Play</button>`;
+  strip.addEventListener("click", ev => { const b = ev.target.closest("button"); if (!b) return;
+    if (b.id === "play") return togglePlay(); stop(); cur = +b.dataset.c; render(); });
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function stop() { clearInterval(timer); timer = null; document.getElementById("play").textContent = "Play"; }
+  function togglePlay() { if (timer) return stop();
+    document.getElementById("play").textContent = "Pause";
+    timer = setInterval(() => { const i = D.centuries.indexOf(cur); cur = D.centuries[(i + 1) % D.centuries.length]; render(); }, reduce ? 2500 : 1600); }
+
+  // ── map ──────────────────────────────────────────────────────────────────
+  // The frame holds the Mashriq; al-Andalus and the Maghrib lie west of it.
+  function projection(lon0, lon1, lat0, lat1, W) {
+    const k = Math.cos((lat0 + lat1) / 2 * Math.PI / 180), H = Math.round(W * (lat1 - lat0) / ((lon1 - lon0) * k));
+    return { W, H, X: lon => (lon - lon0) / (lon1 - lon0) * W, Y: lat => (lat1 - lat) / (lat1 - lat0) * H };
+  }
+  const MAIN = projection(28, 72, 11, 42, 1000), { W, H, X, Y } = MAIN;
+  const map = document.getElementById("map");
+  map.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const gGeo = el("g", { "aria-hidden": "true" }, map), gBase = el("g", {}, map), gFlow = el("g", {}, map), gHome = el("g", {}, map), gText = el("g", {}, map);
+  drawGeography(gGeo, D.basemap || {}, MAIN, true);
+  for (const p of D.places) el("circle", { class: "base", cx: X(p.lon).toFixed(1), cy: Y(p.lat).toFixed(1), r: 1.3 }, gBase);
+
+  function trace(flat, close, pr) {
+    let d = "";
+    for (let i = 0; i < flat.length; i += 2) d += (i ? "L" : "M") + pr.X(flat[i]).toFixed(1) + "," + pr.Y(flat[i + 1]).toFixed(1);
+    return close ? d + "Z" : d;
+  }
+  function drawGeography(g, B, pr, labels) {
+    if (!B.land) return;  // drawn without context when the basemap is not fetched
+    const { X, Y, W, H } = pr;
+    el("rect", { class: "sea", x: 0, y: 0, width: W, height: H }, g);
+    el("path", { class: "landp", d: B.land.map(r => trace(r, true, pr)).join(" "), "fill-rule": "evenodd" }, g);
+    el("path", { class: "lake", d: B.lakes.map(r => trace(r, true, pr)).join(" ") }, g);
+    el("path", { class: "road", d: B.routes.map(r => trace(r, false, pr)).join(" ") }, g);
+    el("path", { class: "river", d: B.rivers.map(r => trace(r.line, false, pr)).join(" ") }, g);
+    if (!labels) return;
+    const longest = new Map();  // label each named river once, on its longest piece in view
+    for (const r of B.rivers) if (r.ar) {
+      const inView = []; for (let i = 0; i < r.line.length; i += 2) { const x = X(r.line[i]), y = Y(r.line[i + 1]); if (x > 20 && x < W - 60 && y > 20 && y < H - 20) inView.push([x, y]); }
+      if (inView.length > (longest.get(r.ar)?.length || 0)) longest.set(r.ar, inView);
+    }
+    for (const [name, pts] of longest) if (pts.length > 4) { const [x, y] = pts[Math.floor(pts.length / 2)];
+      el("text", { class: "rivername", x: (x + 6).toFixed(1), y: (y - 4).toFixed(1) }, g).textContent = name; }
+    for (const s of B.seas) { const t = el("text", { class: "seaname", x: X(s.lon).toFixed(1), y: Y(s.lat).toFixed(1) }, g);
+      t.textContent = s.name; const e = el("tspan", { class: "en", x: X(s.lon).toFixed(1), dy: 13 }, t); e.textContent = s.en; }
+    for (const p of D.places) if (p.type === "province") {
+      const label = { "Jazirat al-Arab": "Arabia", "Aqur": "Jazira", "Sham": "al-Sham" }[p.translit] || p.translit;
+      el("text", { class: "province", x: X(p.lon).toFixed(1), y: (Y(p.lat) + 22).toFixed(1) }, g).textContent = label;
+    }
+  }
+  const maxHome = Math.max(...D.centuries.flatMap(c => Object.values(D.homes[c] || {})));
+  const R = n => 2 + 34 * Math.sqrt(n / maxHome);
+
+  function arc(a, b) { const x1 = X(a.lon), y1 = Y(a.lat), x2 = X(b.lon), y2 = Y(b.lat);
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, dx = x2 - x1, dy = y2 - y1;
+    return `M${x1.toFixed(1)},${y1.toFixed(1)} Q${(mx - dy * .22).toFixed(1)},${(my + dx * .22).toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}`; }
+
+  function drawMap() {
+    gFlow.replaceChildren(); gHome.replaceChildren(); gText.replaceChildren();
+    const flows = (D.flows[cur] || []).filter(([s, d]) => P.has(s) && P.has(d));
+    const fmax = Math.max(1, ...flows.map(f => f[2]));
+    for (const [s, d, n] of flows) {
+      const on = !sel || s === sel || d === sel;
+      el("path", { class: "flow" + (on ? "" : " dim"), d: arc(P.get(s), P.get(d)), "stroke-width": (0.6 + 7 * n / fmax).toFixed(2),
+        "stroke-opacity": (0.25 + 0.6 * n / fmax).toFixed(2) }, gFlow);
+    }
+    const homes = Object.entries(D.homes[cur] || {}).filter(([u]) => P.has(u)).sort((a, b) => b[1] - a[1]);
+    homes.forEach(([u, n], i) => { const p = P.get(u);
+      const c = el("circle", { class: "home" + (u === sel ? " sel" : ""), cx: X(p.lon).toFixed(1), cy: Y(p.lat).toFixed(1), r: R(n).toFixed(1),
+        tabindex: i < 25 ? 0 : -1, role: "button", "aria-label": `${p.translit}: ${n} chains` }, gHome);
+      el("title", {}, c).textContent = `${p.name} · ${p.translit} — ${n.toLocaleString("en")} chains handed on`;
+      const pick = () => { sel = sel === u ? null : u; render(); };
+      c.addEventListener("click", pick);
+      c.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); pick(); } });
+      if (i < 12 || u === sel) { const t = el("text", { class: "city", x: (X(p.lon) + R(n) + 3).toFixed(1), y: (Y(p.lat) + 4).toFixed(1) }, gText); t.textContent = p.name; }
+    });
+    document.getElementById("maptitle").textContent = `${ord(cur)} century AH · ${homes.length} homes · ${flows.length} busiest flows`;
+  }
+
+  // ── panel ────────────────────────────────────────────────────────────────
+  function drawPanel() {
+    const pr = PROF.get(cur), panel = document.getElementById("panel");
+    const homes = Object.entries(D.homes[cur] || {}).sort((a, b) => b[1] - a[1]);
+    if (sel && P.has(sel)) {
+      const p = P.get(sel), out = (D.flows[cur] || []).filter(f => f[0] === sel), inn = (D.flows[cur] || []).filter(f => f[1] === sel);
+      const li = (rows, i) => rows.slice(0, 6).map(f => { const q = P.get(f[i]); return `<li><span class="ar">${q ? q.name : f[i]}</span><i style="width:${100 * f[2] / rows[0][2]}%"></i><span class="num">${fmt(f[2])}</span></li>`; }).join("") || `<li class="note">none among the busiest flows</li>`;
+      const spark = D.centuries.map(c => `<li><span class="num">${ord(c)} c.</span><i style="width:${100 * ((D.homes[c] || {})[sel] || 0) / Math.max(1, ...D.centuries.map(x => (D.homes[x] || {})[sel] || 0))}%"></i><span class="num">${fmt((D.homes[c] || {})[sel] || 0)}</span></li>`).join("");
+      panel.innerHTML = `<div class="eyebrow">${p.type === "province" ? "Province" : "City"} · ${p.region}</div><h3>${p.name}</h3><p class="note" style="margin-top:-8px">${p.translit} · ${p.lat.toFixed(2)}°N ${p.lon.toFixed(2)}°E · home of ${p.n_home.toLocaleString("en")} narrators</p>
+        <div><div class="eyebrow" style="margin-bottom:6px">Chains handed on, by century</div><ol class="rank">${spark}</ol></div>
+        <div><div class="eyebrow" style="margin-bottom:6px">To students in · ${ord(cur)} c.</div><ol class="rank">${li(out, 1)}</ol></div>
+        <div><div class="eyebrow" style="margin-bottom:6px">From teachers in · ${ord(cur)} c.</div><ol class="rank">${li(inn, 0)}</ol></div>`;
+      return;
+    }
+    const top = homes.slice(0, 10), m = top.length ? top[0][1] : 1;
+    panel.innerHTML = `<div class="eyebrow">${ord(cur)} century AH</div>
+      <dl class="kv"><dt>Links dated here</dt><dd class="num">${pr.n_edges.toLocaleString("en")}</dd>
+      <dt>Chains over them</dt><dd class="num">${pr.n_chains.toLocaleString("en")}</dd>
+      <dt>Same-city chains</dt><dd class="num">${pct(pr.same_city_share)}</dd>
+      <dt>Median distance (by chains)</dt><dd class="num">${pr.median_km == null ? "–" : Math.round(pr.median_km) + " km"}</dd>
+      <dt>Lifespans cannot meet</dt><dd class="num">${pct(pr.impossible_share + pr.implausible_share)}</dd></dl>
+      <div><div class="eyebrow" style="margin-bottom:6px">Busiest homes of teachers</div><ol class="rank">${top.map(([u, n]) => { const p = P.get(u);
+        return `<li><span class="ar">${p ? p.name : u}</span><i style="width:${100 * n / m}%"></i><span class="num">${fmt(n)}</span></li>`; }).join("")}</ol></div>`;
+  }
+
+  // ── long view ────────────────────────────────────────────────────────────
+  function series(id, values, fmtY, yMax) {
+    const svg = document.getElementById(id), w = 320, h = 150, l = 44, r = 10, t = 10, b = 24;
+    svg.setAttribute("viewBox", `0 0 ${w} ${h}`); svg.replaceChildren();
+    const raw = yMax ?? (Math.max(...values.filter(v => v != null)) || 1), step = 10 ** Math.floor(Math.log10(raw));
+    const xs = D.centuries, vmax = yMax ?? [1, 2, 2.5, 5, 10].map(m => m * step).find(m => m >= raw);
+    const x = i => l + (xs.length < 2 ? 0 : i * (w - l - r) / (xs.length - 1)), y = v => t + (1 - v / vmax) * (h - t - b);
+    for (const f of [0, .5, 1]) { el("line", { class: "grid", x1: l, x2: w - r, y1: y(f * vmax), y2: y(f * vmax) }, svg);
+      el("text", { x: l - 6, y: y(f * vmax) + 4, "text-anchor": "end" }, svg).textContent = fmtY(f * vmax); }
+    xs.forEach((c, i) => { el("text", { x: x(i), y: h - 6, "text-anchor": "middle" }, svg).textContent = ord(c); });
+    const pts = values.map((v, i) => v == null ? null : [x(i), y(v)]).filter(Boolean);
+    if (pts.length) {
+      el("path", { class: "area", d: `M${pts[0][0]},${y(0)} ` + pts.map(p => `L${p[0]},${p[1]}`).join(" ") + ` L${pts.at(-1)[0]},${y(0)} Z` }, svg);
+      el("path", { class: "line", d: "M" + pts.map(p => p.join(",")).join(" L") }, svg);
+    }
+    values.forEach((v, i) => v != null && el("circle", { class: "pt" + (xs[i] === cur ? " cur" : ""), cx: x(i), cy: y(v), r: xs[i] === cur ? 4.5 : 3 }, svg));
+  }
+  function drawLong() {
+    const rows = D.centuries.map(c => PROF.get(c));
+    series("cLocal", rows.map(r => r.same_city_share), v => Math.round(100 * v) + "%", 1);
+    series("cKm", rows.map(r => r.median_km), v => Math.round(v) + "");
+    series("cBad", rows.map(r => r.impossible_share + r.implausible_share), v => (100 * v).toFixed(1) + "%");
+  }
+  function drawAges() {
+    const svg = document.getElementById("cAge"), w = 320, h = 150, l = 44, r = 10, t = 10, b = 24;
+    const { bins, counts, n } = D.ages, m = Math.max(...counts), bw = (w - l - r) / counts.length;
+    svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+    const y = v => t + (1 - v / m) * (h - t - b);
+    for (const f of [0, .5, 1]) { el("line", { class: "grid", x1: l, x2: w - r, y1: y(f * m), y2: y(f * m) }, svg);
+      el("text", { x: l - 6, y: y(f * m) + 4, "text-anchor": "end" }, svg).textContent = fmt(Math.round(f * m)); }
+    counts.forEach((c, i) => { const rect = el("rect", { class: "barc" + (bins[i] < 10 ? " young" : ""), x: l + i * bw + 1, y: y(c), width: bw - 2, height: y(0) - y(c) }, svg);
+      el("title", {}, rect).textContent = `${bins[i]}${i === counts.length - 1 ? "+" : "–" + (bins[i + 1] - 1)} years: ${c.toLocaleString("en")} links`; });
+    for (const a of [0, 20, 40, 60, 80, 100]) { const i = bins.indexOf(a); if (i >= 0) el("text", { x: l + i * bw, y: h - 6, "text-anchor": "middle" }, svg).textContent = a; }
+    const young = counts.slice(0, 2).reduce((s, c) => s + c, 0);
+    document.getElementById("ageNote").textContent = `${n.toLocaleString("en")} links whose two births and deaths are documented and fit. In ${pct(young / n)} the student was under 10 (orange) when the teacher died, the hearing of children that kept a chain short. The last bar holds ${bins.at(-2)} years and over.`;
+  }
+
+
+  // ── lives ────────────────────────────────────────────────────────────────
+  const LIVES = new Map(D.lives.map(l => [l.id, l]));
+  const called = l => l.known || l.name;
+  const KIND = { hearing: "hearing possible", both: "hearing and teaching possible", teaching: "teaching possible", quiet: "neither" };
+  const QUICK = [4396, 4883, 4049, 7272, 3795, 488].filter(i => LIVES.has(i));
+  const picker = document.getElementById("picker"), who = document.getElementById("who");
+  document.getElementById("whoList").innerHTML = D.lives.map(l => `<option value="${called(l)} · ${l.id}">${l.name}</option>`).join("");
+  picker.insertAdjacentHTML("beforeend", QUICK.map(i => `<button type="button" data-id="${i}">${called(LIVES.get(i))}</button>`).join(""));
+  picker.addEventListener("click", ev => { const b = ev.target.closest("button[data-id]"); if (b) showLife(+b.dataset.id); });
+  who.addEventListener("change", () => { const m = who.value.match(/(\d+)\s*$/); if (m && LIVES.has(+m[1])) showLife(+m[1]); });
+  document.getElementById("lifeLegend").innerHTML = ["hearing", "both", "teaching", "quiet"].map(k => `<span><i style="background:var(--${k === "quiet" ? "quiet" : k === "hearing" ? "hear" : k === "teaching" ? "teach" : "both"})"></i>${KIND[k]}</span>`).join("")
+    + `<span><i style="background:var(--hear);border-radius:50%;width:9px;height:9px"></i>teachers' city</span><span><i style="background:var(--teach);border-radius:50%;width:9px;height:9px"></i>students' city</span>`;
+  const CE = ah => Math.round(622 + ah * 0.970229);
+  const yrs = v => v == null ? "?" : Math.round(v);
+
+  function lanes(items, x, width) {  // greedy rows so labels do not collide
+    const ends = [];
+    return items.map(it => { const a = x(it.year) - width(it) / 2; let r = ends.findIndex(e => e < a);
+      if (r < 0) { r = ends.length; ends.push(0); } ends[r] = a + width(it) + 8; return r; });
+  }
+
+  function showLife(id) {
+    const L = LIVES.get(id); if (!L) return;
+    for (const b of picker.querySelectorAll("button[data-id]")) b.setAttribute("aria-pressed", String(+b.dataset.id === id));
+    const basisText = { recorded: "recorded", age: "from age at death", prior: "estimated", tabaqa: "from the tabaqa", none: "unknown" };
+    document.getElementById("whoHead").innerHTML = `<h3>${called(L)}</h3><span>${L.known ? `<span class="ar">${L.name}</span> · ` : ""}${L.rank ? `<span class="ar">${L.rank}</span> · ` : ""}tabaqa ${L.tabaka ?? "–"} · born ${yrs(L.birth.mid)} AH (${basisText[L.birth.basis]}) · died ${yrs(L.death.mid)} AH (${basisText[L.death.basis]})${L.places.length ? ` · lived in <span class="ar">${L.places.join("، ")}</span>` : ""}</span>`;
+    const svg = document.getElementById("life"); svg.replaceChildren();
+    const Wl = 1000, mid = 190, pad = 70;
+    const t0 = Math.min(L.birth.lo ?? L.birth.mid, ...L.stops.map(s => s.from)) - 4, t1 = Math.max(L.death.hi ?? L.death.mid, ...L.stops.map(s => s.to)) + 4;
+    const x = t => pad + (t - t0) / (t1 - t0) * (Wl - 2 * pad);
+    const up = L.stops.filter(s => s.role === "teacher").sort((a, b) => a.year - b.year);
+    const dn = L.stops.filter(s => s.role === "student").sort((a, b) => a.year - b.year);
+    const wid = s => Math.max(46, s.place.length * 7.5);
+    const lu = lanes(up, x, wid), ld = lanes(dn, x, wid);
+    const rowH = 40, Hl = mid + 60 + rowH * Math.max(1, ...ld.map(r => r + 1)), top = mid - 60 - rowH * Math.max(1, ...lu.map(r => r + 1));
+    svg.setAttribute("viewBox", `0 ${Math.min(0, top - 30)} ${Wl} ${Hl - Math.min(0, top - 30) + 34}`);
+    const yTop = Math.min(0, top - 30), yBot = Hl + 4;
+    // eras
+    D.eras.forEach((e, i) => { const a = Math.max(x(e.from), pad), b = Math.min(x(e.to), Wl - pad); if (b <= a) return;
+      el("rect", { class: "era " + (i % 2 ? "b" : "a"), x: a, y: yTop, width: b - a, height: yBot - yTop }, svg);
+      if (b - a > 70) el("text", { class: "eraname", x: a + 6, y: yTop + 14 }, svg).textContent = e.name; });
+    // ticks
+    const step = [5, 10, 20, 25, 50].find(s => (t1 - t0) / s <= 12) || 100;
+    for (let t = Math.ceil(t0 / step) * step; t <= t1; t += step) {
+      el("line", { class: "tickline", x1: x(t), x2: x(t), y1: yTop + 20, y2: yBot - 18 }, svg);
+      el("text", { class: "tick", x: x(t), y: yBot - 4 }, svg).textContent = t + " AH";
+      el("text", { class: "tick ce", x: x(t), y: yBot + 10 }, svg).textContent = CE(t) + " CE"; }
+    el("text", { class: "side", x: 8, y: mid - 46 }, svg).textContent = "heard from";
+    el("text", { class: "side", x: 8, y: mid + 54 }, svg).textContent = "taught to";
+    // uncertainty of the ends
+    if (L.birth.lo != null && L.birth.hi != null && L.birth.hi > L.birth.lo) el("line", { class: "uncertain", x1: x(L.birth.lo), x2: x(L.birth.hi), y1: mid + 12, y2: mid + 12 }, svg);
+    if (L.death.lo != null && L.death.hi > L.death.lo) el("line", { class: "uncertain", x1: x(L.death.lo), x2: x(L.death.hi), y1: mid + 12, y2: mid + 12 }, svg);
+    // the life, by phase
+    for (const p of L.phases) { const seg = el("line", { class: "seg " + p.kind, x1: x(p.from), x2: x(p.to), y1: mid, y2: mid }, svg);
+      el("title", {}, seg).textContent = `${yrs(p.from)}–${yrs(p.to)} AH: ${KIND[p.kind]}`; }
+    el("circle", { class: "mark", cx: x(L.birth.mid), cy: mid, r: 4 }, svg);
+    el("rect", { class: "mark", x: x(L.death.mid) - 1.5, y: mid - 9, width: 3, height: 18 }, svg);
+    el("text", { class: "endyr", x: x(L.birth.mid) - 6, y: mid + 4, "text-anchor": "end" }, svg).textContent = `b. ${yrs(L.birth.mid)}`;
+    const dt = el("text", { class: "endyr", x: x(L.death.mid) + 8, y: mid + 4 }, svg); dt.textContent = `d. ${yrs(L.death.mid)}`;
+    if (L.death_place) { const t = el("text", { class: "end", x: x(L.death.mid) + 8, y: mid - 10 }, svg); t.textContent = L.death_place; }
+    // stops
+    const maxN = Math.max(1, ...L.stops.map(s => s.n_chains));
+    const drawStops = (list, rows, dir) => list.forEach((s, i) => {
+      const y = mid + dir * (60 + rows[i] * rowH), r = 3 + 9 * Math.sqrt(s.n_chains / maxN), cx = x(s.year);
+      const gs = el("g", { class: "stopg", tabindex: 0 }, svg);
+      el("line", { class: "stem", x1: cx, x2: cx, y1: mid + dir * 6, y2: y - dir * r }, gs);
+      if (s.to > s.from) el("line", { class: "whisker " + s.role, x1: x(s.from), x2: x(s.to), y1: y, y2: y }, gs);
+      const c = el("circle", { class: "stop " + s.role, cx, cy: y, r }, gs);
+      el("title", {}, c).textContent = `${s.place}: ${s.n_chains.toLocaleString("en")} chains, ${s.n_people} ${s.role === "teacher" ? "teachers" : "students"}, links dated ${yrs(s.from)}–${yrs(s.to)} AH (median ${yrs(s.year)}) — ${s.people.join("؛ ")}`;
+      const ty = dir < 0 ? y - r - 6 : y + r + 14;
+      el("text", { class: "stopname", x: cx, y: ty }, gs).textContent = s.place;
+      el("text", { class: "stopn", x: cx, y: dir < 0 ? ty - 15 : ty + 12 }, gs).textContent = fmt(s.n_chains);
+    });
+    drawStops(up, lu, -1); drawStops(dn, ld, 1);
+    drawInset(L);
+    document.getElementById("lifeNote").textContent = `Stops are the home cities of this narrator's teachers and students, each at the median year its links can date to; hover a stop for the earliest to latest. ${L.n_unplaced ? `${L.n_unplaced} links fit the lifespans but not the ages (hearing from ${D.ages_assumed.hear}, teaching from ${D.ages_assumed.teach}) and are not placed. ` : ""}${L.n_refuted ? `${L.n_refuted} links whose lifespans cannot meet are left out. ` : ""}Phases are what the dates allow, not attested events.`;
+  }
+
+  function drawInset(L) {
+    const svg = document.getElementById("inset"); svg.replaceChildren();
+    const pts = L.stops.map(s => ({ ...s, p: P.get(s.uri) })).filter(s => s.p);
+    const lons = pts.map(s => s.p.lon), lats = pts.map(s => s.p.lat);
+    if (!pts.length) return;
+    let lo0 = Math.min(...lons) - 3, lo1 = Math.max(...lons) + 3, la0 = Math.min(...lats) - 2.5, la1 = Math.max(...lats) + 2.5;
+    if (lo1 - lo0 < 12) { const c = (lo0 + lo1) / 2; lo0 = c - 6; lo1 = c + 6; }
+    if (la1 - la0 < 8) { const c = (la0 + la1) / 2; la0 = c - 4; la1 = c + 4; }
+    const pr = projection(lo0, lo1, la0, la1, 300); svg.setAttribute("viewBox", `0 0 ${pr.W} ${pr.H}`);
+    const g = el("g", {}, svg); drawGeography(g, D.basemap || {}, pr, false);
+    const heard = pts.filter(s => s.role === "teacher").sort((a, b) => a.year - b.year);
+    if (heard.length > 1) el("path", { class: "ipath", d: "M" + heard.map(s => `${pr.X(s.p.lon).toFixed(1)},${pr.Y(s.p.lat).toFixed(1)}`).join(" L") }, svg);
+    const maxN = Math.max(1, ...pts.map(s => s.n_chains));
+    for (const s of [...pts].sort((a, b) => b.n_chains - a.n_chains)) {
+      const c = el("circle", { class: "ipt " + s.role, cx: pr.X(s.p.lon), cy: pr.Y(s.p.lat), r: 2.5 + 7 * Math.sqrt(s.n_chains / maxN) }, svg);
+      el("title", {}, c).textContent = `${s.place} · ${s.role === "teacher" ? "heard" : "taught"} c. ${yrs(s.year)} AH`;
+    }
+    const home = [...P.values()].find(p => p.name === L.home);
+    if (home) el("circle", { class: "ihome", cx: pr.X(home.lon), cy: pr.Y(home.lat), r: 12 }, svg);
+    const named = new Set();
+    for (const s of [...pts].sort((a, b) => b.n_chains - a.n_chains).slice(0, 6)) if (!named.has(s.uri)) { named.add(s.uri);
+      el("text", { class: "iname", x: pr.X(s.p.lon) + 7, y: pr.Y(s.p.lat) - 6 }, svg).textContent = s.place; }
+  }
+
+  function render() {
+    for (const b of strip.querySelectorAll("button[data-c]")) b.setAttribute("aria-pressed", String(+b.dataset.c === cur));
+    drawMap(); drawPanel(); drawLong();
+  }
+  document.getElementById("clear").addEventListener("click", () => { sel = null; render(); });
+  drawAges(); render(); showLife(LIVES.has(7272) ? 7272 : D.lives[0]?.id);
+})();
+</script>

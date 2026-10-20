@@ -1,0 +1,20 @@
+# Pinned verification toolchains. tools/formal-setup.sh installs exactly these and
+# verifies every download by sha256; tools/verify.sh runs the gate with them.
+# Platform: x86_64 Linux (the cloud sessions and CI).
+
+[lean]
+version = "4.34.1"            # also formal/lean/lean-toolchain; released 2026-09-24
+url = "https://releases.lean-lang.org/lean4/v4.34.1/lean-4.34.1-linux.zip"
+sha256 = "3013aba02bb8bf31b1cf8c9d956d60fb95bb1c10920dfe91abcaa59cb461ddac"
+dir = "lean-4.34.1-linux"
+
+[quint]
+version = "0.33.0"            # exact in formal/quint/package.json, integrity in package-lock.json
+backend = "typescript"        # the evaluator shipped in the npm package; no runtime download
+seed = "0x2a"
+
+[apalache]
+version = "0.62.1"            # the TLA+ model checker behind `quint verify`
+url = "https://github.com/apalache-mc/apalache/releases/download/v0.62.1/apalache.tgz"
+sha256 = "38202a8c4ebeb3ab73e0fe5a7e4bb948442d46ad5de8a7fb45c9e5cac2beb2a6"
+max_steps = 4
