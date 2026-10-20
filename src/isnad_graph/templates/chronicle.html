@@ -199,7 +199,7 @@ footer.src .stamp { margin: 0 0 6px; font-size: 11px; overflow-wrap: anywhere; }
 
   <section class="long" aria-label="Across centuries">
     <div class="card"><h2>Local transmission</h2><p class="note">Share of chains whose teacher and student lived in the same city (where both are placed in one).</p><svg id="cLocal"></svg></div>
-    <div class="card"><h2>Distance between homes</h2><p class="note">Median distance in km between teacher's and student's homes, over all placed links.</p><svg id="cKm"></svg></div>
+    <div class="card"><h2>Distance between homes</h2><p class="note">Median distance in km between teacher's and student's homes, weighted by the chains each link carries.</p><svg id="cKm"></svg></div>
     <div class="card"><h2>Lifespans that cannot meet</h2><p class="note">Share of chains over links whose documented lifespans do not overlap (impossible) or that would need a life over 120 years (implausible).</p><svg id="cBad"></svg></div>
     <div class="card"><h2>Age of the student at the teacher's death</h2><p class="note" id="ageNote"></p><svg id="cAge"></svg></div>
   </section>
@@ -335,7 +335,7 @@ footer.src .stamp { margin: 0 0 6px; font-size: 11px; overflow-wrap: anywhere; }
       <dl class="kv"><dt>Links dated here</dt><dd class="num">${pr.n_edges.toLocaleString("en")}</dd>
       <dt>Chains over them</dt><dd class="num">${pr.n_chains.toLocaleString("en")}</dd>
       <dt>Same-city chains</dt><dd class="num">${pct(pr.same_city_share)}</dd>
-      <dt>Median distance</dt><dd class="num">${pr.median_km == null ? "–" : Math.round(pr.median_km) + " km"}</dd>
+      <dt>Median distance (by chains)</dt><dd class="num">${pr.median_km == null ? "–" : Math.round(pr.median_km) + " km"}</dd>
       <dt>Lifespans cannot meet</dt><dd class="num">${pct(pr.impossible_share + pr.implausible_share)}</dd></dl>
       <div><div class="eyebrow" style="margin-bottom:6px">Busiest homes of teachers</div><ol class="rank">${top.map(([u, n]) => { const p = P.get(u);
         return `<li><span class="ar">${p ? p.name : u}</span><i style="width:${100 * n / m}%"></i><span class="num">${fmt(n)}</span></li>`; }).join("")}</ol></div>`;

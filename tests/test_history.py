@@ -25,6 +25,8 @@ def test_century_profile_is_chain_weighted():
     assert p.loc[1, "same_city_share"] == 10 / 12
     assert p.loc[2, "same_city_share"] == 1.0  # the unknown edge is not counted
     assert p.loc[2, "impossible_share"] == 1 / 6
+    # chain-weighted: 0 km carries 10 chains, 400 km carries 2 (unweighted: 200)
+    assert p.loc[1, "median_km"] == 0
 
 
 def test_flows_between_provinces():

@@ -163,8 +163,8 @@ province centroid.
 
 ### P1.5 First-century distances
 
-**Evidence.** The 1st-century median distance (962 km) is inflated by
-companions' later homes.
+**Evidence.** The 1st-century chain-weighted median distance (344 km) places
+companions at the homes they settled in after the conquests.
 
 **Work.** Report it with and without Prophet → companion links.
 

@@ -79,3 +79,12 @@ def test_a_missing_death_is_imputed_from_the_tabaqa_and_can_only_be_implausible(
     assert s.loc[3, "death_basis"] == "none"
     f = feasibility(edges((1, 2), (1, 3)), lifespans(n))
     assert f.chronology.tolist() == ["implausible", "unknown"]
+
+
+def test_documented_metrics_need_recorded_deaths():
+    layer = {str(100 + k): (None, None, 150 + k % 40, None, None, 7) for k in range(MIN_TABAQA_N)}
+    n = bio(**layer, **{"1": (None, None, None, None, None, 7),  # teacher: death from tabaqa
+                        "2": (140, "140", 200, "200", None)})    # student: documented
+    f = feasibility(edges((1, 2)), lifespans(n))
+    assert f.chronology.item() == "consistent"
+    assert pd.isna(f.overlap.item()) and pd.isna(f.student_age_at_teacher_death.item())

@@ -27,6 +27,7 @@ from itertools import pairwise
 import numpy as np
 import pandas as pd
 
+from .history import weighted_median
 from .lifespan import estimate
 from .subgraph import _plain, _short
 
@@ -40,8 +41,10 @@ ERAS = (
     {"name": "After Baghdad's fall", "from": 656, "to": 1000},
 )
 STOPS_PER_ROLE = 8
-#: Youngest age to hear: the 5th percentile of the documented ages of students
-#: at their teacher's death (``history.summary``) is 5.
+#: Youngest age to hear: five, the classical threshold (al-Bukhārī's chapter on
+#: when a child's hearing is sound, after Maḥmūd b. al-Rabīʿ's memory at five). It
+#: sits below the data: the 5th percentile of documented students' ages at
+#: their teacher's death is 8 (``history.summary``).
 A_HEAR = 5
 #: Youngest age to transmit, a modelling choice: twenty, the age al-Rāmahurmuzī
 #: reports some held sufficient (he himself preferred fifty).
@@ -72,12 +75,6 @@ def phases(birth: float, death: float, hearing: tuple[float, float] | None,
     return merged
 
 
-def _wmedian(values: pd.Series, weights: pd.Series) -> float:
-    order = np.argsort(values.to_numpy())
-    v, w = values.to_numpy()[order], weights.to_numpy()[order]
-    return float(v[np.searchsorted(np.cumsum(w), w.sum() / 2)])
-
-
 def _stops(links: pd.DataFrame, role: str, other: str, names: pd.Series,
            homes: pd.Series, place_names: pd.Series) -> list[dict]:
     placed = links.assign(uri=links[other].map(homes)).dropna(subset=["uri"])
@@ -85,7 +82,7 @@ def _stops(links: pd.DataFrame, role: str, other: str, names: pd.Series,
     for uri, grp in placed.groupby("uri"):
         top = grp.sort_values("n_chains", ascending=False)[other].head(2)
         rows.append({"role": role, "uri": uri, "place": place_names.get(uri, uri),
-                     "year": round(_wmedian(grp.year, grp.n_chains), 1),
+                     "year": round(weighted_median(grp.year, grp.n_chains), 1),
                      "from": round(float(grp.year.min()), 1),
                      "to": round(float(grp.year.max()), 1),
                      "n_chains": int(grp.n_chains.sum()), "n_people": int(grp[other].nunique()),

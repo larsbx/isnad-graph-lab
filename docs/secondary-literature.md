@@ -41,7 +41,7 @@ one of three statuses:
     elevated (ʿālī) isnads.
   - We cited these from memory and did not check the pages.
 - We found no published corpus-scale measurement of teacher–student age gaps.
-  `student_age_at_teacher_death` measures it: median 33 years; 9.2% under 10.
+  `student_age_at_teacher_death` measures it: median 33 years; 6.6% under 10.
 
 **Geography and riḥla**
 
@@ -80,8 +80,8 @@ We found no automated common-link detection in print; `common_links` does it.
 | claim in the literature | this graph |
 |---|---|
 | the hub moves Hijaz → Iraq → Baghdad → Khurasan/Jibal → Syria (Romanov; Alam & Schneider; Al‑Absi et al.) | busiest teacher homes by century: المدينة → الكوفة → بغداد → نيسابور → إصبهان → دمشق (`history.hubs`) |
-| the riḥla peaks in the 2nd–3rd centuries | same-city share is lowest in the 3rd century (28%) |
-| children's hearing keeps chains short (Bulliet 1983) | 9.2% of documented links have a student under 10 at the teacher's death |
+| the riḥla peaks in the 2nd–3rd centuries | same-city share is lowest in the 3rd century (28%), and the chain-weighted distance between homes rises from 239 km to 619 km |
+| children's hearing keeps chains short (Bulliet 1983) | 6.6% of documented links have a student under 10 at the teacher's death |
 
 ## Next witnesses
 

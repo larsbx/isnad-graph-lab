@@ -7,6 +7,7 @@ happened — and counted by the chains it carries.
 
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 
 VERDICTS = ("consistent", "implausible", "impossible", "conflict", "unknown")
@@ -17,6 +18,17 @@ def century(year: pd.Series) -> pd.Series:
     return ((year - 1) // 100 + 1).astype("Int16")
 
 
+def weighted_median(values: pd.Series, weights: pd.Series) -> float:
+    """The lower weighted median of the non-missing values; NaN if there are none."""
+    keep = values.notna() & weights.gt(0)
+    v, w = values[keep].to_numpy(float), weights[keep].to_numpy(float)
+    if not v.size:
+        return float("nan")
+    order = np.argsort(v, kind="stable")
+    cum = np.cumsum(w[order])
+    return float(v[order][np.searchsorted(cum, cum[-1] / 2)])
+
+
 def _dated(edges: pd.DataFrame) -> pd.DataFrame:
     return edges.assign(century=century(edges.ante_quem)).dropna(subset=["century"])
 
@@ -24,7 +36,7 @@ def _dated(edges: pd.DataFrame) -> pd.DataFrame:
 def century_profile(edges: pd.DataFrame) -> pd.DataFrame:
     """Per century: edges, chains, verdict shares, and how local transmission is —
     the share of chains between narrators of one city (where both are placed in
-    one), and the median distance between homes."""
+    one), and the chain-weighted median distance between homes."""
     e = _dated(edges)
     w, local = e.n_chains, e.same_city
     by = e.assign(**{f"_{v}": w * e.chronology.eq(v) for v in VERDICTS},
@@ -32,9 +44,10 @@ def century_profile(edges: pd.DataFrame) -> pd.DataFrame:
                   ).groupby("century")
     s = by.agg(n_edges=("src", "size"), n_chains=("n_chains", "sum"),
                _local=("_local", "sum"), _placed=("_placed", "sum"),
-               median_km=("distance_km", "median"),
                **{f"_{v}": (f"_{v}", "sum") for v in VERDICTS})
-    return (s.assign(same_city_share=s._local / s._placed,
+    km = by[["distance_km", "n_chains"]].apply(
+        lambda d: weighted_median(d.distance_km, d.n_chains))
+    return (s.assign(median_km=km, same_city_share=s._local / s._placed,
                      **{f"{v}_share": s[f"_{v}"] / s.n_chains for v in VERDICTS})
             .loc[:, lambda d: ~d.columns.str.startswith("_")].reset_index())
 

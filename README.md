@@ -346,14 +346,14 @@ sparse. Only `impossible` raises the `CHRONOLOGY` defect in the assessment.
 Per edge, `ante_quem` = min(d_hi(t), d_hi(s)): the last year the transmission
 can be from, used to date it.
 
-`student_age_at_teacher_death` is computed on the 79,476 documented,
+`student_age_at_teacher_death` is computed on the 59,693 documented,
 consistent links:
 
 | p5 | p25 | p50 | p75 | p95 |
 |---:|---:|---:|---:|---:|
-| 5 | 21 | 33 | 49 | 84 |
+| 8 | 22 | 33 | 48 | 85 |
 
-In 9.2% of them the student was under 10 when the teacher died. This is
+In 6.6% of them the student was under 10 when the teacher died. This is
 Bulliet's age structure, the hearing of children that made isnads short
 (ʿuluww).
 
@@ -383,15 +383,15 @@ conquests.
 Each link is dated by century of its `ante_quem` and weighted by the chains it
 carries.
 
-| c. AH | links | chains | same city | median km | lifespans cannot meet | busiest teacher homes |
+| c. AH | links | chains | same city | median km (chain-weighted) | lifespans cannot meet | busiest teacher homes |
 |---:|---:|---:|---:|---:|---:|---|
-| 1 | 45,673 | 1.42M | 48% | 962 | 2.3% | المدينة، الكوفة، البصرة، مكة، اليمن |
-| 2 | 108,263 | 1.59M | 42% | 450 | 0.8% | الكوفة، المدينة، البصرة، مكة، بغداد |
-| 3 | 92,839 | 0.85M | 28% | 480 | 1.5% | بغداد، البصرة، الكوفة، دمشق، مصر |
-| 4 | 30,483 | 347k | 36% | 684 | 2.4% | بغداد، دمشق، نيسابور، إصبهان، البصرة |
-| 5 | 10,795 | 188k | 31% | 257 | 1.7% | نيسابور، بغداد، دمشق، إصبهان، شيراز |
-| 6 | 4,601 | 42k | 52% | 684 | 1.8% | إصبهان، بغداد، دمشق، مكة، نيسابور |
-| 7 | 3,598 | 22k | 12% | 619 | 3.2% | دمشق، الموصل، بغداد، إصبهان، الشام |
+| 1 | 45,673 | 1.42M | 48% | 344 | 2.3% | المدينة، الكوفة، البصرة، مكة، اليمن |
+| 2 | 108,263 | 1.59M | 42% | 239 | 0.8% | الكوفة، المدينة، البصرة، مكة، بغداد |
+| 3 | 92,839 | 0.85M | 28% | 619 | 1.5% | بغداد، البصرة، الكوفة، دمشق، مصر |
+| 4 | 30,483 | 347k | 36% | 653 | 2.4% | بغداد، دمشق، نيسابور، إصبهان، البصرة |
+| 5 | 10,795 | 188k | 31% | 103 | 1.7% | نيسابور، بغداد، دمشق، إصبهان، شيراز |
+| 6 | 4,601 | 42k | 52% | 341 | 1.8% | إصبهان، بغداد، دمشق، مكة، نيسابور |
+| 7 | 3,598 | 22k | 12% | 747 | 3.2% | دمشق، الموصل، بغداد، إصبهان، الشام |
 
 Two patterns stand out:
 
@@ -400,8 +400,11 @@ Two patterns stand out:
   in the secondary literature.
 * The same-city share falls to its minimum in the 3rd century, the age of the
   riḥla.
+* The chain-weighted distance between homes rises steeply from the 2nd
+  century (239 km) to the 3rd (619 km).
 
-The 1st century's distances are inflated by companions' later homes.
+All 1st-century figures place companions at the homes they settled in after
+the conquests.
 `docs/secondary-literature.md` lists the studies and datasets this layer is
 measured against.
 

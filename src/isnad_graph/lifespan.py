@@ -106,7 +106,8 @@ def lifespans(narrators: pd.DataFrame) -> pd.DataFrame:
 
 def feasibility(edges: pd.DataFrame, spans: pd.DataFrame) -> pd.DataFrame:
     """Edges with ``chronology`` (see module doc), ``overlap`` of the documented
-    lifespans, ``student_age_at_teacher_death`` (years; NA unless documented) and
+    lifespans and ``student_age_at_teacher_death`` (years; NA unless every date
+    they use is documented: births by record or age, deaths by record), and
     ``ante_quem``, the earlier death: the last year the transmission can be from."""
     s = spans.set_index("id")
     t, u = (s.reindex(edges[end].to_numpy()).reset_index(drop=True) for end in ("src", "dst"))
@@ -121,6 +122,7 @@ def feasibility(edges: pd.DataFrame, spans: pd.DataFrame) -> pd.DataFrame:
 
     mid = lambda x, k: (x[f"{k}_lo"] + x[f"{k}_hi"]) / 2  # noqa: E731
     bt, bu = (mid(x, "birth").where(documented(x)) for x in (t, u))
+    dt, du = (mid(x, "death").where(x.death_basis.eq("recorded")) for x in (t, u))
     verdict = np.select(
         [t.death_lo.isna() | u.death_lo.isna(),
          t.bio_conflict.fillna(False) | u.bio_conflict.fillna(False),
@@ -129,8 +131,8 @@ def feasibility(edges: pd.DataFrame, spans: pd.DataFrame) -> pd.DataFrame:
     keep = lambda v: pd.Series(v.to_numpy(), index=edges.index)  # noqa: E731
     return edges.assign(
         chronology=verdict,
-        overlap=keep(np.minimum(mid(t, "death"), mid(u, "death")) - np.maximum(bt, bu)),
-        student_age_at_teacher_death=keep(mid(t, "death") - bu),
+        overlap=keep(np.minimum(dt, du) - np.maximum(bt, bu)),
+        student_age_at_teacher_death=keep(dt - bu),
         ante_quem=keep(np.minimum(t.death_hi, u.death_hi)),
     )
 
