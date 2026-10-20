@@ -1,0 +1,86 @@
+{
+  "abudawud": {
+    "alignments": 5237,
+    "distinct_source_reports": 4555,
+    "entries_in_many_to_one": 1216,
+    "score_one": 62,
+    "median_score": 0.8545,
+    "equal_source_positions": 671,
+    "strict_order_share": 0.8697478991596639,
+    "non_strict_order_share": 0.9978991596638656,
+    "cross_recension_grade_attributions": 0,
+    "unmatched_grade_attributions": 129
+  },
+  "bukhari": {
+    "alignments": 7372,
+    "distinct_source_reports": 6845,
+    "entries_in_many_to_one": 995,
+    "score_one": 53,
+    "median_score": 0.84545,
+    "equal_source_positions": 477,
+    "strict_order_share": 0.9280965947632615,
+    "non_strict_order_share": 0.9928096594763262,
+    "cross_recension_grade_attributions": 0,
+    "unmatched_grade_attributions": 0
+  },
+  "ibnmajah": {
+    "alignments": 4220,
+    "distinct_source_reports": 4199,
+    "entries_in_many_to_one": 41,
+    "score_one": 7,
+    "median_score": 0.7917,
+    "equal_source_positions": 14,
+    "strict_order_share": 0.9950225171841669,
+    "non_strict_order_share": 0.9983408390613889,
+    "cross_recension_grade_attributions": 0,
+    "unmatched_grade_attributions": 464
+  },
+  "malik": {
+    "alignments": 1755,
+    "distinct_source_reports": 1723,
+    "entries_in_many_to_one": 61,
+    "score_one": 6,
+    "median_score": 0.8367,
+    "equal_source_positions": 30,
+    "strict_order_share": 0.9817559863169898,
+    "non_strict_order_share": 0.9988597491448119,
+    "cross_recension_grade_attributions": 0,
+    "unmatched_grade_attributions": 103
+  },
+  "muslim": {
+    "alignments": 7022,
+    "distinct_source_reports": 5176,
+    "entries_in_many_to_one": 3329,
+    "score_one": 27,
+    "median_score": 0.7903,
+    "equal_source_positions": 1833,
+    "strict_order_share": 0.7365047714000854,
+    "non_strict_order_share": 0.9975786924939467,
+    "cross_recension_grade_attributions": 0,
+    "unmatched_grade_attributions": 0
+  },
+  "nasai": {
+    "alignments": 4305,
+    "distinct_source_reports": 4149,
+    "entries_in_many_to_one": 305,
+    "score_one": 0,
+    "median_score": 0.6707,
+    "equal_source_positions": 53,
+    "strict_order_share": 0.8880111524163569,
+    "non_strict_order_share": 0.9003252788104089,
+    "cross_recension_grade_attributions": 12827,
+    "unmatched_grade_attributions": 4218
+  },
+  "tirmidhi": {
+    "alignments": 3818,
+    "distinct_source_reports": 3680,
+    "entries_in_many_to_one": 264,
+    "score_one": 2,
+    "median_score": 0.76305,
+    "equal_source_positions": 130,
+    "strict_order_share": 0.9620120513492272,
+    "non_strict_order_share": 0.9960702122085408,
+    "cross_recension_grade_attributions": 0,
+    "unmatched_grade_attributions": 541
+  }
+}
