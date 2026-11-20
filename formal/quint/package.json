@@ -3,6 +3,6 @@
   "private": true,
   "description": "Pinned Quint toolchain for the isnad transmission model",
   "devDependencies": {
-    "@informalsystems/quint": "0.33.0"
+    "@informalsystems/quint": "0.33.1"
   }
 }
