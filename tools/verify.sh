@@ -2,8 +2,10 @@
 # The gate: every claim the repository makes is checked here, in this order.
 #   1. vendored code matches its pins;  2. lint;  3. tests (incl. vector freshness)
 #   4. Lean: the theorems build, use only the standard axioms, and the Python
-#      verdicts conform to the Lean model on the committed graph
-#   5. Quint: unit runs, a seeded simulation, and Apalache bounded model checking
+#      verdicts, phases and common links conform to the Lean model on the
+#      committed graph
+#   5. Quint: unit runs, non-vacuity witnesses, a seeded simulation, and
+#      Apalache bounded model checking
 # Usage: tools/verify.sh [--quick]   (--quick: skip pytest and Apalache)
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -25,20 +27,23 @@ step "lean: axiom audit";  (cd formal/lean && lake env lean Audit.lean)
 step "lean: conformance";  (cd formal/lean && lake exe conformance ../vectors/conformance.json)
 
 QB="--backend $(pin quint backend) --seed $(pin quint seed)"
+SIM="--max-samples=2000 --max-steps=10"
+quint() { (cd formal/quint && npx quint "$@"); }
 step "quint: typecheck and tests"
-(cd formal/quint && npx quint typecheck transmission.qnt && npx quint test $QB transmission.qnt)
-step "quint: non-vacuity (a three-link isnad is reachable)"
-if (cd formal/quint && npx quint run transmission.qnt $QB --invariant=noThreeLinkIsnad \
-      --max-samples=2000 --max-steps=10 --verbosity=0); then
-  echo "vacuous: the simulator never reached a three-link isnad" >&2; exit 1
-fi
+quint typecheck transmission.qnt && quint test $QB transmission.qnt
+step "quint: non-vacuity (the simulator reaches each witness)"
+for w in noThreeLinkIsnad noGap noTadlis noHasan; do
+  if quint run transmission.qnt $QB $SIM --invariant=$w --verbosity=0 >/dev/null 2>&1; then
+    echo "vacuous: the simulator never violated $w" >&2; exit 1
+  fi
+  echo "reached: not $w"
+done
 step "quint: simulation"
-(cd formal/quint && npx quint run transmission.qnt $QB --invariant=safety --max-samples=2000 --max-steps=10 --verbosity=1)
+quint run transmission.qnt $QB $SIM --invariant=safety --verbosity=1
 if [ "$QUICK" != "--quick" ]; then
   step "quint: Apalache bounded model checking"
   APA_VERSION="$(pin apalache version)"; APA_STEPS="$(pin apalache max_steps)"
-  (cd formal/quint && npx quint verify transmission.qnt --invariant=safety \
-     --apalache-version "$APA_VERSION" --max-steps "$APA_STEPS" --verbosity=1 \
-   && rm -rf _apalache-out)
+  quint verify transmission.qnt --invariant=safety --apalache-version "$APA_VERSION" \
+    --max-steps "$APA_STEPS" --verbosity=1 && rm -rf formal/quint/_apalache-out
 fi
 step "all checks passed"

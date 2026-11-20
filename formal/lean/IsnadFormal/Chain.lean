@@ -88,19 +88,11 @@ theorem sahih_iff (c : Chain) :
     simp [Verdict.code] at this
 
 /-- **The weakest link.** Joining two chains never gives a better verdict than either. -/
-theorem append_no_better (c d : Chain) : c.verdict.code ≤ (c.append d).verdict.code := by
-  unfold Chain.verdict structuralVerdict Chain.append Chain.worst
-  simp only [effRank, List.map_append, worstOf_append]
-  have hm : (rankVerdict (worstOf (c.ranks.map effRank))).code ≤
-      (rankVerdict (max (worstOf (c.ranks.map effRank)) (worstOf (d.ranks.map effRank)))).code :=
-    rankVerdict_mono (Nat.le_max_left _ _)
-  cases hc : c.gap <;> cases hcd : (Chain.gap ⟨c.ranks ++ d.ranks, c.gaps ++ d.gaps,
-      c.headGap || d.headGap, c.tailGap || d.tailGap⟩)
-  all_goals simp only [Bool.false_eq_true, ite_false, ite_true, Verdict.worse_code]
-  all_goals simp only [Chain.gap, List.any_append, Bool.or_eq_true, Bool.or_eq_false_iff] at hc hcd
-  all_goals first | omega | (simp_all; done) | skip
-  all_goals simp [Verdict.code] at *
-  all_goals omega
+theorem append_no_better (c d : Chain) : c.verdict.code ≤ (c.append d).verdict.code :=
+  structuralVerdict_mono
+    (by simp only [Chain.worst, Chain.append, List.map_append, worstOf_append]; omega)
+    (by simp only [Chain.gap, Chain.append, List.any_append, Bool.or_eq_true]
+        rintro ((h | h) | h) <;> simp [h])
 
 /-- A *mursal* (the Companion dropped: a gap at the head) is never *ṣaḥīḥ*. -/
 theorem mursal_not_sahih (c : Chain) (h : c.headGap = true) : c.verdict ≠ .sahih := by

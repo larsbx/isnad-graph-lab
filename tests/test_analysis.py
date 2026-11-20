@@ -2,7 +2,7 @@ from itertools import pairwise
 
 import pandas as pd
 
-from isnad_graph.analysis import common_links
+from isnad_graph.analysis import bundle_nodes, common_links, strand
 from isnad_graph.schema import PROPHET_ID
 
 U, A, M, Y, X = 10, 11, 12, 13, 14  # «إنما الأعمال بالنيات»: ʿUmar → ʿAlqama → al-Taymī → Yaḥyā
@@ -41,3 +41,21 @@ def test_a_pure_single_strand_has_no_common_link():
 def test_thin_bundles_are_not_called():
     cl = common_links(links_of([[PROPHET_ID, U, Y, 100], [PROPHET_ID, U, Y, 101]]))
     assert not cl.is_common_link.any()  # fan-out at Y, but only 2 chains
+
+
+def _step(paths):
+    return bundle_nodes(links_of(paths))[["top_share", "n_chains", "top_student"]].to_dict("index")
+
+
+def test_the_strand_runs_from_the_companion_to_the_first_branching():
+    paths = [[PROPHET_ID, U, A, M, Y, 100 + k] for k in range(5)]
+    assert strand(_step(paths), 1, U, 0.8) == [U, A, M, Y]
+
+
+def test_the_busiest_student_is_the_smallest_id_among_ties():
+    paths = [[PROPHET_ID, U, Y, 100], [PROPHET_ID, U, X, 101], [PROPHET_ID, U, M, 102]]
+    assert _step(paths)[(1, U, U)]["top_student"] == M
+
+
+def test_a_cycle_ends_the_strand():
+    assert strand(_step([[PROPHET_ID, U, A, U, A]] * 3), 1, U, 0.8) == [U, A]
