@@ -10,6 +10,16 @@
   ``[birth_lo, death_lo, death_hi, birth_documented, death_recorded, conflict]``.
   For each verdict, links are taken evenly spaced over the edges in key order,
   plus every boundary link where a bound comparison is an equality.
+* ``phases``: ``[birth, death, hearing | null, teaching | null, phases]`` of a
+  lifeline in half-years (every estimate is a multiple of ½), each phase
+  ``[kind, from, to]``, as ``lives.phases`` computes it; narrators evenly
+  spaced by id, plus every one where two of the six bounds coincide.
+* ``common_link``: ``[companion, chains, strand, common_link | null]`` of a
+  bundle, the chains as narrator ids below the Prophet, as
+  ``analysis.strand`` and ``analysis.common_link`` compute them with their
+  default ``dominance`` and ``min_chains`` (in ``parameters``); bundles evenly
+  spaced in key order, plus every one whose strand meets a share exactly at
+  ``dominance`` or a branching node with exactly ``min_chains`` chains.
 
 The selection is a pure function of the graph, so the file is reproducible
 byte for byte; ``tests/test_formal_vectors.py`` checks that it is current.
@@ -18,14 +28,21 @@ byte for byte; ``tests/test_formal_vectors.py`` checks that it is current.
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
+from fractions import Fraction
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
+from isnad_graph.analysis import bundle_nodes, common_link, strand
 from isnad_graph.assess import Defect, structural_verdict
+from isnad_graph.build import explode_links
 from isnad_graph.graph import IsnadGraph
+from isnad_graph.lifespan import estimate
+from isnad_graph.lives import link_windows, phases
+from isnad_graph.schema import PROPHET_ID, Provenance
 
 PER_VERDICT = 1500
 BOUNDARY = 1500
@@ -49,6 +66,11 @@ def verdict_rows(chains: pd.DataFrame) -> list[list]:
     return domain + [[_int(w), bool(g), int(v)] for w, g, v in stored.itertuples(index=False)]
 
 
+def _evenly(n: int, k: int) -> np.ndarray:
+    """``k`` positions evenly spaced over ``range(n)``."""
+    return np.unique(np.linspace(0, n - 1, min(k, n)).round().astype(int))
+
+
 def _life(row: pd.Series) -> list:
     return [_int(row.birth_lo), _int(row.death_lo), _int(row.death_hi),
             row.birth_basis in ("recorded", "age"), row.death_basis == "recorded",
@@ -60,8 +82,7 @@ def chronology_rows(narrators: pd.DataFrame, edges: pd.DataFrame,
     n = narrators.set_index("id")[["birth_lo", "death_lo", "death_hi", "birth_basis",
                                    "death_basis", "bio_conflict"]]
     e = edges.sort_values(["src", "dst"], kind="stable").reset_index(drop=True)
-    picks = [np.unique(np.linspace(0, len(g) - 1, min(per_verdict, len(g))).round().astype(int))
-             for _, g in e.groupby("chronology", sort=True)]
+    picks = [_evenly(len(g), per_verdict) for _, g in e.groupby("chronology", sort=True)]
     chosen = pd.concat([e[e.chronology.eq(v)].iloc[p] for (v, _), p in
                         zip(e.groupby("chronology", sort=True), picks, strict=True)])
     t, s = n.reindex(e.src).reset_index(drop=True), n.reindex(e.dst).reset_index(drop=True)
@@ -72,14 +93,70 @@ def chronology_rows(narrators: pd.DataFrame, edges: pd.DataFrame,
             for a, b, v in zip(chosen.src, chosen.dst, chosen.chronology, strict=True)]
 
 
+def _half(v: float) -> int:
+    if not float(2 * v).is_integer():
+        raise ValueError(f"{v!r} is not a multiple of ½: the Lean model counts half-years")
+    return int(2 * v)
+
+
+def phase_rows(narrators: pd.DataFrame, edges: pd.DataFrame,
+               per: int = PER_VERDICT, boundary: int = BOUNDARY) -> list[list]:
+    n = estimate(narrators).set_index("id")
+    placed = link_windows(n, edges).query("start <= end")
+    win = lambda end: placed.groupby(end).agg(lo=("start", "min"), hi=("end", "max"))  # noqa: E731
+    life = (n[["birth_est", "death_est"]].dropna().sort_index()
+            .join(win("dst").add_prefix("h_")).join(win("src").add_prefix("t_")))
+    six = np.sort(life.to_numpy(float), axis=1)  # NaN last; NaN never equals
+    ties = life.index[(np.diff(six, axis=1) == 0).any(axis=1)][:boundary]
+    chosen = life.loc[sorted({*life.index[_evenly(len(life), per)], *ties})]
+    pair = lambda lo, hi: None if np.isnan(lo) else (float(lo), float(hi))  # noqa: E731, as lives.span
+    half = lambda w: w and [_half(w[0]), _half(w[1])]  # noqa: E731
+    return [[_half(b), _half(d), half(h), half(t),
+             [[p["kind"], _half(p["from"]), _half(p["to"])] for p in phases(b, d, h, t)]]
+            for b, d, h0, h1, t0, t1 in chosen.itertuples(index=False)
+            for h, t in [(pair(h0, h1), pair(t0, t1))]]
+
+
+def _defaults() -> tuple[Fraction, int]:
+    p = inspect.signature(common_link).parameters
+    return Fraction(str(p["dominance"].default)), p["min_chains"].default
+
+
+def common_link_rows(chains: pd.DataFrame, per: int = PER_VERDICT,
+                     boundary: int = BOUNDARY) -> list[list]:
+    dom, min_chains = _defaults()
+    rec = chains[chains.group_id.notna() & chains.provenance.eq(Provenance.RECORDED)
+                 & chains.path.map(len).ge(2)]
+    nodes = bundle_nodes(explode_links(rec))
+    step = nodes[["top_share", "n_chains", "top_student", "top_n"]].to_dict("index")
+    keys = nodes.index.droplevel("src").unique().sort_values()
+    met = lambda g, b: filter(None, (step.get((g, b, x))  # noqa: E731
+                                     for x in strand(step, g, b, float(dom))))
+    edge = [(g, b) for g, b in keys if any(
+        r["top_n"] * dom.denominator == dom.numerator * r["n_chains"] or r["n_chains"] == min_chains
+        for r in met(g, b))][:boundary]
+    chosen = sorted({*keys[_evenly(len(keys), per)], *edge})
+    below = lambda p: [int(x) for x in (p[1:] if p[0] == PROPHET_ID else p)]  # noqa: E731
+    paths = rec.assign(bundle=rec.path.str[1]).groupby(["group_id", "bundle"]).path
+    return [[int(b), [below(p) for p in paths.get_group((g, b))],
+             [int(x) for x in strand(step, g, b, float(dom))],
+             None if (cl := common_link(step, g, b, float(dom), min_chains)) is None else int(cl)]
+            for g, b in chosen]
+
+
 def vectors(g: IsnadGraph) -> dict:
-    return {"verdict": verdict_rows(g.frame("chains")),
-            "chronology": chronology_rows(g.frame("narrators"), g.frame("transmissions"))}
+    dom, min_chains = _defaults()
+    return {"parameters": {"dominance": [dom.numerator, dom.denominator], "min_chains": min_chains},
+            "verdict": verdict_rows(g.frame("chains")),
+            "chronology": chronology_rows(g.frame("narrators"), g.frame("transmissions")),
+            "phases": phase_rows(g.frame("narrators"), g.frame("transmissions")),
+            "common_link": common_link_rows(g.frame("chains"))}
 
 
 def render(data: dict) -> str:
-    rows = lambda k: ",\n".join(json.dumps(r, separators=(",", ":")) for r in data[k])  # noqa: E731
-    return "{\n" + ",\n".join(f'"{k}": [\n{rows(k)}\n]' for k in data) + "\n}\n"
+    rows = lambda v: ",\n".join(json.dumps(r, separators=(",", ":")) for r in v)  # noqa: E731
+    one = lambda v: f"[\n{rows(v)}\n]" if isinstance(v, list) else json.dumps(v)  # noqa: E731
+    return "{\n" + ",\n".join(f'"{k}": {one(v)}' for k, v in data.items()) + "\n}\n"
 
 
 def main() -> None:
@@ -90,7 +167,7 @@ def main() -> None:
     a.out.parent.mkdir(parents=True, exist_ok=True)
     data = vectors(IsnadGraph.load(a.graph))
     a.out.write_text(render(data), encoding="utf-8")
-    print(f"{a.out}: {len(data['verdict'])} verdict, {len(data['chronology'])} chronology rows")
+    print(f"{a.out}: " + ", ".join(f"{len(v)} {k}" for k, v in data.items() if isinstance(v, list)))
 
 
 if __name__ == "__main__":

@@ -207,13 +207,17 @@ def chain_modes(con: sqlite3.Connection, chains: pd.DataFrame,
 
 
 def explode_links(chains: pd.DataFrame) -> pd.DataFrame:
+    """One row per link of every chain, in chain order: ``depth`` counts from the head."""
     cols = ["chain_id", "hadith_id", "book_id", "group_id", "provenance"]
-    return pd.DataFrame(
-        (*meta, s, d, f, m, i)
-        for *meta, path, links, modes in
-        chains[[*cols, "path", "links", "modes"]].itertuples(index=False)
-        for i, (s, d, f, m) in enumerate(zip(path[:-1], path[1:], links, modes, strict=True))
-    ).set_axis([*cols, "src", "dst", "flag", "mode", "depth"], axis=1)
+    k = chains.links.map(len).to_numpy(np.int64)
+    if not ((chains.path.map(len) - 1 == k) & (chains.modes.map(len) == k)).all():
+        raise ValueError("every chain needs one flag and one mode per link")
+    flat = lambda col, cut: np.concatenate([np.asarray(v, np.int64)[cut]  # noqa: E731
+                                            for v in chains[col]] or [np.empty(0, np.int64)])
+    return chains[cols].iloc[np.repeat(np.arange(len(chains)), k)].reset_index(drop=True).assign(
+        src=flat("path", slice(None, -1)), dst=flat("path", slice(1, None)),
+        flag=flat("links", slice(None)), mode=flat("modes", slice(None)),
+        depth=np.arange(k.sum()) - np.repeat(np.cumsum(k) - k, k))
 
 
 # ── nodes ───────────────────────────────────────────────────────────────────

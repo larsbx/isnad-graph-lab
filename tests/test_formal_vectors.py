@@ -40,3 +40,13 @@ def test_vectors_cover_every_verdict():
         "unknown", "conflict", "impossible", "implausible", "consistent"}
     assert {(row[0], row[1]) for row in data["verdict"]} >= {
         (r, g) for r in [None, *range(1, 13)] for g in (False, True)}
+
+
+def test_vectors_cover_every_phase_and_both_common_link_outcomes():
+    data = json.loads(VECTORS.read_text(encoding="utf-8"))
+    assert {p[0] for row in data["phases"] for p in row[4]} == {
+        "quiet", "hearing", "teaching", "both"}
+    assert {(row[2] is None, row[3] is None) for row in data["phases"]} == {
+        (False, False), (False, True), (True, False), (True, True)}
+    assert {row[3] is None for row in data["common_link"]} == {True, False}
+    assert max(len(row[2]) for row in data["common_link"]) >= 4  # strands of several links

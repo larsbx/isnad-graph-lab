@@ -92,6 +92,12 @@ theorem rankVerdict_acceptable {r : Nat} : (rankVerdict r).acceptable ↔ r ≤ 
   all_goals simp only [Verdict.code]
   all_goals omega
 
+/-- A weaker rank or an added gap never improves the verdict. -/
+theorem structuralVerdict_mono {w w' : Nat} {g g' : Bool} (hw : w ≤ w') (hg : g = true → g' = true) :
+    (structuralVerdict (some w) g).code ≤ (structuralVerdict (some w') g').code := by
+  have := rankVerdict_mono hw
+  cases g <;> cases g' <;> simp_all [structuralVerdict, effRank, Verdict.worse_code] <;> omega
+
 /-- An unranked narrator is never enough for *ṣaḥīḥ*: he is *majhūl*. -/
 theorem unknown_not_sahih (gap : Bool) : structuralVerdict none gap ≠ .sahih := by
   cases gap <;> decide

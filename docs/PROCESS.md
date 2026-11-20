@@ -16,7 +16,7 @@ toolchains are pinned.
 | definition | `formal/lean/IsnadFormal/*.lean`, module docs | the classical rule, with its source | — |
 | theorem | the same files | the formal statement has the properties the tradition claims for it | Lean 4.34.1, core only |
 | axiom audit | `formal/lean/Audit.lean` | no `sorry`; only `propext`, `Classical.choice`, `Quot.sound` | Lean |
-| conformance | `formal/lean/Conformance.lean`, `formal/vectors/` | the Python verdicts on the committed graph equal the Lean model's | Lean executable |
+| conformance | `formal/lean/Conformance.lean`, `formal/vectors/` | the Python verdicts, lifeline phases and common links on the committed graph equal the Lean model's | Lean executable |
 | process model | `formal/quint/transmission.qnt` | invariants over every reachable state of a transmission | Quint 0.33.0, Apalache 0.62.1 (TLA+) |
 | implementation | `src/isnad_graph/` | unit, property and regression tests | pytest |
 
@@ -33,17 +33,29 @@ toolchains are pinned.
 | a mudallis is heard only through an explicit formula | al-Shāfiʿī, *al-Risāla* | `shafiiAccepts` | `tadlis_iff_rejected`, `explicit_clears` |
 | the graph's chronology verdict | `lifespan.feasibility` | `chronology` | `impossible_sound` |
 | the lifeline window with minimum ages | `lives.lifeline` | `window_iff` | `window_iff` |
+| the lifeline's phases | `lives.phases` | `phases` | `phases_partition` (tiling, maximality, pointwise soundness) |
+| the common link lies on every chain of its bundle | Schacht, *Origins*, p. 172; Juynboll, *Muslim Tradition*, ch. 5 | `SingleStrand`, `strand`, `commonLink` | `strand_agrees`, `common_link_on_chain` |
 
-The Quint model states the same conditions over time:
+The Quint model states the same conditions over time. A student names his
+teacher explicitly (samāʿ) or ambiguously (ʿan), or commits irsāl and names his
+teacher's teacher; one narrator is a mudallis. Its invariants:
 
 * `rootedAtSource`;
-* `ittisal`: every link a hearing with both alive;
+* `prefixClosed`: the isnads form a tree, as `CommonLink` assumes of a bundle;
+* `ittisal`: every link a hearing with both alive, and every gap hides a real
+  hearing from the dropped narrator;
 * `chronologicalOrder`;
-* `refutationSound`: no hearing between a refuted pair.
+* `refutationSound`: no hearing between a refuted pair (`refuted_sound`);
+* `weakestLink`: a student's isnad grades no better than his teacher's
+  (`append_no_better`);
+* `gapCaps`: a gap makes it ḍaʿīf or worse (`gap_caps`);
+* `sahihExactly`: ṣaḥīḥ iff no gap and all ranks 1–3 (`sahih_iff`);
+* `tadlisInherited`: an ʿan from a mudallis taints every isnad below it
+  (`tadlis_iff_rejected`).
 
 Apalache checks them for every trace up to the pinned bound. The gate also
-checks non-vacuity: the simulator must reach a three-link isnad, or the gate
-fails.
+checks non-vacuity: the simulator must reach a three-link isnad, a gap, a
+tadlīs defect and a ḥasan isnad, or the gate fails.
 
 ## The order of work
 

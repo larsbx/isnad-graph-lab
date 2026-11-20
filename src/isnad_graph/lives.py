@@ -75,6 +75,22 @@ def phases(birth: float, death: float, hearing: tuple[float, float] | None,
     return merged
 
 
+def link_windows(n: pd.DataFrame, links: pd.DataFrame) -> pd.DataFrame:
+    """The consistent links among ``links`` with their window ``[start, end]``
+    (empty when ``start > end``) and ``year``, its midpoint; ``n`` is
+    ``lifespan.estimate`` indexed by id."""
+    ok = links[links.chronology.eq("consistent")]
+    t, s = (n.reindex(ok[end].to_numpy()) for end in ("src", "dst"))
+    lo = np.maximum(t.birth_est.to_numpy(float) + A_TEACH, s.birth_est.to_numpy(float) + A_HEAR)
+    hi = np.minimum(t.death_est.to_numpy(float), s.death_est.to_numpy(float))
+    return ok.assign(year=(lo + hi) / 2, start=lo, end=hi)
+
+
+def span(placed: pd.DataFrame) -> tuple[float, float] | None:
+    """Earliest start to latest end of placed links: a hearing or teaching window."""
+    return (float(placed.start.min()), float(placed.end.max())) if len(placed) else None
+
+
 def _stops(links: pd.DataFrame, role: str, other: str, names: pd.Series,
            homes: pd.Series, place_names: pd.Series) -> list[dict]:
     placed = links.assign(uri=links[other].map(homes)).dropna(subset=["uri"])
@@ -99,17 +115,12 @@ def lifeline(g, narrator_id: int, *, narrators: pd.DataFrame | None = None,
     p = places if places is not None else g.frame("places")
     x = n.loc[narrator_id]
     mine = e[e.src.eq(narrator_id) | e.dst.eq(narrator_id)]
-    ok = mine[mine.chronology.eq("consistent")]
-    t, s = (n.reindex(ok[end].to_numpy()) for end in ("src", "dst"))
-    lo = np.maximum(t.birth_est.to_numpy(float) + A_TEACH, s.birth_est.to_numpy(float) + A_HEAR)
-    hi = np.minimum(t.death_est.to_numpy(float), s.death_est.to_numpy(float))
-    ok = ok.assign(year=(lo + hi) / 2, start=lo, end=hi)
-    unplaced = int((lo > hi).sum())
-    ok = ok[lo <= hi]
+    ok = link_windows(n, mine)
+    unplaced = int((ok.start > ok.end).sum())
+    ok = ok[ok.start <= ok.end]
     heard, taught = ok[ok.dst.eq(narrator_id)], ok[ok.src.eq(narrator_id)]
     names, homes = n.name, n.home_uri
     place_names = p.set_index("uri").name
-    window = lambda f: (float(f.start.min()), float(f.end.max())) if len(f) else None  # noqa
     b, d = float(x.birth_est), float(x.death_est)
     basis = lambda k: {"lo": _plain(x[f"{k}_lo"]), "hi": _plain(x[f"{k}_hi"]),  # noqa: E731
                        "mid": _plain(x[f"{k}_est"]), "basis": x[f"{k}_basis"]}
@@ -121,7 +132,7 @@ def lifeline(g, narrator_id: int, *, narrators: pd.DataFrame | None = None,
         "home": x.home_place if isinstance(x.home_place, str) else None,
         "places": [place_names.get(u, u) for u in x.places],
         "death_place": place_names.get(x.death_uri) if isinstance(x.death_uri, str) else None,
-        "phases": phases(b, d, window(heard), window(taught)),
+        "phases": phases(b, d, span(heard), span(taught)),
         "stops": [*_stops(heard, "teacher", "src", names, homes, place_names),
                   *_stops(taught, "student", "dst", names, homes, place_names)],
         "n_links": len(mine), "n_unplaced": unplaced, "n_refuted": int(mine.chronology.isin(

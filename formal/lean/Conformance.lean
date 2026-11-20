@@ -12,7 +12,11 @@ with a mismatch, and prints the mismatches it found.
 * `verdict`: `[worst_rank | null, gap, expected_code]`, the full domain and
   every combination stored on a chain;
 * `chronology`: `[teacher, student, expected]`, each end
-  `[bLo, dLo, dHi, bDoc, dRec, conflict]`.
+  `[bLo, dLo, dHi, bDoc, dRec, conflict]`;
+* `phases`: `[birth, death, hearing | null, teaching | null, expected]` in
+  half-years, each expected phase `[kind, from, to]`;
+* `common_link`: `[companion, chains, strand, common_link | null]`, under
+  `parameters.dominance = [num, den]` and `parameters.min_chains`.
 -/
 
 open Lean Isnad
@@ -39,6 +43,28 @@ def chronologyRow (j : Json) : Except String (Bool × String) := do
   let want ← a[2]!.getStr?
   return (got == want, s!"{j.compress} → {got}")
 
+def window (j : Json) : Except String Window :=
+  if j.isNull then pure none else do
+    let a ← j.getArr?
+    return some (← a[0]!.getInt?, ← a[1]!.getInt?)
+
+def phasesRow (j : Json) : Except String (Bool × String) := do
+  let a ← j.getArr?
+  let got := (phases (← a[0]!.getInt?) (← a[1]!.getInt?) (← window a[2]!) (← window a[3]!)).map
+    fun s => Json.arr #[s.kind.name, s.lo, s.hi]
+  return (Json.arr got.toArray == a[4]!, s!"{j.compress} → {(Json.arr got.toArray).compress}")
+
+def ints (j : Json) : Except String (List Int) := do (← j.getArr?).toList.mapM (·.getInt?)
+
+def commonLinkRow (num den minChains : Nat) (j : Json) : Except String (Bool × String) := do
+  let a ← j.getArr?
+  let c ← a[0]!.getInt?
+  let B ← (← a[1]!.getArr?).toList.mapM ints
+  let s := strand B num den c
+  let cl := commonLink B num den minChains c
+  let want ← if a[3]!.isNull then pure none else some <$> a[3]!.getInt?
+  return (s == (← ints a[2]!) && cl == want, s!"bundle of {c}: strand {s}, common link {cl}")
+
 def check (name : String) (rows : Array Json)
     (row : Json → Except String (Bool × String)) : IO Bool := do
   let mut bad : Array String := #[]
@@ -54,4 +80,10 @@ def main (args : List String) : IO UInt32 := do
   let j ← IO.ofExcept (Json.parse (← IO.FS.readFile path))
   let v ← check "verdict" (← IO.ofExcept (j.getObjValAs? (Array Json) "verdict")) verdictRow
   let c ← check "chronology" (← IO.ofExcept (j.getObjValAs? (Array Json) "chronology")) chronologyRow
-  return if v && c then 0 else 1
+  let p ← check "phases" (← IO.ofExcept (j.getObjValAs? (Array Json) "phases")) phasesRow
+  let par ← IO.ofExcept (j.getObjVal? "parameters")
+  let dom ← IO.ofExcept (par.getObjValAs? (Array Nat) "dominance")
+  let minChains ← IO.ofExcept (par.getObjValAs? Nat "min_chains")
+  let l ← check "common_link" (← IO.ofExcept (j.getObjValAs? (Array Json) "common_link"))
+    (commonLinkRow dom[0]! dom[1]! minChains)
+  return if v && c && p && l then 0 else 1
