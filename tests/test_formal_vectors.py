@@ -50,3 +50,13 @@ def test_vectors_cover_every_phase_and_both_common_link_outcomes():
         (False, False), (False, True), (True, False), (True, True)}
     assert {row[3] is None for row in data["common_link"]} == {True, False}
     assert max(len(row[2]) for row in data["common_link"]) >= 4  # strands of several links
+
+
+def test_inference_vectors_cover_every_abstention_and_ordered_successes():
+    rows = json.loads(VECTORS.read_text(encoding="utf-8"))["inference"]
+    assert {row[4] for row in rows} == {
+        None, "no_matn_boundary", "tahwil", "no_isnad_mentions", "unresolved_mention"}
+    tied = [row for row in rows if row[5] and len(row[5]) > 1
+            and len({m[1] for m in row[0] if m[2] <= row[1]})
+            < sum(m[2] <= row[1] for m in row[0])]
+    assert len(tied) >= 20  # ties in position check that both sides sort stably

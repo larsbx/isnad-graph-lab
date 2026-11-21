@@ -508,15 +508,20 @@ The classical rules the graph applies are formalized in Lean 4 and proved
   `unrefuted_complete`, `liqa_muasara`);
 * al-Shāfiʿī's rule on tadlīs (`tadlis_iff_rejected`);
 * the common link lies on every chain of a single-strand bundle that reaches
-  his generation (`common_link_on_chain`);
+  his generation (`common_link_on_chain`), and the graph's computed strand is
+  such a strand at dominance 1 on chains without repeats (`strand_single`,
+  `commonLink_on_chain`);
+* the inference of chains from in-text names abstains exactly on its four
+  stated grounds, reads the taḥwīl mark as its regular expression does, and
+  keeps text order (`infer_iff`, `tahwil_iff`, `infer_text_order`);
 * a lifeline's phases tile the life, alternate, and are of the right kind at
   every point (`phases_partition`).
 
 Two checks tie the proofs to the code and the data:
 
 * the Python verdicts, lifeline phases and common links on the committed
-  graph are checked against the Lean model (`formal/vectors`, 13,934 rows,
-  all agree);
+  graph, and the chain inference on seeded cases, are checked against the
+  Lean model (`formal/vectors`, 16,934 rows, all agree);
 * the transmission process, with formulas of transmission, irsāl and tadlīs,
   is a Quint model whose invariants Apalache, a TLA+ model checker, checks.
 

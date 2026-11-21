@@ -20,6 +20,11 @@
   default ``dominance`` and ``min_chains`` (in ``parameters``); bundles evenly
   spaced in key order, plus every one whose strand meets a share exactly at
   ``dominance`` or a branching node with exactly ``min_chains`` chains.
+* ``inference``: ``[mentions, matn_start | null, text, known, abstention | null,
+  chain | null]`` as ``inference.abstention`` and ``inference.infer_source_chain``
+  compute them, each mention ``[rawi_id | null, start, end]``. The graph keeps no
+  raw mentions, so these are drawn from a seeded generator, over an alphabet
+  that straddles every bound of the taḥwīl regex, with ties in position.
 
 The selection is a pure function of the graph, so the file is reproducible
 byte for byte; ``tests/test_formal_vectors.py`` checks that it is current.
@@ -30,6 +35,7 @@ from __future__ import annotations
 import argparse
 import inspect
 import json
+import random
 from fractions import Fraction
 from pathlib import Path
 
@@ -40,11 +46,15 @@ from isnad_graph.analysis import bundle_nodes, common_link, strand
 from isnad_graph.assess import Defect, structural_verdict
 from isnad_graph.build import explode_links
 from isnad_graph.graph import IsnadGraph
+from isnad_graph.inference import Mention, abstention, infer_source_chain
 from isnad_graph.lifespan import estimate
 from isnad_graph.lives import link_windows, phases
 from isnad_graph.schema import PROPHET_ID, Provenance
 
 PER_VERDICT = 1500
+INFERENCE_CASES, SEED = 3000, 0x2A
+#: ح, Arabic letters and marks, and the characters just outside each range.
+ALPHABET = "\u062d" * 2 + "\u0627\u064b\u0620\u0621\u065f\u0660\u066f\u0670\u06d3\u06d4 x1"
 BOUNDARY = 1500
 OUT = Path("formal/vectors/conformance.json")
 
@@ -144,13 +154,29 @@ def common_link_rows(chains: pd.DataFrame, per: int = PER_VERDICT,
             for g, b in chosen]
 
 
+def inference_rows(n: int = INFERENCE_CASES, seed: int = SEED) -> list[list]:
+    rng = random.Random(seed)
+    rows = []
+    for _ in range(n):
+        ms = [Mention(rng.choice([None, *range(1, 7)]), s := rng.randrange(12),
+                      s + rng.randrange(1, 4)) for _ in range(rng.randrange(7))]
+        matn = None if rng.random() < 0.08 else rng.randrange(16)
+        text = "".join(rng.choices(ALPHABET, k=16))
+        known = sorted(rng.sample(range(1, 7), rng.randrange(2, 7)))
+        chain = infer_source_chain(ms, matn, text, known)
+        rows.append([[list(m) for m in ms], matn, text, known, abstention(ms, matn, text, known),
+                     None if chain is None else list(chain)])
+    return rows
+
+
 def vectors(g: IsnadGraph) -> dict:
     dom, min_chains = _defaults()
     return {"parameters": {"dominance": [dom.numerator, dom.denominator], "min_chains": min_chains},
             "verdict": verdict_rows(g.frame("chains")),
             "chronology": chronology_rows(g.frame("narrators"), g.frame("transmissions")),
             "phases": phase_rows(g.frame("narrators"), g.frame("transmissions")),
-            "common_link": common_link_rows(g.frame("chains"))}
+            "common_link": common_link_rows(g.frame("chains")),
+            "inference": inference_rows()}
 
 
 def render(data: dict) -> str:

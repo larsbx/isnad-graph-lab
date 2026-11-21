@@ -16,7 +16,7 @@ toolchains are pinned.
 | definition | `formal/lean/IsnadFormal/*.lean`, module docs | the classical rule, with its source | — |
 | theorem | the same files | the formal statement has the properties the tradition claims for it | Lean 4.34.1, core only |
 | axiom audit | `formal/lean/Audit.lean` | no `sorry`; only `propext`, `Classical.choice`, `Quot.sound` | Lean |
-| conformance | `formal/lean/Conformance.lean`, `formal/vectors/` | the Python verdicts, lifeline phases and common links on the committed graph equal the Lean model's | Lean executable |
+| conformance | `formal/lean/Conformance.lean`, `formal/vectors/` | the Python verdicts, lifeline phases and common links on the committed graph, and the chain inference on seeded cases, equal the Lean model's | Lean executable |
 | process model | `formal/quint/transmission.qnt` | invariants over every reachable state of a transmission | Quint 0.33.0, Apalache 0.62.1 (TLA+) |
 | implementation | `src/isnad_graph/` | unit, property and regression tests | pytest |
 
@@ -34,7 +34,8 @@ toolchains are pinned.
 | the graph's chronology verdict | `lifespan.feasibility` | `chronology` | `impossible_sound` |
 | the lifeline window with minimum ages | `lives.lifeline` | `window_iff` | `window_iff` |
 | the lifeline's phases | `lives.phases` | `phases` | `phases_partition` (tiling, maximality, pointwise soundness) |
-| the common link lies on every chain of its bundle | Schacht, *Origins*, p. 172; Juynboll, *Muslim Tradition*, ch. 5 | `SingleStrand`, `strand`, `commonLink` | `strand_agrees`, `common_link_on_chain` |
+| the common link lies on every chain of its bundle | Schacht, *Origins*, p. 172; Juynboll, *Muslim Tradition*, ch. 5 | `SingleStrand`, `strand`, `commonLink` | `strand_agrees`, `common_link_on_chain`; at δ ≥ 1 without repeats `strand_single`, `commonLink_on_chain` |
+| a chain is inferred from in-text names only when nothing is in doubt | `inference.infer_source_chain` | `infer`, `abstention`, `tahwil` | `infer_iff`, `infer_isSome_iff`, `tahwil_iff`, `infer_text_order`, `matn_ignored` |
 
 The Quint model states the same conditions over time. A student names his
 teacher explicitly (samāʿ) or ambiguously (ʿan), or commits irsāl and names his

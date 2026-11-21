@@ -16,7 +16,9 @@ with a mismatch, and prints the mismatches it found.
 * `phases`: `[birth, death, hearing | null, teaching | null, expected]` in
   half-years, each expected phase `[kind, from, to]`;
 * `common_link`: `[companion, chains, strand, common_link | null]`, under
-  `parameters.dominance = [num, den]` and `parameters.min_chains`.
+  `parameters.dominance = [num, den]` and `parameters.min_chains`;
+* `inference`: `[mentions, matn | null, text, known, abstention | null,
+  chain | null]`, each mention `[rawi | null, start, end]`.
 -/
 
 open Lean Isnad
@@ -65,6 +67,22 @@ def commonLinkRow (num den minChains : Nat) (j : Json) : Except String (Bool × 
   let want ← if a[3]!.isNull then pure none else some <$> a[3]!.getInt?
   return (s == (← ints a[2]!) && cl == want, s!"bundle of {c}: strand {s}, common link {cl}")
 
+def mention (j : Json) : Except String Mention := do
+  let a ← j.getArr?
+  return { rawi := ← optInt a[0]!, start := ← a[1]!.getNat?, stop := ← a[2]!.getNat? }
+
+def inferenceRow (j : Json) : Except String (Bool × String) := do
+  let a ← j.getArr?
+  let ms ← (← a[0]!.getArr?).toList.mapM mention
+  let matn ← if a[1]!.isNull then pure none else some <$> a[1]!.getNat?
+  let text := (← a[2]!.getStr?).toList
+  let known ← ints a[3]!
+  let why := (abstention ms matn text known).map (·.name)
+  let ch := infer ms matn text known
+  let wantWhy ← if a[4]!.isNull then pure none else some <$> a[4]!.getStr?
+  let wantCh ← if a[5]!.isNull then pure none else some <$> ints a[5]!
+  return (why == wantWhy && ch == wantCh, s!"{j.compress} → {why}, {ch}")
+
 def check (name : String) (rows : Array Json)
     (row : Json → Except String (Bool × String)) : IO Bool := do
   let mut bad : Array String := #[]
@@ -86,4 +104,5 @@ def main (args : List String) : IO UInt32 := do
   let minChains ← IO.ofExcept (par.getObjValAs? Nat "min_chains")
   let l ← check "common_link" (← IO.ofExcept (j.getObjValAs? (Array Json) "common_link"))
     (commonLinkRow dom[0]! dom[1]! minChains)
-  return if v && c && p && l then 0 else 1
+  let i ← check "inference" (← IO.ofExcept (j.getObjValAs? (Array Json) "inference")) inferenceRow
+  return if v && c && p && l && i then 0 else 1
