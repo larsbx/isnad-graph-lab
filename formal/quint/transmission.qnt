@@ -35,7 +35,7 @@
  * The lives are a small concrete instance: D was born after B died, so the
  * pair B → D is refuted. B is a mudallis.
  */
-module transmission {
+module lives {
   type Narrator = str
   type Via = str  // how a holder names his source: "sama", "an" or "irsal"
 
@@ -49,7 +49,25 @@ module transmission {
   pure val MODES: Set[Via] = Set("sama", "an")
   pure val A_HEAR = 5
   pure val A_TEACH = 20
-  pure val YEARS = (-53).to(160)
+  pure val FIRST = -53
+  pure val LAST = 160
+
+  /// Where the truth of some comparison changes: `y ≥ L` at L (L a birth, or
+  /// a birth plus a minimum age), `y ≤ D` at D + 1 (D a death); 0 and 1 cut out
+  /// the initial year. Between two consecutive cuts lies one *region*.
+  pure val CUTS: Set[int] = Set(FIRST, 0, 1).union(NARRATORS.map(n => Set(
+      BIRTH.get(n), BIRTH.get(n) + A_HEAR, BIRTH.get(n) + A_TEACH, DEATH.get(n) + 1)).flatten())
+  /// Years a behaviour can use at most: the initial year and one per hearing.
+  pure val SPAN = 4
+  /// The first SPAN years of every region. See `transmissionRegions`.
+  pure val REGIONS: Set[int] = FIRST.to(LAST).filter(y =>
+    y - CUTS.filter(c => c <= y).fold(FIRST, (m, c) => if (c > m) c else m) < SPAN)
+}
+
+/// The model, for any set of years in which hearings may happen.
+module transmissionSpec {
+  import lives.*
+  const YEARS: Set[int]
 
   pure def alive(n: Narrator, y: int): bool = BIRTH.get(n) <= y and y <= DEATH.get(n)
 
@@ -192,6 +210,14 @@ module transmission {
   val safety: bool = rootedAtSource and prefixClosed and ittisal and chronologicalOrder
     and refutationSound and weakestLink and gapCaps and sahihExactly and tadlisInherited
 
+}
+
+/// The model over every year from the Prophet's birth to the last death:
+/// checked by the simulator and, to a bounded depth, by Apalache.
+module transmission {
+  import lives.*
+  import transmissionSpec(YEARS = FIRST.to(LAST)).*
+
   // ── runs ─────────────────────────────────────────────────────────────────
   /// A connected ṣaḥīḥ isnad P → A → B is reachable, and grades ṣaḥīḥ.
   run chainExistsTest =
@@ -253,4 +279,29 @@ module transmission {
 
   /// The source does not commit irsāl: there is no one above him to name.
   run sourceCannotBeDroppedTest = init.then(irsal("P", "A", 5)).fail()
+}
+
+/**
+ * The same model over REGIONS only, checked exhaustively by TLC.
+ *
+ * Years enter the guards and the invariants only through comparisons with
+ * thresholds (`y ≥ L` for a birth or a birth plus a minimum age, `y ≤ D` for a
+ * death) and with each other (`y ≥ now`, `heardIn(a) ≤ heardIn(b)`). Within a
+ * region every threshold comparison has one truth value. A behaviour uses at
+ * most SPAN + 1 distinct years: 0, which is a region of its own, and one per
+ * hearing, at most SPAN. So there is an order-preserving injection g from the
+ * years a behaviour uses into REGIONS that keeps each year in its region (a
+ * region has all its years in REGIONS, or at least SPAN). Applying g to every
+ * year maps the behaviour to one of this module in which every guard and
+ * every invariant has the same truth value at every step; REGIONS ⊆
+ * FIRST..LAST gives the converse. The invariants hold in `transmission` iff
+ * they hold here.
+ *
+ * Each hearing adds a holder and there are SPAN narrators below the source,
+ * so every behaviour reaches its last state within SPAN hearings: TLC's
+ * search of this module covers every reachable state, at every depth.
+ */
+module transmissionRegions {
+  import lives.*
+  import transmissionSpec(YEARS = REGIONS).*
 }
