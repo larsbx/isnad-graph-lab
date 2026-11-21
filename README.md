@@ -496,6 +496,10 @@ python vendor/python/vendoring/check_vendored_sync.py      # what CI runs
 
 ## Formal foundations
 
+The [side-by-side formalizations of ḥadīth science](docs/hadith-formalizations.md)
+compare the graph’s structural model with the al-Albānī grading kernel, with
+revision-pinned definitions, theorem statements and worked examples.
+
 The classical rules the graph applies are formalized in Lean 4 and proved
 (`formal/lean`):
 
