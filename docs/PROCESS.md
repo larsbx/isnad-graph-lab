@@ -1,20 +1,16 @@
 # Process: proof-driven development
 
-Every claim this repository makes about an isnad rests on three things:
-
-* a classical definition, cited;
-* a theorem about its formal statement;
-* a check that the implementation agrees with the statement on the real data.
-
-This document defines the order of work, what each layer checks, and how the
-toolchains are pinned.
+Classical grading criteria take findings whose textual sources are cited.
+Graph theorems concern recorded ranks, links and dates. Conformance checks
+compare the implementations on exported cases. A claim about an actual
+transmission requires evidence at the report and route level.
 
 ## The layers
 
 | layer | where | checks | tool |
 |---|---|---|---|
-| definition | `formal/lean/IsnadFormal/*.lean`, module docs | the classical rule, with its source | — |
-| theorem | the same files | the formal statement has the properties the tradition claims for it | Lean 4.34.1, core only |
+| definition | `formal/lean/Hadith/ClassicalCriteria.lean`, `formal/lean/IsnadFormal/*.lean` | the cited criteria and the graph’s observational inputs | — |
+| theorem | the same files | consequences of the stated premises | Lean 4.34.1, core only |
 | axiom audit | `formal/lean/Audit.lean` | no `sorry`; only `propext`, `Classical.choice`, `Quot.sound` | Lean |
 | conformance | `formal/lean/Conformance.lean`, `formal/vectors/` | the Python verdicts, lifeline phases and common links on the committed graph equal the Lean model's | Lean executable |
 | process model | `formal/quint/transmission.qnt` | invariants over every reachable state of a transmission | Quint 0.33.0, Apalache 0.62.1 (TLA+) |
@@ -22,23 +18,25 @@ toolchains are pinned.
 
 ## What is formalized
 
-| classical rule | source | formal statement | theorem |
+| Claim | Source or scope | Formal statement | Theorem |
 |---|---|---|---|
-| ṣaḥīḥ = connected, by ʿadl ḍābiṭ narrators, without shudhūdh or ʿilla | Ibn al-Ṣalāḥ, *ʿUlūm al-ḥadīth*, first type | `Chain.verdict` | `sahih_iff` (conditions 1–3; 4–5 are out of scope by statement) |
-| the marātib and their verdicts; an unranked narrator is majhūl | Ibn Ḥajar, *Taqrīb al-tahdhīb*, muqaddima | `rankVerdict`, `effRank` | `rankVerdict_mono`, `unknown_not_sahih` |
-| an isnad is as strong as its weakest link | | `Chain.append` | `append_no_better` |
-| a gap (irsāl, inqiṭāʿ, taʿlīq, mubham) is not muttaṣil | Ibn al-Ṣalāḥ, types 9–11 (mursal, munqaṭiʿ, muʿḍal) | `structuralVerdict` | `gap_caps`, `gap_not_acceptable`, `mursal_not_sahih` |
-| muʿāṣara suffices for a non-mudallis | Muslim, *Muqaddimat al-Ṣaḥīḥ* | `muasara` | `refuted_sound`, `unrefuted_complete` |
-| liqāʾ is required | al-Bukhārī and ʿAlī b. al-Madīnī, after Ibn Rajab, *Sharḥ ʿIlal al-Tirmidhī* | `liqa` | `liqa_muasara`, `refuted_no_liqa` |
-| a mudallis is heard only through an explicit formula | al-Shāfiʿī, *al-Risāla* | `shafiiAccepts` | `tadlis_iff_rejected`, `explicit_clears` |
+| Intrinsic ṣaḥīḥ and ḥasan | Ibn al-Ṣalāḥ, first type, and Ibn Ḥajar, *Nukhba*, v04:p722 | `ClassicalCriteria.intrinsicGrade` | `intrinsic_sahih_iff`, `intrinsic_hasan_iff` |
+| Sixth narrator rank | Ibn Ḥajar, *Taqrīb*, v01:p074 | `sixthRankStatus` | `sixth_rank_maqbul_iff`, `sixth_rank_layyin_iff` |
+| Structural ṣaḥīḥ code and the rank-9 fallback | Graph score using the source’s rank scale | `Chain.verdict`, `rankVerdict`, `effRank` | `sahih_iff`, `rankVerdict_mono`, `unknown_not_sahih` |
+| Effect of adding ranks and gap markers | Graph score | `Chain.append`, `structuralVerdict` | `append_no_better`, `gap_caps`, `gap_not_acceptable`, `mursal_not_sahih` |
+| Presumption of hearing for ʿanʿana under specified conditions | Muslim, *Muqaddimat al-Ṣaḥīḥ*, pp. 29–33 | `MuslimAnanaFindings.Presumption` | `muslim_presumption_requires_review` |
+| Dates at which both could be alive | Interval constraints | `muasara`, `withinBothLives` | `refuted_sound`, `unrefuted_complete`, `liqa_muasara`, `refuted_no_attested_meeting` |
+| Explicit hearing from a known mudallis | al-Shāfiʿī, *al-Risāla*, p. 378 | `shafiiAccepts` | `shafii_requires_explicit`, `explicit_clears` |
+| Flag for a known mudallis with ambiguous wording | Graph defect labeling | `tadlisDefect` | `tadlis_iff_ambiguous` |
 | the graph's chronology verdict | `lifespan.feasibility` | `chronology` | `impossible_sound` |
 | the lifeline window with minimum ages | `lives.lifeline` | `window_iff` | `window_iff` |
 | the lifeline's phases | `lives.phases` | `phases` | `phases_partition` (tiling, maximality, pointwise soundness) |
 | the common link lies on every chain of its bundle | Schacht, *Origins*, p. 172; Juynboll, *Muslim Tradition*, ch. 5 | `SingleStrand`, `strand`, `commonLink` | `strand_agrees`, `common_link_on_chain` |
 
-The Quint model states the same conditions over time. A student names his
-teacher explicitly (samāʿ) or ambiguously (ʿan), or commits irsāl and names his
-teacher's teacher; one narrator is a mudallis. Its invariants:
+The Quint model checks a synthetic process over time. A student names his
+teacher explicitly (samāʿ) or ambiguously (ʿan), or the model records irsāl
+by dropping that teacher. The process stipulates one mudallis. Its invariants
+concern recorded paths and model hearings.
 
 * `rootedAtSource`;
 * `prefixClosed`: the isnads form a tree, as `CommonLink` assumes of a bundle;
@@ -49,9 +47,10 @@ teacher's teacher; one narrator is a mudallis. Its invariants:
 * `weakestLink`: a student's isnad grades no better than his teacher's
   (`append_no_better`);
 * `gapCaps`: a gap makes it ḍaʿīf or worse (`gap_caps`);
-* `sahihExactly`: ṣaḥīḥ iff no gap and all ranks 1–3 (`sahih_iff`);
-* `tadlisInherited`: an ʿan from a mudallis taints every isnad below it
-  (`tadlis_iff_rejected`).
+* `sahihExactly` characterizes the synthetic graph score by its gap and rank
+  inputs (`sahih_iff`).
+* `tadlisInherited` propagates a modeled ambiguous formula from a mudallis
+  to chains through him (`tadlis_iff_ambiguous`).
 
 Apalache checks them for every trace up to the pinned bound. The gate also
 checks non-vacuity: the simulator must reach a three-link isnad, a gap, a

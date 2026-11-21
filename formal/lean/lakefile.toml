@@ -5,6 +5,10 @@ defaultTargets = ["IsnadFormal", "conformance"]
 [[lean_lib]]
 name = "IsnadFormal"
 
+[[lean_lib]]
+name = "HadithCriteria"
+roots = ["Hadith.ClassicalCriteria"]
+
 [[lean_exe]]
 name = "conformance"
 root = "Conformance"

@@ -2,8 +2,8 @@ import Lean
 import IsnadFormal
 
 /-!
-Every theorem in `Isnad` rests only on Lean's three standard axioms: no `sorry`,
-no added axiom. Run by `tools/verify.sh` as `lake env lean Audit.lean`.
+The audit covers `Isnad` and the shared `Hadith.ClassicalCriteria` module and
+allows Lean's three standard axioms. Run by `tools/verify.sh`.
 -/
 
 open Lean Elab Command in
@@ -12,7 +12,8 @@ open Lean Elab Command in
   let mut checked := 0
   let mut bad : Array (Name × Name) := #[]
   for (n, ci) in (← getEnv).constants.toList do
-    if (`Isnad).isPrefixOf n && ci matches .thmInfo _ then
+    if ((`Isnad).isPrefixOf n || (`Hadith.ClassicalCriteria).isPrefixOf n) &&
+        ci matches .thmInfo _ then
       checked := checked + 1
       for a in ← liftCoreM (collectAxioms n) do
         unless allowed.contains a do bad := bad.push (n, a)
