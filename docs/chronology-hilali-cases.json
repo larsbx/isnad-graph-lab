@@ -1,0 +1,177 @@
+{
+  "source_sha256": "d528084321e715006712e0e2461809a3afc9408065a1d1af90238c8b723815a6",
+  "cases": [
+    {
+      "hadith_id": 34570,
+      "sanad_id": null,
+      "depth": 0,
+      "src": 5543,
+      "dst": 4632,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "فَجَاءَ عُثْمَانَ بْنَ عَفَّانَ",
+      "note": "ʿAbd Allāh b. Abī Bakr relates the story of an unnamed Anṣārī. That man goes to ʿUthmān to give away his garden. The tag points to the recipient in the story.",
+      "sources": [
+        "Pinned hadiths.nass and hadith_rawis, report 34570",
+        "https://www.islam.museum/ar/passage/muwatta-1-262/"
+      ]
+    },
+    {
+      "hadith_id": 34956,
+      "sanad_id": null,
+      "depth": 0,
+      "src": 5913,
+      "dst": 3634,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "ثُمَّ كَتَبَ إِلَى عُمَرَ",
+      "note": "The Syrians ask Abū ʿUbayda about collecting alms. He then writes to ʿUmar. The tagged ʿUmar is a party to the nested correspondence.",
+      "sources": [
+        "Pinned hadiths.nass and hadith_rawis, report 34956"
+      ]
+    },
+    {
+      "hadith_id": 35080,
+      "sanad_id": 48708,
+      "depth": 2,
+      "src": 5543,
+      "dst": 7187,
+      "cause": "reviewed_recorded_splice",
+      "anchor": "هَذَا عُثْمَانُ بْنُ عَفَّانَ يَنْهَى",
+      "note": "Jaʿfar reports from his father that al-Miqdād visited ʿAlī. Al-Miqdād introduces ʿUthmān in quoted speech, and ʿAlī later visits him. The source sanad serializes two story participants and is normalized with a prophetic apex. The parallel edition preserves the outer route and the narrative roles.",
+      "sources": [
+        "Pinned hadiths.nass and hadith_rawis, report 35080",
+        "https://sunnah.com/search?q=Suqya"
+      ]
+    },
+    {
+      "hadith_id": 35197,
+      "sanad_id": null,
+      "depth": 0,
+      "src": 5913,
+      "dst": 3634,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "أَنَّ هَبَّارَ بْنَ الْأَسْوَدِ جَاءَ",
+      "note": "Sulaymān describes Habbār's arrival and his conversation with ʿUmar. The tagged ʿUmar receives Habbār's question and speaks within that narrative.",
+      "sources": [
+        "Pinned hadiths.nass and hadith_rawis, report 35197"
+      ]
+    },
+    {
+      "hadith_id": 35287,
+      "sanad_id": null,
+      "depth": 0,
+      "src": 2187,
+      "dst": 7319,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "أَنَّ رَجُلًا مَرَّ عَلَى أَبِي ذَرٍّ",
+      "note": "Ibn Ḥabbān describes an unnamed man passing by Abū Dharr at al-Rabadha. The mention used by inference occurs in the reported dialogue inside that event.",
+      "sources": [
+        "Pinned hadiths.nass and hadith_rawis, report 35287"
+      ]
+    },
+    {
+      "hadith_id": 35407,
+      "sanad_id": null,
+      "depth": 2,
+      "src": 5913,
+      "dst": 3634,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "فَرَضَ عُمَرُ بْنُ الْخَطَّابِ ، وَعُثْمَانُ بْنُ عَفَّانَ ، وَزَيْدُ بْنُ ثَابِتٍ",
+      "note": "Sulaymān groups three authorities who assigned the same inheritance share. The inference serializes the coordinated subjects into successive transmission links.",
+      "sources": [
+        "Pinned hadiths.nass and hadith_rawis, report 35407"
+      ]
+    },
+    {
+      "hadith_id": 35446,
+      "sanad_id": null,
+      "depth": 0,
+      "src": 5913,
+      "dst": 3634,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "أَنَّ طُلَيْحَةَ الْأَسَدِيَّةَ كَانَتْ",
+      "note": "The story starts with Ṭulayḥa's divorce and subsequent marriage. ʿUmar enters the narrative as judge and gives a ruling. The linked ʿUmar belongs inside that account.",
+      "sources": [
+        "Pinned hadiths.nass and hadith_rawis, report 35446"
+      ]
+    },
+    {
+      "hadith_id": 35524,
+      "sanad_id": null,
+      "depth": 0,
+      "src": 5543,
+      "dst": 7319,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "فَاخْتَصَمَتَا إِلَى عُثْمَانَ بْنِ عَفَّانَ",
+      "note": "The account concerns two wives of Ibn Ḥabbān's grandfather. They bring their dispute to ʿUthmān. The parser promotes the judge named within the incident to a teacher.",
+      "sources": [
+        "Pinned hadiths.nass and hadith_rawis, report 35524"
+      ]
+    },
+    {
+      "hadith_id": 35621,
+      "sanad_id": null,
+      "depth": 0,
+      "src": 5543,
+      "dst": 7272,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "أَهْدَى لِعُثْمَانَ بْنِ عَفَّانَ جَارِيَةً",
+      "note": "Ibn Shihāb describes ʿAbd Allāh b. ʿĀmir's gift to ʿUthmān and quotes the latter's reply. The linked name occurs inside that exchange.",
+      "sources": [
+        "Pinned hadiths.nass and hadith_rawis, report 35621"
+      ]
+    },
+    {
+      "hadith_id": 35745,
+      "sanad_id": null,
+      "depth": 0,
+      "src": 5913,
+      "dst": 7272,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "عَنْ سُنَيْنٍ أَبِي جَمِيلَةَ",
+      "note": "The edition explicitly names Sunayn Abū Jamīla after Ibn Shihāb. The entity spans omit him. He finds a child and brings the child to ʿUmar. Inference skips the named narrator and instead joins a participant in the event.",
+      "sources": [
+        "Pinned hadiths.nass and hadith_rawis, report 35745",
+        "https://www.islam.museum/ar/passage/muwatta-22-2155/"
+      ]
+    },
+    {
+      "hadith_id": 35776,
+      "sanad_id": null,
+      "depth": 1,
+      "src": 5913,
+      "dst": 7272,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "ضَوَالُّ الْإِبِلِ فِي زَمَانِ عُمَرَ بْنِ الْخَطَّابِ",
+      "note": "Ibn Shihāb describes the treatment of stray camels in ʿUmar's time. The name is the complement of a temporal phrase.",
+      "sources": [
+        "Pinned hadiths.nass and hadith_rawis, report 35776"
+      ]
+    },
+    {
+      "hadith_id": 35883,
+      "sanad_id": null,
+      "depth": 0,
+      "src": 5913,
+      "dst": 3634,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "أَجْرَى فَرَسًا",
+      "note": "ʿIrāk and Sulaymān are named before an incident about an unnamed horseman. ʿUmar adjudicates the dispute within the narrative.",
+      "sources": [
+        "Pinned hadiths.nass and hadith_rawis, report 35883"
+      ]
+    },
+    {
+      "hadith_id": 35921,
+      "sanad_id": null,
+      "depth": 0,
+      "src": 5913,
+      "dst": 3634,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "إِلَى عُمَرَ بْنِ الْخَطَّابِ يَطْلُبُ",
+      "note": "The bereaved father approaches ʿUmar about compensation. The linked name is that of the official consulted in the reported event.",
+      "sources": [
+        "Pinned hadiths.nass and hadith_rawis, report 35921"
+      ]
+    }
+  ]
+}

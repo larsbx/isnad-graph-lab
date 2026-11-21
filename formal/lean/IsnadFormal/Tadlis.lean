@@ -1,35 +1,44 @@
+import Hadith.ClassicalCriteria
+
 /-!
-# *Tadlīs*: al-Shāfiʿī's rule
+# Explicit hearing for a narrator known for tadlīs
 
-al-Shāfiʿī (*al-Risāla*): the report of a narrator known for *tadlīs* is not
-accepted until he says *ḥaddathanī* or *samiʿtu*, an explicit statement of
-hearing. An ambiguous formula from him (*ʿan*, *anna*, *qāla* …) does not
-establish hearing.
-
-The graph's `TADLIS` and `TADLIS_WEAK` defects flag a link whose student is a
-*mudallis* and whose formula is ambiguous. This file proves that is exactly
-the set of links al-Shāfiʿī's rule does not accept.
+Al-Shāfiʿī's *al-Risāla* (ed. Aḥmad Shākir, p. 378) requires an explicit
+statement of hearing such as *ḥaddathanī* or *samiʿtu* from a known mudallis
+for the narration at issue. The formula check concerns this requirement.
+The graph's `TADLIS` and `TADLIS_WEAK` flags only record ambiguous formulas.
+A link with an unread or written label alone still lacks the required explicit
+hearing formula in this check.
 -/
 
 namespace Isnad
+open Hadith.ClassicalCriteria (Finding)
 
 /-- The four classes of transmission formula (`isnad_graph.sigha`). -/
 inductive ModeClass where
   | explicit | written | ambiguous | unread
   deriving DecidableEq, Repr
 
-/-- al-Shāfiʿī's rule: a *mudallis* is heard only through an unambiguous formula. -/
-def shafiiAccepts (mudallis : Bool) (m : ModeClass) : Bool := !mudallis || m != .ambiguous
+/-- The explicit-hearing condition under this rule. The finding concerns the
+wording of the report on the route being judged, independently of graph flags. -/
+def shafiiAccepts (mudallis : Bool) (explicitHearing : Finding) : Bool :=
+  !mudallis || decide (explicitHearing = .established)
 
 /-- The graph's tadlīs defect (`assess.assess_chains`). -/
 def tadlisDefect (mudallis : Bool) (m : ModeClass) : Bool := mudallis && m == .ambiguous
 
-theorem tadlis_iff_rejected (mudallis : Bool) (m : ModeClass) :
-    tadlisDefect mudallis m = !shafiiAccepts mudallis m := by
+theorem tadlis_iff_ambiguous (mudallis : Bool) (m : ModeClass) :
+    tadlisDefect mudallis m = true ↔ mudallis = true ∧ m = .ambiguous := by
   cases mudallis <;> cases m <;> decide
 
-/-- An explicit statement of hearing clears a *mudallis*. -/
-theorem explicit_clears (mudallis : Bool) : shafiiAccepts mudallis .explicit = true := by
+theorem shafii_requires_explicit (h : Finding) :
+    shafiiAccepts true h = true ↔ h = .established := by simp [shafiiAccepts]
+
+/-- An explicit statement meets this hearing requirement. -/
+theorem explicit_clears (mudallis : Bool) : shafiiAccepts mudallis .established = true := by
   cases mudallis <;> decide
+
+example : tadlisDefect true .unread = false ∧ shafiiAccepts true .unresolved = false := by decide
+example : tadlisDefect true .written = false ∧ shafiiAccepts true .unresolved = false := by decide
 
 end Isnad

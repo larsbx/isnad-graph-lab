@@ -1,6 +1,6 @@
 // -*- mode: Bluespec; -*-
 /**
- * The transmission of one report, as the isnad records it.
+ * A synthetic transmission process for one report and its recorded isnads.
  *
  * A report starts with the source (the Prophet ﷺ). It spreads by hearings: a
  * teacher who holds it tells a student who does not, in some year when both
@@ -11,9 +11,9 @@
  * holder's isnad is the chain the report came down as he names it. Time only
  * moves forward.
  *
- * The safety properties are the classical conditions on an isnad, stated
- * over every reachable state, each the dynamic counterpart of a theorem in
- * formal/lean:
+ * The bounded safety properties concern the named chains and hearings in
+ * this process. The ages and grades below are model inputs. The Lean
+ * intrinsic-grade criteria use separate report-specific findings.
  *
  * - rootedAtSource: every isnad starts at the source and ends at its holder;
  * - prefixClosed: the isnad of every narrator on an isnad is its prefix up to
@@ -27,10 +27,10 @@
  * - weakestLink: a student's isnad grades no better than his teacher's
  *   (`append_no_better`);
  * - gapCaps: an isnad with a gap is ḍaʿīf or worse (`gap_caps`);
- * - sahihExactly: an isnad is ṣaḥīḥ exactly when it has no gap and all its
- *   narrators are ranked 1–3 (`sahih_iff`);
+ * - sahihExactly: a modeled isnad has the corpus ṣaḥīḥ code exactly when
+ *   it has no marked gap and the ranks meet the cutoff (`sahih_iff`);
  * - tadlisInherited: an ʿan from a mudallis is a defect of every isnad below
- *   it (al-Shāfiʿī's rule, `tadlis_iff_rejected`).
+ *   it (the graph flag lemma `tadlis_iff_ambiguous`).
  *
  * The lives are a small concrete instance: D was born after B died, so the
  * pair B → D is refuted. B is a mudallis.

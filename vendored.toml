@@ -23,3 +23,12 @@ root = "vendor/python"
 [package.files]
 "vendoring/__init__.py" = "959cdf7a89536784da18659db7cfe4099c885f5370249eccc71ce73775f8a584"
 "vendoring/check_vendored_sync.py" = "0e38721b19fcad261692f5424a4d580d82968a91f4baef01080486da372b4570"
+
+[[package]]
+name = "Hadith"
+repository = "larsbx/usul-al-fiqh-deontic-circuits"
+commit = "d9c012a4c5de04aa934152fbf678173aa1b4eb3f"
+root = "formal/lean"
+
+[package.files]
+"Hadith/ClassicalCriteria.lean" = "42b63fe2263f451105fa63cc2198e2c65b52589eaa1f4eb8a111cbda83a29b49"

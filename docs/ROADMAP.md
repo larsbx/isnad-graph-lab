@@ -39,17 +39,18 @@ The time-and-place milestone (#7) consists of:
 ### P0.1 Diagnose the "impossible" links
 
 The [occurrence-level chronology audit](chronology-audit.md) reproduces this
-population and replays the assessment with source-supported corrections.
-The open acceptance criterion is below.
+population. The [follow-up](chronology-followup.md) found thirteen more route
+splices in the al-Hilālī cohort, reducing it below the published threshold.
 
 **Evidence.** Of 14,194 links whose documented lifespans cannot meet:
 
-- 95% have a book compiler as the student;
-- 51% come from the inferred chains;
-- 68% rest on a single chain.
+- 95% have a student who ends some chain in the graph. The pair itself occurs
+  at a chain end on 44% of edges.
+- 51% include an inferred occurrence.
+- 68% occur in only one chain.
 
-That pattern points to compiler identification, an unmarked taʿlīq, or a
-misread inferred chain, not to chronology. These links raise the `CHRONOLOGY`
+The categories overlap. Source review has identified compiler boundaries,
+inferred splices and documented date conflicts. These links raise the `CHRONOLOGY`
 defect, which feeds the structural verdicts and the defect lift.
 
 **Work.**
@@ -65,9 +66,10 @@ reproduction and defect-lift figures are then re-reported.
 
 ### P0.2 A second source for dates and places, and identity errors
 
-**Evidence.** 36% of impossible links have deaths more than 150 years apart,
-which no lifespan explains: a homonym or a mis-linked narrator. The source's
-`death_year` and `iqama` have never been compared with an independent record.
+**Evidence.** On 5,042 impossible edges, the graph's point death dates differ
+by more than 150 years. The [biography pilot](chronology-followup.md#p02--second-source-linkage)
+compares a pinned second catalog, identifies disagreements and provides a
+200-pair precision review sample.
 
 **Work.**
 
