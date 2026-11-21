@@ -84,3 +84,14 @@ Run `python -m pytest -q`, `python -m ruff check src tests tools`, and
 `PYTHONPATH=src python -m isnad_graph.cli verify`.
 Regressions cover confounding, unequal stratum sizes, sparse exact enumeration,
 zero cells, missing exposure groups, genuine effects and exposure reversal.
+
+## Formal check
+
+`formal/lean/IsnadFormal/Stratified.lean` states the three statistics over the
+integers and proves that relabelling flagged and clean negates the score,
+keeps the variance, inverts the risk ratio and leaves the exact p unchanged;
+that a degenerate stratum contributes no score or variance and does not move
+the exact p; and that the exact p lies in (0, 1]. The conformance runner
+recomputes every published comparison above, and 400 seeded ones, in exact
+arithmetic: the risk ratios and z scores agree to their published decimals and
+the exact p values to a relative 10⁻⁹, the smallest (4.785 × 10⁻⁶³) included.

@@ -520,17 +520,35 @@ properties of the corpus representation, dating bounds and link flags
 * al-Shāfiʿī’s explicit-hearing condition for a known mudallis
   (`shafii_requires_explicit`);
 * the common link lies on every chain of a single-strand bundle that reaches
-  his generation (`common_link_on_chain`);
+  his generation (`common_link_on_chain`), and the graph's computed strand is
+  such a strand at dominance 1 on chains without repeats (`strand_single`,
+  `commonLink_on_chain`);
+* the inference of chains from in-text names abstains exactly on its four
+  stated grounds, reads the taḥwīl mark as its regular expression does, and
+  keeps text order (`infer_iff`, `tahwil_iff`, `infer_text_order`);
+* the defect lift's statistics: relabelling flagged and clean negates the CMH
+  score, inverts the risk ratio and leaves the exact p unchanged; a
+  degenerate stratum adds nothing; the exact p lies in (0, 1]
+  (`pExact_swap`, `score_swap_pooled`, `pExact_degenerate`, `var_eq_zero_iff`,
+  `pExact_pos`);
 * a lifeline's phases tile the life, alternate, and are of the right kind at
   every point (`phases_partition`).
 
 Two checks tie the proofs to the code and the data:
 
-* the Python verdicts, lifeline phases and common links on the committed
-  graph are checked against the Lean model (`formal/vectors`, 13,934 rows,
-  all agree);
+* the Python verdicts, lifeline phases, common links and defect-lift
+  statistics on the committed graph, and the chain inference and further
+  statistics on seeded cases, are checked against the Lean model
+  (`formal/vectors`, 17,350 rows, all agree; the exact p in exact arithmetic,
+  so scipy's floating-point p values are confirmed to a relative 10⁻⁹, down to
+  4.8 × 10⁻⁶³);
 * the transmission process, with formulas of transmission, irsāl and tadlīs,
-  is a Quint model whose invariants Apalache, a TLA+ model checker, checks.
+  is a Quint model whose invariants two TLA+ model checkers check: Apalache
+  (symbolic, every trace to depth 4) and TLC (explicit, every reachable state
+  of an equivalent model over the critical years, 741,987 states; the
+  equivalence is proved in Lean for the transcribed transition relation,
+  `Model.Q.transmission_iff_regions`, and the transcription is checked against
+  Quint by trace replay and an exact state count).
 
 The process, the pins and the hooks are in [docs/PROCESS.md](docs/PROCESS.md).
 To run the gate: `tools/formal-setup.sh && tools/verify.sh`.
