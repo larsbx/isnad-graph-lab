@@ -47,7 +47,13 @@ def q(expr):
     out = subprocess.run(["npx", "quint", "-r", "transmission.qnt::lives"], input=expr + "\n",
                          capture_output=True, text=True, cwd="formal/quint", check=True).stdout
     return [int(x) for x in re.findall(r"-?\d+", out.split(">>>")[1])]
+def life(expr):
+    out = subprocess.run(["npx", "quint", "-r", "transmission.qnt::lives"], input=expr + "\n",
+                         capture_output=True, text=True, cwd="formal/quint", check=True).stdout
+    return {k: int(v) for k, v in re.findall(r'"(\w+)" -> (-?\d+)', out.split(">>>")[1])}
 json.dump({"first": q("FIRST")[0], "last": q("LAST")[0], "span": q("SPAN")[0],
+           "a_hear": q("A_HEAR")[0], "a_teach": q("A_TEACH")[0],
+           "birth": life("BIRTH"), "death": life("DEATH"),
            "cuts": q("CUTS"), "regions": q("REGIONS")}, open(sys.argv[1], "w"))
 PY
 (cd formal/lean && lake exe conformance --regions "$REG"); rm -f "$REG"
@@ -68,5 +74,12 @@ if [ "$QUICK" != "--quick" ]; then
   log="$(quint verify transmission.qnt $TLC --verbosity=3 --invariant=safety 2>&1)" \
     || { echo "$log" | tail -40 >&2; exit 1; }
   echo "$log" | grep -E " 0 states left on queue|depth of the complete|\[ok\]"
+  step "lean: Model is Quint's transition relation (formal/lean/IsnadFormal/Transmission.lean)"
+  DISTINCT="$(echo "$log" | grep -oE '[0-9,]+ distinct states found' | tail -1 | tr -d ',' | cut -d' ' -f1)"
+  (cd formal/lean && lake exe conformance --count "$DISTINCT")
+  ITF="$(mktemp -d)"
+  quint run transmission.qnt $QB --max-samples=1000 --max-steps=30 --n-traces=1000 \
+    --out-itf="$ITF/t{seq}.itf.json" --invariant=safety --verbosity=0 >/dev/null
+  (cd formal/lean && lake exe conformance --itf "$ITF"); rm -rf "$ITF"
 fi
 step "all checks passed"

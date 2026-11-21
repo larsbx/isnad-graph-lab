@@ -534,7 +534,9 @@ Two checks tie the proofs to the code and the data:
   is a Quint model whose invariants two TLA+ model checkers check: Apalache
   (symbolic, every trace to depth 4) and TLC (explicit, every reachable state
   of an equivalent model over the critical years, 741,987 states; the
-  equivalence is `Regions.reduction` in Lean).
+  equivalence is proved in Lean for the transcribed transition relation,
+  `Model.Q.transmission_iff_regions`, and the transcription is checked against
+  Quint by trace replay and an exact state count).
 
 The process, the pins and the hooks are in [docs/PROCESS.md](docs/PROCESS.md).
 To run the gate: `tools/formal-setup.sh && tools/verify.sh`.

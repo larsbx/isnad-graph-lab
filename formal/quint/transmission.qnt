@@ -295,9 +295,11 @@ module transmission {
  * year maps the behaviour to one of this module in which every guard and
  * every invariant has the same truth value at every step; REGIONS ⊆
  * FIRST..LAST gives the converse. The invariants hold in `transmission` iff
- * they hold here. Proved in formal/lean/IsnadFormal/Regions.lean
- * (`reduction`, `perRegion_of_initial`); tools/verify.sh checks that REGIONS
- * is `regionYears CUTS SPAN FIRST LAST` there.
+ * they hold here. Proved in Lean for this transition relation, transcribed:
+ * formal/lean/IsnadFormal/Transmission.lean, `Model.Q.transmission_iff_regions`.
+ * tools/verify.sh checks the transcription against this file: the constants
+ * and REGIONS are Lean's; 1,000 simulated traces replay as Lean steps; and
+ * Lean's region model reaches exactly as many states as TLC finds here.
  *
  * Each hearing adds a holder and there are SPAN narrators below the source,
  * so every behaviour reaches its last state within SPAN hearings: TLC's
