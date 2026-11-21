@@ -38,6 +38,10 @@ The time-and-place milestone (#7) consists of:
 
 ### P0.1 Diagnose the "impossible" links
 
+The [occurrence-level chronology audit](chronology-audit.md) reproduces this
+population and replays the assessment with source-supported corrections.
+The open acceptance criterion is below.
+
 **Evidence.** Of 14,194 links whose documented lifespans cannot meet:
 
 - 95% have a book compiler as the student;
