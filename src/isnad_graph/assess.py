@@ -52,8 +52,8 @@ MAJHUL_RANK = 9
 
 
 def structural_verdict(worst_rank: float, gap: bool) -> Verdict:
-    """Verdict from the weakest narrator's rank (1 companion … 12 fabricator); an
-    unknown rank is *majhūl*. Specified and proved in ``formal/lean``
+    """Corpus score from the weakest narrator's rank (1 companion … 12 fabricator).
+    Missing ranks use the rank-9 fallback. Specified in ``formal/lean``
     (``Isnad.structuralVerdict``, ``Isnad.sahih_iff``)."""
     worst_rank = MAJHUL_RANK if pd.isna(worst_rank) else worst_rank
     v = (Verdict.SAHIH if worst_rank <= 3 else Verdict.HASAN if worst_rank <= 6

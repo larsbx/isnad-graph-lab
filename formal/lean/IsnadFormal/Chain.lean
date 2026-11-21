@@ -1,24 +1,17 @@
+import Hadith.ClassicalCriteria
 import IsnadFormal.Grade
 
 /-!
-# The *ṣaḥīḥ* isnad (Ibn al-Ṣalāḥ, *ʿUlūm al-ḥadīth*, first type)
+# The graph's structural ṣaḥīḥ code
 
-> *al-ḥadīth al-ṣaḥīḥ* is the *musnad* whose isnad is connected by the
-> transmission of an *ʿadl ḍābiṭ* from an *ʿadl ḍābiṭ* to its end, and which is
-> neither *shādhdh* nor *muʿallal*.
-
-That gives five conditions:
-
-1. *ittiṣāl al-sanad*: every link is a direct transmission;
-2. *ʿadāla* and
-3. *ḍabṭ* of every narrator: Ibn Ḥajar's ranks 1–3;
-4. no *shudhūdh*;
-5. no *ʿilla*.
-
-Conditions 4 and 5 are judgements made by comparing routes and texts, and are
-outside a structural verdict. This file proves that the structural verdict
-says *ṣaḥīḥ* exactly when conditions 1–3 hold, and that adding narrators can
-only lower it: an isnad is as strong as its weakest link.
+The graph uses observed gap markers and narrator ranks to score a stored
+chain. Ibn al-Ṣalāḥ's definition (*ʿUlūm al-ḥadīth*, type 1) calls for
+established continuity, uprightness and precision throughout, and findings
+on shudhūdh and a disqualifying ʿilla. Ibn Ḥajar's intrinsic criteria use
+these findings for a reviewed āḥād report (`Hadith.ClassicalCriteria`).
+A missing gap marker records what the graph observed. Assessing the actual
+transmission and checking the report against competing evidence require
+source findings. Here `sahih_iff` characterizes the corpus code.
 -/
 
 namespace Isnad
@@ -41,7 +34,7 @@ namespace Chain
 
 def worst (c : Chain) : Nat := worstOf (c.ranks.map effRank)
 
-/-- Condition 1, *ittiṣāl*: no link is a gap. -/
+/-- No gap is marked in the graph record. -/
 def connected (c : Chain) : Prop := c.headGap = false ∧ c.tailGap = false ∧ ∀ g ∈ c.gaps, g = false
 
 def gap (c : Chain) : Bool := c.headGap || c.tailGap || c.gaps.any id
@@ -69,8 +62,8 @@ theorem effRank_le_three {r : Option Nat} : effRank r ≤ 3 ↔ ∃ k, r = some 
 theorem Chain.gap_false_iff (c : Chain) : c.gap = false ↔ c.connected := by
   simp [Chain.gap, Chain.connected, List.any_eq_false, and_assoc]
 
-/-- **Ibn al-Ṣalāḥ, conditions 1–3.** The structural verdict is *ṣaḥīḥ* exactly
-when the isnad is connected and every narrator is ranked 1–3 (*ʿadl ḍābiṭ*). -/
+/-- The graph code is ṣaḥīḥ exactly when there is no marked gap and all
+supplied ranks meet the cutoff. The empty fold is an algebraic identity. -/
 theorem sahih_iff (c : Chain) :
     c.verdict = .sahih ↔ c.connected ∧ ∀ r ∈ c.ranks, ∃ k, r = some k ∧ k ≤ 3 := by
   rw [← Chain.gap_false_iff]
@@ -94,10 +87,22 @@ theorem append_no_better (c d : Chain) : c.verdict.code ≤ (c.append d).verdict
     (by simp only [Chain.gap, Chain.append, List.any_append, Bool.or_eq_true]
         rintro ((h | h) | h) <;> simp [h])
 
-/-- A *mursal* (the Companion dropped: a gap at the head) is never *ṣaḥīḥ*. -/
+/-- A chain with a marked head gap does not receive the graph's ṣaḥīḥ code. -/
 theorem mursal_not_sahih (c : Chain) (h : c.headGap = true) : c.verdict ≠ .sahih := by
   intro hs
   have := ((sahih_iff c).mp hs).1.1
   simp_all
+
+/-- A fixed ṣaḥīḥ graph score is compatible with both an established intrinsic
+grade and an unresolved ʿilla review. This is a synthetic witness about the
+inputs to the two checks. -/
+theorem structural_sahih_with_pending_review :
+    ∃ c : Chain, c.verdict = .sahih ∧
+      ∃ r : Hadith.ClassicalCriteria.RouteFindings,
+        Hadith.ClassicalCriteria.intrinsicGrade .established r = some .sahihLiDhatihi ∧
+        Hadith.ClassicalCriteria.intrinsicGrade .established
+          { r with freeOfQadihIlla := .unresolved } = none :=
+  ⟨⟨[some 3], [false], false, false⟩, by decide,
+    ⟨.established, .established, .full, .established, .established⟩, by decide, by decide⟩
 
 end Isnad

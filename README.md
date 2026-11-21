@@ -480,6 +480,9 @@ one upstream commit and the SHA-256 of every file:
 | `vizops` | `larsbx/math-vizops` @ `a6972ac8` | `figure`, `layout`, `palette`, `outcome`, `adapters`: the self-contained figure core |
 | `vendoring` | `larsbx/finite-math-kernels` @ `9d27bc45` | the checker |
 
+The shared `formal/lean/Hadith/ClassicalCriteria.lean` module is also pinned
+in `vendored.toml`, to its source in Uṣūl al-Fiqh Deontic Circuits.
+
 `vizops` is vendored as an import-only namespace package. Its `__init__` and
 its source registry, bridge and manim scenes belong to math-vizops' own sibling
 checkouts and renderer, and stay there. `pyproject.toml` installs the vendored
@@ -497,20 +500,25 @@ python vendor/python/vendoring/check_vendored_sync.py      # what CI runs
 ## Formal foundations
 
 The [side-by-side formalizations of ḥadīth science](docs/hadith-formalizations.md)
-compare the graph’s structural model with the al-Albānī grading kernel, with
-revision-pinned definitions, theorem statements and worked examples.
+present the shared classical criteria, the graph’s structural model and
+the al-Albānī replay profile, with source loci and worked examples.
 
-The classical rules the graph applies are formalized in Lean 4 and proved
-(`formal/lean`):
+The shared Lean module checks the intrinsic ṣaḥīḥ and ḥasan criteria and
+Ibn Ḥajar’s condition on the sixth narrator rank. The graph also proves
+properties of the corpus representation, dating bounds and link flags
+(`formal/lean`).
 
-* Ibn al-Ṣalāḥ's definition of ṣaḥīḥ, conditions 1–3 (`sahih_iff`);
-* Ibn Ḥajar's marātib, with an unranked narrator read as majhūl
+* the corpus’s structural ṣaḥīḥ code (`sahih_iff`);
+* the rank score, with rank 9 as the graph’s fallback for a missing rank
   (`unknown_not_sahih`);
 * the weakest link (`append_no_better`);
 * gaps (`gap_caps`, `mursal_not_sahih`);
-* Muslim's muʿāṣara and al-Bukhārī's liqāʾ (`refuted_sound`,
-  `unrefuted_complete`, `liqa_muasara`);
-* al-Shāfiʿī's rule on tadlīs (`tadlis_iff_rejected`);
+* overlap and refutation of candidate hearing dates (`refuted_sound`,
+  `unrefuted_complete`, `refuted_no_attested_meeting`);
+* Muslim’s conditions for presuming hearing in an ambiguous transmission
+  (`MuslimAnanaFindings.Presumption`);
+* al-Shāfiʿī’s explicit-hearing condition for a known mudallis
+  (`shafii_requires_explicit`);
 * the common link lies on every chain of a single-strand bundle that reaches
   his generation (`common_link_on_chain`);
 * a lifeline's phases tile the life, alternate, and are of the right kind at

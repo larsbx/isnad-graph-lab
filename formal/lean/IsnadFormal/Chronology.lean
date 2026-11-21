@@ -1,27 +1,47 @@
+import Hadith.ClassicalCriteria
+
 /-!
 # *Muʿāṣara* and *liqāʾ*: when two lives allow a transmission
 
-A link is *muttaṣil* only if the student can have heard from the teacher. The
-classical standards differ in what they demand:
+Muslim's *Muqaddimat al-Ṣaḥīḥ* (ed. ʿAbd al-Bāqī, pp. 29–33) describes
+the presumption for an ambiguous transmission between trustworthy narrators
+when meeting and hearing are possible and there is no contrary evidence.
+He discusses separate examination of hearing for known mudallis narrators.
+The findings for applying that presumption are recorded independently of
+the arithmetic on life dates.
 
-* **Muslim** (*Muqaddimat al-Ṣaḥīḥ*): *muʿāṣara*, the two were contemporaries
-  and a meeting was possible, provided the narrator is not a *mudallis*;
-* **al-Bukhārī and ʿAlī b. al-Madīnī** (as Ibn Rajab and Ibn Ḥajar report them):
-  *thubūt al-liqāʾ*, at least one meeting is established.
-
-Both need the lives to overlap. The graph knows lives only up to intervals: a
-birth in `[bLo, bHi]`, a death in `[dLo, dHi]`. This file proves:
+The graph knows lives up to intervals, with a birth in `[bLo, bHi]` and a
+death in `[dLo, dHi]`. The interval proofs give:
 
 * the graph's refutation is sound: when the bounds refute a pair, no dates
   within them make the two contemporaries;
 * it is the best possible: when they do not refute it, some dates within them
   do;
-* *liqāʾ* implies *muʿāṣara*, so a refuted link fails both standards;
+* if there is a common year within the two lifetimes, the lifetimes overlap;
 * the window the lifelines use, with minimum ages, is non-empty exactly when a
   hearing at those ages can fit.
 -/
 
 namespace Isnad
+open Hadith.ClassicalCriteria (Finding)
+
+/-- Independent findings about applying Muslim's presumption to an ʿanʿana.
+An interval overlap is one input to investigating the possibility of meeting
+and hearing. These findings also require consideration of the transmitters
+and of evidence against meeting or hearing. -/
+structure MuslimAnanaFindings where
+  bothTrustworthy : Finding
+  meetingAndHearingPossible : Finding
+  freeOfKnownTadlis : Finding
+  freeOfContraryEvidence : Finding
+
+def MuslimAnanaFindings.Presumption (f : MuslimAnanaFindings) : Prop :=
+  f.bothTrustworthy = .established ∧ f.meetingAndHearingPossible = .established ∧
+    f.freeOfKnownTadlis = .established ∧ f.freeOfContraryEvidence = .established
+
+theorem muslim_presumption_requires_review (f : MuslimAnanaFindings)
+    (h : f.freeOfContraryEvidence = .unresolved) : ¬ f.Presumption := by
+  simp [MuslimAnanaFindings.Presumption, h]
 
 /-- What the graph knows of a life. -/
 structure Bounds where
@@ -40,8 +60,11 @@ def Bounds.wellFormed (B : Bounds) : Prop := B.bLo ≤ B.bHi ∧ B.dLo ≤ B.dHi
 /-- *Muʿāṣara*: the lives `[bt, dt]` and `[bs, ds]` overlap. -/
 def muasara (bt dt bs ds : Int) : Prop := bs ≤ dt ∧ bt ≤ ds
 
-/-- *Liqāʾ*: a meeting in year `τ` with both alive. -/
-def liqa (bt dt bs ds τ : Int) : Prop := bt ≤ τ ∧ τ ≤ dt ∧ bs ≤ τ ∧ τ ≤ ds
+/-- The date constraint for two people being alive in year `τ`. -/
+def withinBothLives (bt dt bs ds τ : Int) : Prop := bt ≤ τ ∧ τ ≤ dt ∧ bs ≤ τ ∧ τ ≤ ds
+
+/-- Earlier name for the date constraint on a candidate meeting year. -/
+abbrev liqa := withinBothLives
 
 /-- The graph's refutation of teacher `T` → student `S`. -/
 def refuted (T S : Bounds) : Prop := S.bLo > T.dHi ∨ T.bLo > S.dHi
@@ -61,14 +84,22 @@ theorem unrefuted_complete {T S : Bounds} (h : ¬ refuted T S)
   exact ⟨T.bLo, T.dHi, S.bLo, S.dHi, by unfold Bounds.admits; omega,
     by unfold Bounds.admits; omega, by unfold muasara; omega⟩
 
-/-- al-Bukhārī's standard implies Muslim's: a meeting makes them contemporaries. -/
+/-- A year within both lifetimes witnesses contemporaneity. -/
 theorem liqa_muasara {bt dt bs ds τ : Int} (h : liqa bt dt bs ds τ) : muasara bt dt bs ds := by
-  unfold liqa at h; unfold muasara; omega
+  unfold liqa withinBothLives at h; unfold muasara; omega
 
-/-- A refuted link fails both standards: no admitted dates allow a meeting. -/
+/-- Under the admitted dates, a refuted link has no candidate meeting year. -/
 theorem refuted_no_liqa {T S : Bounds} (h : refuted T S) {bt dt bs ds τ : Int}
     (ht : T.admits bt dt) (hs : S.admits bs ds) : ¬ liqa bt dt bs ds τ :=
   fun hl => refuted_sound h ht hs (liqa_muasara hl)
+
+/-- An attested meeting must occur within both lifetimes. Subject to this
+evidential premise, documented non-overlap rules out that meeting. -/
+theorem refuted_no_attested_meeting {T S : Bounds} (h : refuted T S)
+    {bt dt bs ds : Int} (ht : T.admits bt dt) (hs : S.admits bs ds)
+    {attested : Int → Prop} (dates : ∀ τ, attested τ → withinBothLives bt dt bs ds τ)
+    (τ : Int) : ¬ attested τ :=
+  fun meet => refuted_no_liqa h ht hs (dates τ meet)
 
 /-- **The lifeline window.** With a teacher at least `aT` and a student at least
 `aH` years old (both non-negative), a hearing fits iff
@@ -77,7 +108,7 @@ theorem window_iff (bt dt bs ds aT aH : Int) (hT : 0 ≤ aT) (hH : 0 ≤ aH) :
     max (bt + aT) (bs + aH) ≤ min dt ds ↔
       ∃ τ, liqa bt dt bs ds τ ∧ bt + aT ≤ τ ∧ bs + aH ≤ τ := by
   constructor
-  · intro h; exact ⟨max (bt + aT) (bs + aH), by unfold liqa; omega, by omega, by omega⟩
-  · rintro ⟨τ, hl, h1, h2⟩; unfold liqa at hl; omega
+  · intro h; exact ⟨max (bt + aT) (bs + aH), by unfold liqa withinBothLives; omega, by omega, by omega⟩
+  · rintro ⟨τ, hl, h1, h2⟩; unfold liqa withinBothLives at hl; omega
 
 end Isnad

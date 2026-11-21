@@ -19,9 +19,12 @@ al-Tahdhīb, muqaddima):
 | 11   | *muttaham bi-l-kadhib*                              |
 | 12   | *kadhdhāb*, *waḍḍāʿ*                                |
 
-The source's verdict for a rank (and `isnad_graph.assess.structural_verdict`)
+The graph's corpus scoring rule (also `isnad_graph.assess.structural_verdict`)
 is: ranks 1–3 *ṣaḥīḥ*, 4–6 *ḥasan*, 7–9 *ḍaʿīf*, 10 very weak, 11 accused,
-12 fabricated. A narrator the source does not rank is *majhūl*: rank 9.
+12 fabricated. A missing corpus rank takes the numeric fallback 9. These
+codes describe a score on the graph's inputs. In the *Taqrīb* introduction,
+Ibn Ḥajar lists several different cases at rank 5 and makes rank 6 contingent
+on corroboration (OpenITI JK 121, v01:p074).
 -/
 
 namespace Isnad
@@ -59,7 +62,7 @@ end Verdict
 /-- The rank of *majhūl*, given to a narrator the source does not rank. -/
 def majhulRank : Nat := 9
 
-/-- A narrator's rank, unknown read as *majhūl*. -/
+/-- A narrator's rank, with the graph's rank-9 fallback for missing data. -/
 def effRank : Option Nat → Nat
   | none => majhulRank
   | some r => r

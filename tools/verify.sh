@@ -44,6 +44,7 @@ if [ "$QUICK" != "--quick" ]; then
   step "quint: Apalache bounded model checking"
   APA_VERSION="$(pin apalache version)"; APA_STEPS="$(pin apalache max_steps)"
   quint verify transmission.qnt --invariant=safety --apalache-version "$APA_VERSION" \
-    --max-steps "$APA_STEPS" --verbosity=1 && rm -rf formal/quint/_apalache-out
+    --max-steps "$APA_STEPS" --verbosity=1
+  rm -rf formal/quint/_apalache-out
 fi
 step "all checks passed"
