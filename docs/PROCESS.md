@@ -35,6 +35,7 @@ toolchains are pinned.
 | the lifeline window with minimum ages | `lives.lifeline` | `window_iff` | `window_iff` |
 | the lifeline's phases | `lives.phases` | `phases` | `phases_partition` (tiling, maximality, pointwise soundness) |
 | the common link lies on every chain of its bundle | Schacht, *Origins*, p. 172; Juynboll, *Muslim Tradition*, ch. 5 | `SingleStrand`, `strand`, `commonLink` | `strand_agrees`, `common_link_on_chain`; at δ ≥ 1 without repeats `strand_single`, `commonLink_on_chain` |
+| TLC may check the transmission model over its critical years only | the region construction of timed automata (Alur and Dill, 1994), here over years | `Regions.same`, `inRegions`, `regionYears`, `Fm` | `reduction`, `perRegion_of_initial` |
 | the defect lift: MH risk ratio, signed CMH score, exact conditional p | Mantel and Haenszel (1959); `docs/stratified-defect-inference.md` | `Table`, `tailLe`, `tailGe`, `pExact`, `score` | `pExact_swap`, `score_swap_pooled`, `var_swap`, `mh_swap`, `pExact_degenerate`, `degenerate_score`, `var_eq_zero_iff`, `pExact_pos`, `pExact_le`, `pExactFast_eq` |
 | a chain is inferred from in-text names only when nothing is in doubt | `inference.infer_source_chain` | `infer`, `abstention`, `tahwil` | `infer_iff`, `infer_isSome_iff`, `tahwil_iff`, `infer_text_order`, `matn_ignored` |
 
@@ -59,8 +60,11 @@ Two model checkers check them. Apalache (SMT) checks every trace of
 `transmission`, over every year, up to the pinned depth. TLC (explicit
 state) searches every reachable state of `transmissionRegions`, the same
 model over the critical years: the first four years of each region between
-the thresholds the guards and invariants compare with. The module doc proves
-that the invariants hold in one model iff they hold in the other. Each hearing
+the thresholds the guards and invariants compare with. `Regions.reduction`
+proves that formulas built from such comparisons keep their truth value
+under the map onto those years, so the invariants hold in one model iff they
+hold in the other; the gate checks that Quint's `REGIONS` is Lean's
+`regionYears`. Each hearing
 adds a holder, so that search is complete at every depth: 741,987 distinct
 states, depth 5.
 

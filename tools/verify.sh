@@ -39,6 +39,18 @@ for w in noThreeLinkIsnad noGap noTadlis noHasan; do
   fi
   echo "reached: not $w"
 done
+step "quint: the region model's years are Regions.regionYears (formal/lean)"
+REG="$(mktemp)"
+python3 - "$REG" <<'PY'
+import json, re, subprocess, sys
+def q(expr):
+    out = subprocess.run(["npx", "quint", "-r", "transmission.qnt::lives"], input=expr + "\n",
+                         capture_output=True, text=True, cwd="formal/quint", check=True).stdout
+    return [int(x) for x in re.findall(r"-?\d+", out.split(">>>")[1])]
+json.dump({"first": q("FIRST")[0], "last": q("LAST")[0], "span": q("SPAN")[0],
+           "cuts": q("CUTS"), "regions": q("REGIONS")}, open(sys.argv[1], "w"))
+PY
+(cd formal/lean && lake exe conformance --regions "$REG"); rm -f "$REG"
 step "quint: simulation"
 quint run transmission.qnt $QB $SIM --invariant=safety --verbosity=1
 if [ "$QUICK" != "--quick" ]; then

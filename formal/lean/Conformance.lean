@@ -18,7 +18,16 @@ with a mismatch, and prints the mismatches it found.
 * `common_link`: `[companion, chains, strand, common_link | null]`, under
   `parameters.dominance = [num, den]` and `parameters.min_chains`;
 * `inference`: `[mentions, matn | null, text, known, abstention | null,
-  chain | null]`, each mention `[rawi | null, start, end]`.
+  chain | null]`, each mention `[rawi | null, start, end]`;
+* `stratified`: `[strata, rr | null, status, z | null, p | null, informative]`,
+  each stratum `[a, n1, b, n0]`. Recomputed exactly: the risk ratio to its
+  3 decimals, z to its 4 (by squares: z = S/√V), p to a relative 1e-9.
+
+With `--regions FILE` it instead checks the Quint model's critical years
+(`tools/verify.sh` writes FILE from the Quint REPL): `REGIONS` is
+`Regions.regionYears CUTS SPAN FIRST LAST`, and FIRST, 0 and 1 are cuts and
+SPAN ≥ 1, the side conditions of `Regions.reduction` and
+`Regions.perRegion_of_initial`.
 -/
 
 open Lean Isnad
@@ -140,7 +149,22 @@ def check (name : String) (rows : Array Json)
   for m in bad.toList.take 10 do IO.println s!"  mismatch {m}"
   return bad.isEmpty
 
+def regions (path : String) : IO UInt32 := do
+  let j ← IO.ofExcept (Json.parse (← IO.FS.readFile path))
+  let get (k : String) : IO Int := IO.ofExcept (j.getObjValAs? Int k)
+  let ints (k : String) : IO (List Int) := IO.ofExcept (j.getObjValAs? (List Int) k)
+  let first ← get "first"
+  let last ← get "last"
+  let span := (← get "span").toNat
+  let cuts ← ints "cuts"
+  let quint ← ints "regions"
+  let lean := Regions.regionYears cuts span first last
+  let sides := cuts.contains first && cuts.contains 0 && cuts.contains 1 && span ≥ 1
+  IO.println s!"regions: {quint.length} Quint years, {lean.length} by regionYears, side conditions {sides}"
+  return if sides && lean == quint.mergeSort then 0 else 1
+
 def main (args : List String) : IO UInt32 := do
+  if let ["--regions", path] := args then return ← regions path
   let path := args.headD "../vectors/conformance.json"
   let j ← IO.ofExcept (Json.parse (← IO.FS.readFile path))
   let v ← check "verdict" (← IO.ofExcept (j.getObjValAs? (Array Json) "verdict")) verdictRow

@@ -295,7 +295,9 @@ module transmission {
  * year maps the behaviour to one of this module in which every guard and
  * every invariant has the same truth value at every step; REGIONS ⊆
  * FIRST..LAST gives the converse. The invariants hold in `transmission` iff
- * they hold here.
+ * they hold here. Proved in formal/lean/IsnadFormal/Regions.lean
+ * (`reduction`, `perRegion_of_initial`); tools/verify.sh checks that REGIONS
+ * is `regionYears CUTS SPAN FIRST LAST` there.
  *
  * Each hearing adds a holder and there are SPAN narrators below the source,
  * so every behaviour reaches its last state within SPAN hearings: TLC's
