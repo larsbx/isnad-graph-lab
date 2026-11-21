@@ -1,0 +1,210 @@
+{
+  "source_sha256": "d528084321e715006712e0e2461809a3afc9408065a1d1af90238c8b723815a6",
+  "cases": [
+    {
+      "hadith_id": 5659,
+      "sanad_id": null,
+      "depth": 1,
+      "src": 3825,
+      "dst": 927,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "قُلْتُ لِأَبِي أُسَامَةَ ، أَحَدَّثَكُمُ الْأَعْمَشُ",
+      "note": "Isḥāq asks Abū Usāma about al-Aʿmash, whose hearing from Shaqīq is quoted. The source's in-text IDs omit Abū Usāma and al-Aʿmash, causing the inference to join Isḥāq directly to Shaqīq.",
+      "sources": [
+        "https://sunnah.com/bukhari:6097"
+      ]
+    },
+    {
+      "hadith_id": 17653,
+      "sanad_id": 29441,
+      "depth": 0,
+      "src": -1,
+      "dst": 6600,
+      "cause": "reviewed_date_record_discrepancy",
+      "anchor": "عَنْ أَبِي الْيَسَرِ ، أَنَّ رَسُولَ اللَّهِ",
+      "note": "The source has Abū al-Yasar born in 35 AH. Al-Mizzī identifies the same Abū al-Yasar, Kaʿb b. ʿAmr al-Sulamī, as attending Badr at age twenty. This contradicts the stored birth year. No replacement birth year is inferred.",
+      "sources": [
+        "https://sunna.alifta.gov.sa/BookToc/ViewServicePage?bookId=48&mainId=452909",
+        "https://dorar.net/h/Oi9aaXzc/osoul"
+      ]
+    },
+    {
+      "hadith_id": 17653,
+      "sanad_id": 29442,
+      "depth": 0,
+      "src": -1,
+      "dst": 6600,
+      "cause": "reviewed_date_record_discrepancy",
+      "anchor": "عَنْ أَبِي الْيَسَرِ ، أَنَّ رَسُولَ اللَّهِ",
+      "note": "The second stored sanad has the same Abū al-Yasar endpoint and the same contradicted birth-year field. The separate occurrence is reviewed against the same source.",
+      "sources": [
+        "https://sunna.alifta.gov.sa/BookToc/ViewServicePage?bookId=48&mainId=452909",
+        "https://dorar.net/h/Oi9aaXzc/osoul"
+      ]
+    },
+    {
+      "hadith_id": 27690,
+      "sanad_id": 41819,
+      "depth": 1,
+      "src": 4840,
+      "dst": 7319,
+      "cause": "reviewed_documented_date_conflict",
+      "anchor": "عَنْ مُحَمَّدِ بْنِ يَحْيَى بْنِ حَبَّانَ ، عَنْ عَبْدِ اللَّهِ بْنِ سَلَامٍ",
+      "note": "This Ibn Mājah route prints both named narrators with ʿan. Al-Dhahabī dates Ibn Ḥabbān's birth to 47 AH and Ibn Salām's death to 43 AH. Direct contact is incompatible with those dates. The alternate route via Yūsuf b. ʿAbd Allāh b. Salām is a separate transmission claim.",
+      "sources": [
+        "https://sunna.alifta.gov.sa/BookToc/ViewMatnPage?MainID=109399",
+        "https://bayan.alwa7i.com/hadith/sunan-ibn-majah/1102",
+        "https://islamweb.net/ar/library/content/60/772/%D9%85%D8%AD%D9%85%D8%AF-%D8%A8%D9%86-%D9%8A%D8%AD%D9%8A%D9%89",
+        "https://islamweb.net/ar/library/index.php?ID=218&bk_no=60&flag=1&page=bookcontents"
+      ]
+    },
+    {
+      "hadith_id": 34395,
+      "sanad_id": null,
+      "depth": 0,
+      "src": 5913,
+      "dst": 8290,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "أَنَّ عُمَرَ بْنَ الْخَطَّابِ خَرَجَ",
+      "note": "The younger narrator relates a direct quotation about an event, a party setting out. ʿUmar is the subject of that event. The text gives no claim that the younger narrator received the account from ʿUmar.",
+      "sources": [
+        "Pinned hadiths.nass, report 34395 and hadith_rawis spans"
+      ]
+    },
+    {
+      "hadith_id": 34621,
+      "sanad_id": null,
+      "depth": 0,
+      "src": 4945,
+      "dst": 3299,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "أَنَّهُ قَالَ : كَانَ أَبُو بَكْرٍ الصِّدِّيقُ",
+      "note": "Saʿīd describes Abū Bakr's and ʿUmar's prayer habits. Abū Bakr is a subject of the account, with no formula attributing the account to him.",
+      "sources": [
+        "Pinned hadiths.nass, report 34621 and hadith_rawis spans"
+      ]
+    },
+    {
+      "hadith_id": 35196,
+      "sanad_id": null,
+      "depth": 0,
+      "src": 5913,
+      "dst": 3634,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "وَإِنَّهُ قَدِمَ عَلَى عُمَرَ بْنِ الْخَطَّابِ",
+      "note": "Sulaymān's account opens with Abū Ayyūb setting out. He is the pilgrim who came to ʿUmar. The tagged ʿUmar mention is a participant in the reported event.",
+      "sources": [
+        "Pinned hadiths.nass, report 35196 and hadith_rawis spans"
+      ]
+    },
+    {
+      "hadith_id": 35763,
+      "sanad_id": null,
+      "depth": 0,
+      "src": 5913,
+      "dst": 8290,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "فَرُفِعَ ذَلِكَ إِلَى عُمَرَ بْنِ الْخَطَّابِ",
+      "note": "ʿUmar adjudicates a theft described by Yaḥyā b. ʿAbd al-Raḥmān b. Ḥāṭib. The tagged ʿUmar is introduced as the recipient of the complaint within the story.",
+      "sources": [
+        "https://thahabi.org/book/13713/read/762"
+      ]
+    },
+    {
+      "hadith_id": 35862,
+      "sanad_id": null,
+      "depth": 0,
+      "src": 3131,
+      "dst": 7272,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "فَأَرْسَلَ إِلَى زَيْدِ بْنِ ثَابِتٍ",
+      "note": "Ibn Shihāb narrates a story in which Marwān consults Zayd. The source offsets miss Marwān and turn Zayd, introduced within the story, into Ibn Shihāb's teacher.",
+      "sources": [
+        "Pinned hadiths.nass, report 35862 and hadith_rawis spans"
+      ]
+    },
+    {
+      "hadith_id": 80434,
+      "sanad_id": 100884,
+      "depth": 5,
+      "src": 30276,
+      "dst": 29795,
+      "cause": "reviewed_compiler_context_cut",
+      "anchor": "قَالَ ابْنُ عُمَرَ : فَحَدَّثَنَا مُوسَى",
+      "note": "The source segment begins with al-Wāqidī. The preceding KG report 80433 and the printed edition's single entry 6716 give al-Ḥākim's intervening chain to al-Wāqidī. The apparent direct compiler link comes from segmentation. Quarantine the route until its prefix is restored.",
+      "sources": [
+        "Pinned hadiths.nass, reports 80433–80434",
+        "https://www.cia.gov/library/abbottabad-compound/FB/FBC885B7AE55FB4581F988B4F7E8D33Bvol4.pdf"
+      ]
+    },
+    {
+      "hadith_id": 115003,
+      "sanad_id": 149999,
+      "depth": 2,
+      "src": 1526,
+      "dst": 24549,
+      "cause": "reviewed_compiler_suspension",
+      "anchor": "وَقَالَ الْعَلاءُ بْنُ عَبْدِ الرَّحْمَنِ",
+      "note": "Al-Dāraquṭnī quotes al-ʿAlāʾ's account. The printed sequence around this entry gives other routes as separate reports and supplies no personal receipt from al-ʿAlāʾ. Record the discontinuity at the compiler's boundary.",
+      "sources": [
+        "https://sunna.alifta.gov.sa/BookToc/ViewMatnPage?MainID=146207",
+        "https://ablibrary.net/book_content/b/5099/263?lang=ar"
+      ]
+    },
+    {
+      "hadith_id": 115004,
+      "sanad_id": 150001,
+      "depth": 3,
+      "src": 7272,
+      "dst": 24549,
+      "cause": "reviewed_compiler_suspension",
+      "anchor": "وَقَالَ الزُّهْرِيُّ",
+      "note": "The entry begins by quoting al-Zuhrī. The context in the checked printed edition keeps this citation distinct from the connected routes around it.",
+      "sources": [
+        "https://ablibrary.net/book_content/b/5099/263?lang=ar",
+        "https://www.islamicurdubooks.com/hadith/hadith-.php?bookid=34&hadith_number=1001"
+      ]
+    },
+    {
+      "hadith_id": 571218,
+      "sanad_id": 484857,
+      "depth": 10,
+      "src": 27803,
+      "dst": 10034,
+      "cause": "reviewed_compiler_written_citation",
+      "anchor": "قَرَأْتُ فِي كِتَابِ أَبِي الْحَسَنِ بْنِ الْفُرَاتِ",
+      "note": "Al-Khaṭīb says he read Ibn al-Furāt's book in the latter's handwriting. This supports a written citation, which does not require their lifespans to overlap. The replay removes the direct-contact penalty without turning the written citation into a taʿlīq.",
+      "sources": [
+        "https://ablibrary.net/book_content/b/5912/109?lang=ar"
+      ]
+    },
+    {
+      "hadith_id": 576029,
+      "sanad_id": null,
+      "depth": 4,
+      "src": 24752,
+      "dst": 75948,
+      "cause": "reviewed_inferred_splice",
+      "anchor": "سُلَيْمَانُ بْنُ أَيُّوبَ الرَّازِيُّ ، أَنْبَأَنَا أَبُو الْحُسَيْنِ",
+      "note": "The two endpoint mention spans are 241 and 379 characters and swallow several named narrators and reporting verbs. The adjacent mentions represent whole clauses, which merges routes when used as a chain. The surrounding dual verb belongs to the narrower phrase at the end of these spans.",
+      "sources": [
+        "Pinned hadiths.nass, report 576029 and hadith_rawis spans 162–403 and 406–785"
+      ]
+    },
+    {
+      "hadith_id": 587927,
+      "sanad_id": 499022,
+      "depth": 9,
+      "src": 9927,
+      "dst": 75503,
+      "cause": "reviewed_identity_mismatch",
+      "anchor": "أَبُو مَسْعُودٍ عَبْدُ الرَّحْمَنِ بْنُ عَلِيِّ بْنِ حَمْدٍ",
+      "note": "The source text's given name is ʿAbd al-Raḥmān. The mention and sanad both use rawi 75503, whose biography is ʿAbd al-Raḥīm. Other Ibn ʿAsākir passages use ʿAbd al-Raḥīm and name al-Ḥaddād between him and Abū Nuʿaym. The local spelling mismatch and potential missing intermediary warrant withholding this route from the replay. The evidence does not identify a replacement narrator.",
+      "sources": [
+        "Pinned hadiths.nass and rawis rows",
+        "https://islamport.com/l/trj/4962/25250.htm",
+        "https://ablibrary.net/book_content/b/6320/44?lang=ar"
+      ]
+    }
+  ]
+}
