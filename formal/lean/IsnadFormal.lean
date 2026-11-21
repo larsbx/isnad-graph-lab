@@ -6,3 +6,4 @@ import IsnadFormal.Tadlis
 import IsnadFormal.Phases
 import IsnadFormal.CommonLink
 import IsnadFormal.Inference
+import IsnadFormal.Stratified

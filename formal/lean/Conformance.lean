@@ -83,6 +83,53 @@ def inferenceRow (j : Json) : Except String (Bool × String) := do
   let wantCh ← if a[5]!.isNull then pure none else some <$> ints a[5]!
   return (why == wantWhy && ch == wantCh, s!"{j.compress} → {why}, {ch}")
 
+/-! Exact rationals `n / d`, `d > 0`, enough for the checks. -/
+structure Q where
+  n : Int
+  d : Nat
+
+def Q.ofFrac (p : Int × Nat) : Q := ⟨p.1, p.2⟩
+def Q.ofJson (j : Json) : Except String Q := do
+  let x ← j.getNum?
+  return ⟨x.mantissa, 10 ^ x.exponent⟩
+def Q.sub (a b : Q) : Q := ⟨a.n * b.d - b.n * a.d, a.d * b.d⟩
+def Q.le (a b : Q) : Bool := a.n * b.d ≤ b.n * a.d
+def Q.abs (a : Q) : Q := ⟨a.n.natAbs, a.d⟩
+def Q.add (a b : Q) : Q := ⟨a.n * b.d + b.n * a.d, a.d * b.d⟩
+def Q.mul (a b : Q) : Q := ⟨a.n * b.n, a.d * b.d⟩
+def Q.div (a b : Q) : Q := ⟨a.n * b.d * (if b.n < 0 then -1 else 1), a.d * b.n.natAbs⟩
+def Q.near (a b tol : Q) : Bool := (a.sub b).abs.le tol
+/-- `S / √V ≥ x`, for `V > 0`, without square roots. -/
+def geRoot (S V x : Q) : Bool :=
+  if x.n ≤ 0 then S.n ≥ 0 || (S.mul S).le ((x.mul x).mul V)
+  else S.n > 0 && ((x.mul x).mul V).le (S.mul S)
+def leRoot (S V x : Q) : Bool := geRoot ⟨-S.n, S.d⟩ V ⟨-x.n, x.d⟩
+
+def stratifiedRow (j : Json) : Except String (Bool × String) := do
+  let a ← j.getArr?
+  let ss ← (← a[0]!.getArr?).toList.mapM fun t => do
+    let v ← t.getArr?
+    return (⟨← v[0]!.getNat?, ← v[1]!.getNat?, ← v[2]!.getNat?, ← v[3]!.getNat?⟩ : Table)
+  let pos := ss.filter (·.t ≠ 0)
+  let num := Q.ofFrac (fsum (pos.map fun s => ((s.mhNum : Int), s.t)))
+  let den := Q.ofFrac (fsum (pos.map fun s => ((s.mhDen : Int), s.t)))
+  let status := if den.n ≠ 0 then "finite" else if num.n ≠ 0 then "infinite" else "undefined"
+  let rrOk ← if den.n = 0 then pure a[1]!.isNull else do
+    pure (Q.near (num.div den) (← Q.ofJson a[1]!) ⟨5000001, 10 ^ 10⟩)
+  let S := Q.ofFrac (score ss)
+  let V := Q.ofFrac (fsum ((ss.filter (·.t > 1)).map fun s => ((s.varNum : Int), s.t * s.t * (s.t - 1))))
+  let informative := (ss.filter fun s => s.t > 1 && s.varNum > 0).length
+  let zpOk ← if V.n = 0 then pure (a[3]!.isNull && a[4]!.isNull) else do
+    let z ← Q.ofJson a[3]!
+    let tol : Q := ⟨500001, 10 ^ 10⟩
+    let p := pExactFast ss
+    let pq ← Q.ofJson a[4]!
+    let exact : Q := ⟨p.1, p.2⟩
+    pure (geRoot S V (z.sub tol) && leRoot S V (z.add tol) &&
+      Q.near pq exact (exact.mul ⟨1, 10 ^ 9⟩))
+  let ok := rrOk && zpOk && status == (← a[2]!.getStr?) && informative == (← a[5]!.getNat?)
+  return (ok, s!"{a[0]!.compress}: status {status}, informative {informative}")
+
 def check (name : String) (rows : Array Json)
     (row : Json → Except String (Bool × String)) : IO Bool := do
   let mut bad : Array String := #[]
@@ -105,4 +152,5 @@ def main (args : List String) : IO UInt32 := do
   let l ← check "common_link" (← IO.ofExcept (j.getObjValAs? (Array Json) "common_link"))
     (commonLinkRow dom[0]! dom[1]! minChains)
   let i ← check "inference" (← IO.ofExcept (j.getObjValAs? (Array Json) "inference")) inferenceRow
-  return if v && c && p && l && i then 0 else 1
+  let st ← check "stratified" (← IO.ofExcept (j.getObjValAs? (Array Json) "stratified")) stratifiedRow
+  return if v && c && p && l && i && st then 0 else 1

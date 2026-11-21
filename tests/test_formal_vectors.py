@@ -60,3 +60,11 @@ def test_inference_vectors_cover_every_abstention_and_ordered_successes():
             and len({m[1] for m in row[0] if m[2] <= row[1]})
             < sum(m[2] <= row[1] for m in row[0])]
     assert len(tied) >= 20  # ties in position check that both sides sort stably
+
+
+def test_stratified_vectors_cover_the_published_comparisons_and_edge_cases():
+    rows = json.loads(VECTORS.read_text(encoding="utf-8"))["stratified"]
+    assert {row[2] for row in rows} == {"finite", "infinite", "undefined"}
+    assert any(row[4] is None for row in rows) and min(r[4] for r in rows if r[4]) < 1e-60
+    assert any(len(row[0]) == 3 for row in rows)  # three strata pool
+    assert any(n1 == 0 or n0 == 0 for row in rows for _, n1, _, n0 in row[0])

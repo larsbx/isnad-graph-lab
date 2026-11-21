@@ -25,6 +25,11 @@
   compute them, each mention ``[rawi_id | null, start, end]``. The graph keeps no
   raw mentions, so these are drawn from a seeded generator, over an alphabet
   that straddles every bound of the taḥwīl regex, with ties in position.
+* ``stratified``: ``[strata, risk_ratio_mh | null, risk_ratio_status, z_cmh | null,
+  p_exact | null, n_informative_strata]`` as ``assess.stratified_inference``
+  computes them, each stratum ``[a, n1, b, n0]``: every published defect-lift
+  comparison, recomputed from the graph, then seeded small tables (with
+  empty, degenerate and one-sided strata).
 
 The selection is a pure function of the graph, so the file is reproducible
 byte for byte; ``tests/test_formal_vectors.py`` checks that it is current.
@@ -43,7 +48,7 @@ import numpy as np
 import pandas as pd
 
 from isnad_graph.analysis import bundle_nodes, common_link, strand
-from isnad_graph.assess import Defect, structural_verdict
+from isnad_graph.assess import Defect, defect_lift, stratified_inference, structural_verdict
 from isnad_graph.build import explode_links
 from isnad_graph.graph import IsnadGraph
 from isnad_graph.inference import Mention, abstention, infer_source_chain
@@ -169,6 +174,23 @@ def inference_rows(n: int = INFERENCE_CASES, seed: int = SEED) -> list[list]:
     return rows
 
 
+def stratified_rows(g: IsnadGraph, n: int = 400, seed: int = SEED) -> list[list]:
+    reports = g.frame("hadiths").set_index("id")[["best_verdict", "shared_defects"]]
+    grades = g.frame("external_grades")
+    excluded = g.manifest["assessment"]["defect_lift_excludes"]
+    published = [[[s["flagged_rejected"], s["flagged_total"], s["clean_rejected"], s["clean_total"]]
+                  for s in strata] for strata in
+                 defect_lift(reports, grades[~grades.collection.isin(excluded)]).strata]
+    rng = random.Random(seed)
+    table = lambda: [rng.randint(0, n1 := rng.randint(0, 30)), n1,  # noqa: E731
+                     rng.randint(0, n0 := rng.randint(0, 30)), n0]
+    seeded = [[table() for _ in range(rng.randint(1, 3))] for _ in range(n)]
+    keys = ["risk_ratio_mh", "risk_ratio_status", "z_cmh", "p_exact", "n_informative_strata"]
+    plain = lambda v: float(v) if isinstance(v, np.floating) else v  # noqa: E731
+    return [[t, *(plain(r[k]) for k in keys)] for t in published + seeded
+            for r in [stratified_inference([tuple(x) for x in t])]]
+
+
 def vectors(g: IsnadGraph) -> dict:
     dom, min_chains = _defaults()
     return {"parameters": {"dominance": [dom.numerator, dom.denominator], "min_chains": min_chains},
@@ -176,7 +198,8 @@ def vectors(g: IsnadGraph) -> dict:
             "chronology": chronology_rows(g.frame("narrators"), g.frame("transmissions")),
             "phases": phase_rows(g.frame("narrators"), g.frame("transmissions")),
             "common_link": common_link_rows(g.frame("chains")),
-            "inference": inference_rows()}
+            "inference": inference_rows(),
+            "stratified": stratified_rows(g)}
 
 
 def render(data: dict) -> str:
