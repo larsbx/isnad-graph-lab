@@ -17,7 +17,7 @@ toolchains are pinned.
 | theorem | the same files | the formal statement has the properties the tradition claims for it | Lean 4.34.1, core only |
 | axiom audit | `formal/lean/Audit.lean` | no `sorry`; only `propext`, `Classical.choice`, `Quot.sound` | Lean |
 | conformance | `formal/lean/Conformance.lean`, `formal/vectors/` | the Python verdicts, lifeline phases, common links and defect-lift statistics on the committed graph, and the chain inference and statistics on seeded cases, equal the Lean model's | Lean executable |
-| process model | `formal/quint/transmission.qnt` | invariants over every reachable state of a transmission | Quint 0.33.0, Apalache 0.62.1 (TLA+) |
+| process model | `formal/quint/transmission.qnt` | invariants over every reachable state of a transmission | Quint 0.33.0; Apalache 0.62.1 and the TLC it bundles (TLA+) |
 | implementation | `src/isnad_graph/` | unit, property and regression tests | pytest |
 
 ## What is formalized
@@ -55,9 +55,17 @@ teacher's teacher; one narrator is a mudallis. Its invariants:
 * `tadlisInherited`: an ʿan from a mudallis taints every isnad below it
   (`tadlis_iff_rejected`).
 
-Apalache checks them for every trace up to the pinned bound. The gate also
-checks non-vacuity: the simulator must reach a three-link isnad, a gap, a
-tadlīs defect and a ḥasan isnad, or the gate fails.
+Two model checkers check them. Apalache (SMT) checks every trace of
+`transmission`, over every year, up to the pinned depth. TLC (explicit
+state) searches every reachable state of `transmissionRegions`, the same
+model over the critical years: the first four years of each region between
+the thresholds the guards and invariants compare with. The module doc proves
+that the invariants hold in one model iff they hold in the other. Each hearing
+adds a holder, so that search is complete at every depth: 741,987 distinct
+states, depth 5.
+
+The gate also checks non-vacuity: both the simulator and TLC must reach a
+three-link isnad, a gap, a tadlīs defect and a ḥasan isnad, or the gate fails.
 
 ## The order of work
 

@@ -18,3 +18,5 @@ version = "0.62.1"            # the TLA+ model checker behind `quint verify`
 url = "https://github.com/apalache-mc/apalache/releases/download/v0.62.1/apalache.tgz"
 sha256 = "38202a8c4ebeb3ab73e0fe5a7e4bb948442d46ad5de8a7fb45c9e5cac2beb2a6"
 max_steps = 4
+# TLC: the tla2tools bundled in this apalache.jar, which `quint verify
+# --backend tlc` runs; pinned by the sha256 above.

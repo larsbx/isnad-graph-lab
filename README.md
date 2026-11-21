@@ -531,7 +531,9 @@ Two checks tie the proofs to the code and the data:
   so scipy's floating-point p values are confirmed to a relative 10⁻⁹, down to
   4.8 × 10⁻⁶³);
 * the transmission process, with formulas of transmission, irsāl and tadlīs,
-  is a Quint model whose invariants Apalache, a TLA+ model checker, checks.
+  is a Quint model whose invariants two TLA+ model checkers check: Apalache
+  (symbolic, every trace to depth 4) and TLC (explicit, every reachable state
+  of an equivalent model over the critical years, 741,987 states).
 
 The process, the pins and the hooks are in [docs/PROCESS.md](docs/PROCESS.md).
 To run the gate: `tools/formal-setup.sh && tools/verify.sh`.

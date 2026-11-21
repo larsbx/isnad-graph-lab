@@ -4,8 +4,9 @@
 #   4. Lean: the theorems build, use only the standard axioms, and the Python
 #      verdicts, phases and common links conform to the Lean model on the
 #      committed graph
-#   5. Quint: unit runs, non-vacuity witnesses, a seeded simulation, and
-#      Apalache bounded model checking
+#   5. Quint: unit runs, non-vacuity witnesses, a seeded simulation,
+#      Apalache bounded model checking, and TLC's exhaustive search of the
+#      region model (transmissionRegions)
 # Usage: tools/verify.sh [--quick]   (--quick: skip pytest and Apalache)
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -45,5 +46,15 @@ if [ "$QUICK" != "--quick" ]; then
   APA_VERSION="$(pin apalache version)"; APA_STEPS="$(pin apalache max_steps)"
   quint verify transmission.qnt --invariant=safety --apalache-version "$APA_VERSION" \
     --max-steps "$APA_STEPS" --verbosity=1 && rm -rf formal/quint/_apalache-out
+  step "quint: TLC, every reachable state of the region model"
+  TLC="--main transmissionRegions --backend tlc --apalache-version $APA_VERSION"
+  for w in noThreeLinkIsnad noGap noTadlis noHasan; do
+    if quint verify transmission.qnt $TLC --verbosity=1 --invariant=$w >/dev/null 2>&1; then
+      echo "vacuous: TLC never violated $w" >&2; exit 1
+    fi
+  done
+  log="$(quint verify transmission.qnt $TLC --verbosity=3 --invariant=safety 2>&1)" \
+    || { echo "$log" | tail -40 >&2; exit 1; }
+  echo "$log" | grep -E " 0 states left on queue|depth of the complete|\[ok\]"
 fi
 step "all checks passed"

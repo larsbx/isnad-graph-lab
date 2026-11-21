@@ -60,8 +60,8 @@ module lives {
   /// Years a behaviour can use at most: the initial year and one per hearing.
   pure val SPAN = 4
   /// The first SPAN years of every region. See `transmissionRegions`.
-  pure val REGIONS: Set[int] = FIRST.to(LAST).filter(y =>
-    y - CUTS.filter(c => c <= y).fold(FIRST, (m, c) => if (c > m) c else m) < SPAN)
+  pure val REGIONS: Set[int] = FIRST.to(LAST).filter(y => CUTS.exists(c =>
+    c <= y and y - c < SPAN and CUTS.forall(d => d <= y implies d <= c)))
 }
 
 /// The model, for any set of years in which hearings may happen.
