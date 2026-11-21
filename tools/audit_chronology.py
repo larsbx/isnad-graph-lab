@@ -146,7 +146,10 @@ def source_occurrences(
                     acceptable_location = (
                         (reviewed not in COMPILER_REVIEWS or (raw_boundary and author_boundary))
                         and (reviewed != Cause.INFERRED_SPLICE or inferred)
-                        and (reviewed != Cause.DOCUMENTED_CONFLICT or not inferred)
+                        and (
+                            reviewed not in {Cause.DOCUMENTED_CONFLICT, Cause.RECORDED_SPLICE}
+                            or not inferred
+                        )
                     )
                     if row.flag or not acceptable_location or review["anchor"] not in text:
                         raise ValueError(f"review evidence no longer applies at {key}")
@@ -316,13 +319,30 @@ def write_outputs(out: Path, hits, edges, baseline, replay, exposure, drift, sum
     )
 
 
-def run(graph: Path, db: Path, review_file: Path | None, out: Path) -> dict:
+def load_reviews(review_file: Path | None, supplements: tuple[Path, ...]) -> dict:
+    cases = reviewed_cases(review_file)
+    for path in supplements:
+        added = reviewed_cases(path)
+        if cases.keys() & added.keys():
+            raise ValueError(f"duplicate occurrence across review files: {path}")
+        cases.update(added)
+    return cases
+
+
+def run(
+    graph: Path,
+    db: Path,
+    review_file: Path | None,
+    out: Path,
+    *,
+    supplements: tuple[Path, ...] = (),
+) -> dict:
     manifest_path = graph / "manifest.json"
     manifest_digest = sha256(manifest_path)
     original = json.loads(manifest_path.read_text(encoding="utf-8"))
     if original["source"]["sha256"] != HADITH_KG.sha256 or sha256(db) != HADITH_KG.sha256:
         raise ValueError("source database digest does not match the committed graph")
-    cases = reviewed_cases(review_file)
+    cases = load_reviews(review_file, supplements)
     edges, chains, narrators, books, hadiths, grades = (
         pd.read_parquet(graph / f"{name}.parquet") for name in TABLES
     )
@@ -524,6 +544,10 @@ def run(graph: Path, db: Path, review_file: Path | None, out: Path) -> dict:
             "expert_chronology_lift_all_sample_sizes": records(confirmed_lift),
         },
     }
+    if supplements:
+        summary["supplemental_reviews"] = [
+            {"filename": path.name, "sha256": sha256(path)} for path in supplements
+        ]
     write_outputs(out, hits, edge_rows, original_reports, after, exposure, drift, summary)
     return summary
 
@@ -533,12 +557,13 @@ def main() -> None:
     parser.add_argument("--graph", type=Path, default=ROOT / "data/graph")
     parser.add_argument("--db", type=Path, default=ROOT / DEFAULT_PATH)
     parser.add_argument("--reviews", type=Path, default=ROOT / "docs/chronology-audit-cases.json")
+    parser.add_argument("--supplemental-reviews", type=Path, action="append", default=[])
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     graph, out = args.graph.resolve(), args.out.resolve()
     if out.is_relative_to(graph):
         parser.error("--out must be outside the committed graph directory")
-    result = run(graph, args.db, args.reviews, out)
+    result = run(graph, args.db, args.reviews, out, supplements=tuple(args.supplemental_reviews))
     print(json.dumps(result["population"], indent=2))
 
 

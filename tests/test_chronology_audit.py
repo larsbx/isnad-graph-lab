@@ -220,3 +220,28 @@ def test_report_tri_state_uses_only_acceptable_routes():
     }
     with pytest.raises(ValueError, match="present in the replay"):
         report_exposure(c, {2})
+
+
+def test_reviewed_recorded_splice_does_not_reclassify_parallel_occurrence():
+    chains = pd.DataFrame(
+        {
+            "chain_id": [1, 2],
+            "hadith_id": [10, 10],
+            "verdict": [Verdict.SAHIH, Verdict.HASAN],
+            "defects": [8, 8],
+            "worst_rank": [3, 4],
+        }
+    )
+    hits = pd.DataFrame(
+        {
+            "chain_id": [1, 2],
+            "src": [80, 80],
+            "dst": [81, 81],
+            "cause": [Cause.RECORDED_SPLICE, Cause.UNRESOLVED],
+        }
+    )
+    replay, excluded, retained, _ = replay_assessment(chains, hits)
+    assert excluded.tolist() == [True, False]
+    assert retained.tolist() == [False, True]
+    assert replay.chain_id.tolist() == [2]
+    assert report_assessment(replay).loc[10, "shared_defects"] == int(Defect.CHRONOLOGY)

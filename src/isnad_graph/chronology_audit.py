@@ -30,6 +30,7 @@ class Cause(StrEnum):
     INDIRECT_FORMULA = "explicit_indirect_formula"
     CO_NARRATORS = "inferred_co_narrators"
     INFERRED_SPLICE = "reviewed_inferred_splice"
+    RECORDED_SPLICE = "reviewed_recorded_splice"
     IDENTITY_MISMATCH = "reviewed_identity_mismatch"
     DATE_RECORD_DISCREPANCY = "reviewed_date_record_discrepancy"
     DOCUMENTED_CONFLICT = "reviewed_documented_date_conflict"
@@ -49,6 +50,7 @@ COMPILER_REVIEWS = frozenset(
 )
 REVIEWABLE = COMPILER_REVIEWS | {
     Cause.INFERRED_SPLICE,
+    Cause.RECORDED_SPLICE,
     Cause.IDENTITY_MISMATCH,
     Cause.DATE_RECORD_DISCREPANCY,
     Cause.DOCUMENTED_CONFLICT,
@@ -58,6 +60,7 @@ QUARANTINED = frozenset(
         Cause.CO_NARRATORS,
         Cause.COMPILER_CONTEXT_CUT,
         Cause.INFERRED_SPLICE,
+        Cause.RECORDED_SPLICE,
         Cause.IDENTITY_MISMATCH,
         Cause.DATE_RECORD_DISCREPANCY,
     }
